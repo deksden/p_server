@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "cross-env DEBUG='ex-modular:*' babel-node src/app.js",
-    "start-vnext": "cross-env DEBUG='ex-modular:*' babel-node src/app-vnext.js",
+    "start-vnext": "cross-env DEBUG='ex-modular:*' babel-node _Legacy/app-vnext.js",
     "start:clear-db": "rimraf ./data/db.sqlite && cross-env DEBUG='ex-modular:*' babel-node src/app.js",
     "clean": "rimraf ./data/db.sqlite && rimraf lib",
     "clean:node_modules": "rimraf ./data/db.sqlite && rimraf lib && rimraf ./node_modules",

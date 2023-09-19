@@ -1,4 +1,4 @@
-import ServerBricks from './core/server-bricks'
+// import ServerBricks from './core/server-bricks'
 import cl from 'json-colorizer'
 
 const app = {
