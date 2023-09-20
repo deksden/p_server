@@ -96,6 +96,20 @@ export const exModular = (app) => {
         .catch((e) => { throw e })
     })).catch((e) => { throw e })
   }
+
+  /**
+   * Декларативное описание модели
+   * @typdef {Object} exModel
+   * @property {string} name - имя модели, должно быть уникальным
+   * @property {Object[]} props - массив свойств модели
+   * @property {string} props.name - имя свойства
+   * @property {Object} [storage] - опционально, хранилище модели
+   * */
+
+  /**
+   * Добавить модель в список моделей, обработать все параметры
+   * @param {exModel} model - добавляемая модель типа exModel
+   * */
   ex.modelAdd = (model) => {
     if (!model || !model.name || !model.props) {
       throw new Error(`exModular.modelAdd: invalid schema "${model}"`)

@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 export const Seed = (app) => {
-  const Service = (modelName, fileName, opt) => {
+  return (modelName, fileName, opt) => {
     if (!opt) {
       opt = {}
     }
@@ -38,7 +38,9 @@ export const Seed = (app) => {
                 if (count === 0) {
                   return Promise.all(data.map((item) =>
                     Model.create(item)
-                      .catch((e) => { throw e })
+                      .catch((e) => {
+                        throw e
+                      })
                   ))
                 }
               })
@@ -53,7 +55,9 @@ export const Seed = (app) => {
                     }
                     return Model.update(item.id, item)
                   })
-                  .catch((e) => { throw e })
+                  .catch((e) => {
+                    throw e
+                  })
               } else {
                 return Model.create(item)
               }
@@ -61,7 +65,9 @@ export const Seed = (app) => {
           } else {
             return Promise.all(data.map((item) =>
               Model.create(item)
-                .catch((e) => { throw e })
+                .catch((e) => {
+                  throw e
+                })
             ))
           }
         })
@@ -69,6 +75,4 @@ export const Seed = (app) => {
       throw e
     }
   }
-
-  return Service
 }

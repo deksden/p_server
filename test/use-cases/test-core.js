@@ -25,7 +25,7 @@ import {
   signupUser,
   noteListOpt
 } from '../client/client-api'
-// import { ExtTest } from '../../src/ext-test/ext-test'
+// import { ExtMrp } from '../../src/ext-test/ext-test'
 import { ExtTest } from '../../src/ext-test/ext-test'
 // import * as ACCESS from '../../src/packages/const-access'
 
