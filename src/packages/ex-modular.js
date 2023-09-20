@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import {isFunction} from "./is-function";
 
 export const exModular = (app) => {
   const ex = {}
@@ -83,10 +84,23 @@ export const exModular = (app) => {
   }
 
   // init models
-  ex.modelsInit = () => {
+  ex.modelsInit = (app) => {
     if (!ex.storages || !ex.models) {
       throw new Error('.storages should be initialized before initializing model')
     }
+
+    ex.modules.map((module) => {
+      if (module && module.models && Array.isArray(module.models)) {
+        module.models.map((modelInit) => {
+          if (isFunction(modelInit)) {
+            ex.modelAdd(modelInit(app))
+          }
+        })
+        return Promise.resolve()
+      }
+      return Promise.resolve()
+    })
+
     return Promise.all(Object.keys(ex.models).map((modelName) => {
       const model = ex.models[modelName]
       if (!model.storage || model.storage === 'default') {
@@ -104,11 +118,15 @@ export const exModular = (app) => {
    * @property {Object[]} props - массив свойств модели
    * @property {string} props.name - имя свойства
    * @property {Object} [storage] - опционально, хранилище модели
+   *
+   * (seedFileName)
    * */
 
   /**
    * Добавить модель в список моделей, обработать все параметры
    * @param {exModel} model - добавляемая модель типа exModel
+   *
+   * seeds[]: moduleName, seedFileName
    * */
   ex.modelAdd = (model) => {
     if (!model || !model.name || !model.props) {
@@ -123,9 +141,46 @@ export const exModular = (app) => {
     ex.init.push(item)
   }
 
-  ex.initAll = () =>
-    ex.services.serial(ex.init)
-      .catch((e) => { throw e })
+  ex.initAll = () => {
+    // add init from module.seeds:
+    ex.modules.map((module) => {
+      if (module.seeds && Array.isArray(module.seeds) && module.seeds.length > 0) {
+        module.seeds.map((seed) => {
+          if (seed.modelName && seed.seedFileName) {
+            const seedInit = (app) => () => {
+              console.log(`init seed: module "${seed.modelName}" - file "${seed.seedFileName}"`)
+              return ex.services.seed(seed.modelName, seed.seedFileName)
+                .catch((e) => { throw e })
+            }
+            ex.initAdd(seedInit(app))
+          }
+          return Promise.resolve()
+        })
+        return Promise.resolve()
+      }
+      return Promise.resolve()
+    })
+
+    // add init from models[i].seedFileName
+    Object.keys(ex.models).map((modelName) => {
+      const model = ex.models[modelName]
+      if (model.seedFileName) {
+        const seedInit = (app) => () => {
+          console.log(`init seed: module "${model.name}" - file "${model.seedFileName}"`)
+          return ex.services.seed(model.name, model.seedFileName)
+            .catch((e) => { throw e })
+        }
+        ex.initAdd(seedInit(app))
+        return Promise.resolve()
+      }
+      return Promise.resolve()
+    })
+
+    return ex.services.serial(ex.init)
+      .catch((e) => {
+        throw e
+      })
+  }
 
   /**
    * routes.Add: add routes to list of all routes in app

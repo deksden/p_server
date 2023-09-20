@@ -1,7 +1,7 @@
-import { v4 as uuid } from 'uuid'
+import {v4 as uuid} from 'uuid'
 
 export const Note = (app) => {
-  const Model = {
+  return {
     name: 'Note',
     props: [
       {
@@ -46,5 +46,4 @@ export const Note = (app) => {
       }
     ]
   }
-  return Model
 }

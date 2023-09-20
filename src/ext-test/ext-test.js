@@ -8,7 +8,7 @@
 
 */
 import { Note } from './model-note'
-import { InitExtTest } from './init-test'
+// import { InitExtTest } from './init-test'
 
 const packageName = 'ExtTest'
 
@@ -19,11 +19,20 @@ export const ExtTest = (app, opt) => {
       'models',
       'modelAdd',
       'initAdd'
+    ],
+    models: [
+      Note
+    ],
+    seeds: [
+      {
+        modelName: 'Note',
+        seedFileName: 'test-note.json'
+      }
     ]
   })
 
   app.exModular.modelAdd(Note(app))
-  app.exModular.initAdd(InitExtTest(app))
+  // app.exModular.initAdd(InitExtTest(app))
 
   return app
 }
