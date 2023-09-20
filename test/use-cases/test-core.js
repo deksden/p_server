@@ -18,6 +18,7 @@ import env from 'dotenv-safe'
 import _ from 'lodash'
 
 import App from '../../src/packages/server-bricks'
+import appInit from '../../src/packages/app-init'
 
 import {
   loginAs,
@@ -52,13 +53,7 @@ describe('exModular: controller', function () {
         app = a
         ExtTest(app)
       })
-      .then(() => app.exModular.storages.Init()) // init storages
-      .then(() => app.exModular.modelsInit())
-      .then(() => {
-        app.exModular.routes.builder.forAllModels()
-        return app.exModular.routes.builder.generateRoutes()
-      })
-      .then(() => app.exModular.initAll())
+      .then(() => appInit(app)) // init app
       .then(() => {
         context.request = supertest(app)
         done()

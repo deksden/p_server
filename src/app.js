@@ -1,6 +1,7 @@
 import Express from 'express'
 import serverBricks from './packages/server-bricks'
 import serverBuilder from './packages/server-builder'
+import appInit from './packages/app-init'
 // import { Deploy } from './ext-deploy/deploy'
 import env from 'dotenv-safe'
 // import { ExtFin } from './ext-fin/ext-fin'
@@ -17,15 +18,9 @@ const express = Express()
 serverBricks(express, {})
   .then((_app) => {
     app = _app
-    Deploy(app)
-    ExtFin(app)
+    // Deploy(app)
+    // ExtFin(app)
   })
-  .then(() => app.exModular.storages.Init()) // init storages
-  .then(() => app.exModular.modelsInit())
-  .then(() => {
-    app.exModular.routes.builder.forAllModels()
-    return app.exModular.routes.builder.generateRoutes()
-  })
-  .then(() => app.exModular.initAll())
-  .then(() => serverBuilder(app, {}))
+  .then(() => appInit(app)) // init app
+  .then(() => serverBuilder(app, {})) // init server
   .catch((e) => { throw e })
