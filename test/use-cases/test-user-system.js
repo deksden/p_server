@@ -6,7 +6,7 @@ import dirtyChai from 'dirty-chai'
 import env from 'dotenv-safe'
 import _ from 'lodash'
 
-import App from '../../src/packages/server-bricks'
+import { serverBricks as App } from '../../src/packages/server-bricks.mjs'
 
 import {
   UserAdmin,
@@ -38,9 +38,9 @@ import {
   createUserSecond
   // userDelete,
   // userSave
-} from '../client/client-api'
-import * as ACCESS from '../../src/packages/const-access'
-import { ExtTest } from '../../src/ext-test/ext-test'
+} from '../client/client-api.mjs'
+import * as ACCESS from '../../src/packages/const-access.mjs'
+import { ExtTest } from '../../src/ext-test/ext-test.mjs'
 
 /**
 

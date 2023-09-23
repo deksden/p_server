@@ -1,5 +1,5 @@
 // import _ from 'lodash'
-import * as ACCESS from './const-access'
+import * as ACCESS from './const-access.mjs'
 
 const packageName = 'Access-simple'
 

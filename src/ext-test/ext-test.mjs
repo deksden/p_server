@@ -7,7 +7,7 @@
  This module initialize "Test" extension module.
 
 */
-import { Note } from './model-note'
+import { Note } from './model-note.mjs'
 // import { InitExtTest } from './init-test'
 
 const packageName = 'ExtTest'

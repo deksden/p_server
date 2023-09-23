@@ -7,8 +7,8 @@
  This module initialize "MRP" extension module.
 
 */
-import { MRP } from './model-mrp'
-import { InitExtTest } from './init-mrp'
+import { MRP } from './model-mrp.mjs'
+import { InitExtTest } from './init-mrp.mjs'
 
 const packageName = 'ExtMrp'
 

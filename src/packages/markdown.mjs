@@ -1,4 +1,4 @@
-import marked from 'marked'
+import { marked } from 'marked'
 import _ from 'lodash'
 
 const htmlEscapeToText = function (text) {

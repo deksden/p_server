@@ -10,4 +10,4 @@ export const appInit = (app) => {
     .catch((e) => { throw e })
 }
 
-module.exports = appInit
+// module.exports = appInit

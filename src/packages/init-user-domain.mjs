@@ -1,4 +1,4 @@
-import * as ACCESS from './const-access'
+import * as ACCESS from './const-access.mjs'
 
 export const InitUserDomain = (app) => () => {
   const UserDomain = app.exModular.models.UserDomain

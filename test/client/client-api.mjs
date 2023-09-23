@@ -1,4 +1,4 @@
-import * as ACCESS from '../../src/packages/const-access'
+import * as ACCESS from '../../src/packages/const-access.mjs'
 
 const adminPassword = 'admin12345'
 const userPassword = 'user12345'

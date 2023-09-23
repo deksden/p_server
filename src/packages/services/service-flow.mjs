@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import * as flowActions from '../flows/flow-actions'
-import * as flowAuth from '../flows/flow-auth'
-import { ST } from '../flows/flow-types'
+import * as flowActions from '../flows/flow-actions.mjs'
+import * as flowAuth from '../flows/flow-auth.mjs'
+import { ST } from '../flows/flow-types.mjs'
 
 export const Flow = (app) => {
   const Service = {

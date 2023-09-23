@@ -1,5 +1,5 @@
-import { actions } from './flow-actions'
-import { ST } from './flow-types'
+import { actions } from './flow-actions.mjs'
+import { ST } from './flow-types.mjs'
 
 export const authCheckDomain = [
   {

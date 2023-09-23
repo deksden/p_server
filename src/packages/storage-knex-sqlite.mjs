@@ -1,4 +1,4 @@
-import KnexStorage from './storage-knex'
+import KnexStorage from './storage-knex.mjs'
 import Knex from 'knex'
 
 export default (app) => {

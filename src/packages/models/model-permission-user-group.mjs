@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import { AccessPermissionType } from '../const-access'
+import { AccessPermissionType } from '../const-access.mjs'
 // import _ from 'lodash'
 
 export const PermissionUserGroup = () => {

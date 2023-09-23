@@ -1,5 +1,8 @@
 import { URLSearchParams } from 'url'
-import fetch, { Headers, Request } from 'node-fetch'
+import fetch from 'node-fetch'
+// import { Headers, Request } from 'node-fetch'
+
+// const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args))
 
 export const Yandex = (app) => {
   /**

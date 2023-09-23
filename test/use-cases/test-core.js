@@ -17,17 +17,17 @@ import chaiAsPromised from 'chai-as-promised'
 import env from 'dotenv-safe'
 import _ from 'lodash'
 
-import App from '../../src/packages/server-bricks'
-import appInit from '../../src/packages/app-init'
+import { serverBricks as App } from '../../src/packages/server-bricks.mjs'
+import { appInit } from '../../src/packages/app-init.mjs'
 
 import {
   loginAs,
   UserAdmin,
   signupUser,
   noteListOpt
-} from '../client/client-api'
+} from '../client/client-api.mjs'
 // import { ExtMrp } from '../../src/ext-test/ext-test'
-import { ExtTest } from '../../src/ext-test/ext-test'
+import { ExtTest } from '../../src/ext-test/ext-test.mjs'
 // import * as ACCESS from '../../src/packages/const-access'
 
 chai.use(dirtyChai)

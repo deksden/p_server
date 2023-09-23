@@ -1,6 +1,6 @@
 import sgMail from '@sendgrid/mail'
 import _ from 'lodash'
-import { markdown, plaintext } from '../markdown'
+import { markdown, plaintext } from '../markdown.mjs'
 import parser from 'email-addresses'
 
 const msg = {
