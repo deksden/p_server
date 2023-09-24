@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "resource": "hy",
+    "caption": "ContiPro",
+    "address": "Czech Respublic",
+    "date": "01-01-2017",
+    "invoicePrice": "9900",
+    "invoiceCurrency": "eur",
+    "orderDuration": 30,
+    "inWorkingDays": false,
+    "orderMin": 500,
+    "unit": "gr",
+    "orderStep": 500,
+    "deliveryCompany": "DHL",
+    "deliveryDuration": 15,
+    "deliveryInWorkingDays": false
+  }
+]

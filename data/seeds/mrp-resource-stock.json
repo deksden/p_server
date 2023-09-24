@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1,
+    "type": "initial",
+    "resource": "hy",
+    "date": "20-11-2017",
+    "qnt": 120,
+    "price": 10.80,
+    "vendor": "ContiPro",
+    "comments": ""
+  },
+  {
+    "id": "2",
+    "type": "in-transfer",
+    "resource": "hy",
+    "date": "15-02-2018",
+    "qnt": 300,
+    "price": 10.80,
+    "comments": ""
+  }
+]

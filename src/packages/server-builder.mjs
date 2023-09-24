@@ -69,4 +69,4 @@ export const serverBuilder = (app, options) => {
     .catch((e) => { throw e })
 }
 
-module.exports = serverBuilder
+// module.exports = serverBuilder

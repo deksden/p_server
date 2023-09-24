@@ -1,0 +1,13 @@
+[
+  {
+    "id": "bmx",
+    "caption": "Biomatrix",
+    "unit": "Ампула 2мл",
+    "initialDate": "01-01-2018",
+    "qntMin": 500,
+    "qntStep": 1000,
+    "baseQnt": 1000,
+    "inWorkingDays": false,
+    "comments": "Гель Биоматрикс в ампулах"
+  }
+]

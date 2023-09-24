@@ -22,16 +22,16 @@ export const ExtTest = (app, opt) => {
     ],
     models: [
       Note
-    ],
-    seeds: [
-      {
-        modelName: 'Note',
-        seedFileName: 'test-note.json'
-      }
     ]
+    // seeds: [
+    //   {
+    //     modelName: 'Note',
+    //     seedFileName: 'test-note.json'
+    //   }
+    // ]
   })
 
-  app.exModular.modelAdd(Note(app))
+  // app.exModular.modelAdd(Note(app))
   // app.exModular.initAdd(InitExtTest(app))
 
   return app

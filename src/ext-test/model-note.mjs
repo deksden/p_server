@@ -3,6 +3,7 @@ import {v4 as uuid} from 'uuid'
 export const Note = (app) => {
   return {
     name: 'Note',
+    seedFileName: 'test-note.json',
     props: [
       {
         name: 'id',

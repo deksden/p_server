@@ -1,0 +1,56 @@
+[
+      {
+        "id": 1,
+        "vendor": 1,
+        "type": "invoice",
+        "term": "percent",
+        "value": 10,
+        "currency": "",
+        "base": "invoiceSum",
+        "time": 0,
+        "caption": "prepayment - 10% on start production"
+      },
+      {
+        "id": 2,
+        "vendor": 1,
+        "type": "invoice",
+        "term": "percent",
+        "value": 90,
+        "currency": "",
+        "base": "invoiceSum",
+        "time": 30,
+        "caption": "rest - before start of delivery"
+      },
+      {
+        "id": 3,
+        "vendor": 1,
+        "type": "delivery",
+        "term": "fixed",
+        "value": 150,
+        "time": 2,
+        "currency": "eur",
+        "caption": "export declaration, per declaration"
+      },
+      {
+        "id": 4,
+        "vendor": 1,
+        "type": "delivery",
+        "term": "percent",
+        "value": 20,
+        "currency": "",
+        "time": 10,
+        "base": "invoiceSum",
+        "caption": "VAT, per invoice sum"
+      },
+      {
+        "id": 5,
+        "vendor": 1,
+        "type": "delivery",
+        "term": "percent",
+        "value": 15,
+        "currency": "",
+        "time": 20,
+        "base": "invoiceSum",
+        "caption": "unsorted expences"
+      }
+    ]
