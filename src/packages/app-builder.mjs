@@ -45,7 +45,7 @@ import { SessionSocial } from './models/model-session-social.mjs'
 import { Intg } from '../ext-intg/intg.mjs'
 import { Flow } from './services/service-flow.mjs'
 
-export const serverBricks = (express, options) => {
+export const appBuilder = (express, options) => {
   if (!express) {
     express = Express()
   }
@@ -121,7 +121,7 @@ export const serverBricks = (express, options) => {
       app.exModular.modelAdd(UserDomain(app))
       app.exModular.modelAdd(UserSocial(app))
 
-      // configure app with modules:
+      // configure app with build-in modules:
       SignupOpen(app)
       AuthPassword(app)
       AuthSocial(app)
@@ -143,4 +143,4 @@ export const serverBricks = (express, options) => {
     .catch((err) => { throw err })
 }
 
-// module.exports = serverBricks
+// module.exports = appBuilder

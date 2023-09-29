@@ -6,7 +6,7 @@ import dirtyChai from 'dirty-chai'
 import env from 'dotenv-safe'
 import _ from 'lodash'
 
-import { serverBricks as App } from '../../src/packages/server-bricks.mjs'
+import { appBuilder as App } from '../../src/packages/app-builder.mjs'
 
 import {
   UserAdmin,

@@ -1,5 +1,5 @@
 import Express from 'express'
-import { serverBricks } from './packages/server-bricks.mjs'
+import { appBuilder } from './packages/app-builder.mjs'
 import { serverBuilder } from './packages/server-builder.mjs'
 import { appInit } from './packages/app-init.mjs'
 // import { Deploy } from './ext-deploy/deploy'
@@ -15,7 +15,7 @@ let app = null
 const express = Express()
 
 // build app & server
-serverBricks(express, {})
+appBuilder(express, {})
   .then((_app) => {
     app = _app
     // Deploy(app)
