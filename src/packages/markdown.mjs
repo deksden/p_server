@@ -1,5 +1,6 @@
-import { marked } from 'marked'
+import marked from 'marked'
 import _ from 'lodash'
+
 
 const htmlEscapeToText = function (text) {
   return text.replace(/&#[0-9]*;|&amp;/g, function (escapeCode) {
