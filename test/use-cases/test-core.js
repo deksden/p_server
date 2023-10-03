@@ -228,7 +228,7 @@ describe('exModular: controller', function () {
           .then((res) => {
             context.adminToken = res.body.token
             context.token = context.adminToken
-            return noteListOpt(context, { filter: { createdAt_lte: '2020-03-02' } })
+            return noteListOpt(context, { filter: { createdAt_lte: '02-03-2020' } })
           })
           .then((res) => {
             expect(res.body).to.exist('Body should exist')
@@ -249,7 +249,7 @@ describe('exModular: controller', function () {
           .then((res) => {
             context.adminToken = res.body.token
             context.token = context.adminToken
-            return noteListOpt(context, { filter: { createdAt_gte: '2020-02-01', createdAt_lt: '2020-03-02' } })
+            return noteListOpt(context, { filter: { createdAt_gte: '01-02-2020', createdAt_lt: '02-03-2020' } })
           })
           .then((res) => {
             expect(res.body).to.exist('Body should exist')

@@ -110,7 +110,7 @@ export const ControllerDF = (app) => {
         }
         if (prop.type === 'datetime' && !Array.isArray(val)) {
           // console.log(val)
-          val = ((moment.utc(val)).toDate()).valueOf()
+          val = ((moment.utc(val, 'DD-MM-YYYY')).toDate()).valueOf()
           // console.log(`val: ${val.toString()}`)
           // console.log(`val: ${val.valueOf()}`)
           val = val.valueOf()
