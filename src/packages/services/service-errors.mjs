@@ -44,7 +44,9 @@ export const Errors = (app) => {
 
     if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
       console.log('ERROR handler:')
-      console.log(err.toString())
+      console.log(err.message)
+      console.log('STACK:')
+      console.log(err.stack)
     }
 
     if (err instanceof errors.ServerError) {

@@ -1,5 +1,6 @@
 import fs from 'fs'
 import mustache from 'mustache'
+import _ from 'lodash'
 
 const packageName = 'codegen'
 
@@ -21,14 +22,14 @@ export const Codegen = (app, opt) => {
 
   const checkModelName = (req, res, next) => {
     if (!req.params.modelName) {
-      next(new app.services.errors.ServerInvalidParameters(
+      next(new app.exModular.services.errors.ServerInvalidParameters(
         'modelName',
         'string',
         'ModelName should be specified for codegen'))
     }
     const Model = app.exModular.models[req.params.modelName]
     if (!Model || !Model.props) {
-      next(new app.services.errors.ServerInvalidParameters(
+      next(new app.exModular.services.errors.ServerInvalidParameters(
         'modelName',
         'string',
         'ModelName invalid - not found'))
@@ -39,7 +40,7 @@ export const Codegen = (app, opt) => {
 
   const generateCodeForModel = (req, res) => {
     if (!req.model) {
-      throw new app.services.errors.ServerInvalidParameters(
+      throw new app.exModular.services.errors.ServerInvalidParameters(
         'modelName',
         'string',
         'req.model not found, use checkModelName middleware')
@@ -50,7 +51,7 @@ export const Codegen = (app, opt) => {
 
   const generateList = (req, res) => {
     if (!req.model) {
-      throw new app.services.errors.ServerInvalidParameters(
+      throw new app.exModular.services.errors.ServerInvalidParameters(
         'modelName',
         'string',
         'req.model not found, use checkModelName middleware')
@@ -85,7 +86,7 @@ export const Codegen = (app, opt) => {
 
   const generateEdit = (req, res) => {
     if (!req.model) {
-      throw new app.services.errors.ServerInvalidParameters(
+      throw new app.exModular.services.errors.ServerInvalidParameters(
         'modelName',
         'string',
         'req.model not found, use checkModelName middleware')
@@ -119,11 +120,58 @@ export const Codegen = (app, opt) => {
     res.send(txt)
   }
 
+  const generateAppResources = (req, res) => {
+    let txt = ''
+    let models = Object.keys(app.exModular.models)
+
+    if(req.query) {
+      models = req.query.models
+    }
+
+    models.map((modelName) => {
+      const Model = app.exModular.models[modelName]
+
+      txt = txt +
+        `<Resource\n` +
+        `  name='${Model.name}'\n` +
+        `  options={{label: '${Model.caption || Model.name}'}}\n` +
+        `  list={${Model.name}List}\n` +
+        `  icon={${Model.icon || "TableRowsIcon"}}\n` +
+        `  edit={${Model.name}Edit}\n` +
+        `  create={${Model.name}Create}\n` +
+        `/>\n`
+    })
+    res.send(txt)
+  }
+
+  const generateAppImports = (req, res) => {
+    let txt = ''
+    let txt2 = 'import TableRowsIcon from \'@mui/icons-material/TableRows\'\n'
+    let models = Object.keys(app.exModular.models)
+
+    if(req.query) {
+      models = req.query.models
+    }
+
+    models.map((modelName) => {
+      const Model = app.exModular.models[modelName]
+
+      txt = txt + `import {${Model.name}List, ${Model.name}Edit, ${Model.name}Create} from './resources/${_.kebabCase(Model.name)}'\n`
+
+      if (Model.icon) {
+        txt2 = txt2 + `import ${Model.icon}Icon from '@mui/icons-material/${Model.icon}'\n`
+      }
+    })
+
+    txt = txt2 + '\n' + txt + '\n'
+    res.send(txt)
+  }
+
   app.exModular.routes.Add({
     method: 'GET',
     name: 'codegen',
     description: 'Generate code for model',
-    path: '/codegen/:modelName',
+    path: '/codegen/model/:modelName',
     validate: checkModelName,
     handler: generateCodeForModel
   })
@@ -132,7 +180,7 @@ export const Codegen = (app, opt) => {
     method: 'GET',
     name: 'codegen',
     description: 'Generate list code for model',
-    path: '/codegen/:modelName/list',
+    path: '/codegen/model/:modelName/list',
     validate: checkModelName,
     handler: generateList
   })
@@ -141,9 +189,25 @@ export const Codegen = (app, opt) => {
     method: 'GET',
     name: 'codegen',
     description: 'Generate list code for model',
-    path: '/codegen/:modelName/edit',
+    path: '/codegen/model/:modelName/edit',
     validate: checkModelName,
     handler: generateEdit
+  })
+
+  app.exModular.routes.Add({
+    method: 'GET',
+    name: 'codegen',
+    description: 'Generate app resources',
+    path: '/codegen/app/resources',
+    handler: generateAppResources
+  })
+
+  app.exModular.routes.Add({
+    method: 'GET',
+    name: 'codegen',
+    description: 'Generate app imports',
+    path: '/codegen/app/imports',
+    handler: generateAppImports
   })
 
   return app

@@ -3,7 +3,9 @@ import { v4 as uuid } from 'uuid'
 export const MrpPlan = (app) => {
   return {
     name: 'MrpPlan',
+    caption: 'MRP Plan',
     seedFileName: 'mrp-plan.json',
+    icon: 'BarChart',
     props: [
       {
         name: 'id',
