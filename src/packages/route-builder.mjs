@@ -47,15 +47,13 @@ export const routeCreate = (app, Model) => {
     name: objectName,
     description: `Create new "${Model.name}"`,
     path: resourcePath,
-    before: [
+    before: _.concat(Model.beforeCreateBeg, [
       app.exModular.auth.check,
       app.exModular.access.check(objectName),
       app.exModular.services.validator.checkBodyForArrayOfModel(Model, { optionalId: true })
-    ],
+    ], Model.beforeCreateEnd),
     handler: app.exModular.services.controllerDF.create(Model),
-    after: [
-      app.exModular.services.controllerDF.sendData
-    ]
+    after: _.concat(Model.afterCreateBeg, [app.exModular.services.controllerDF.sendData], Model.afterCreateEnd)
   }
 }
 
@@ -306,12 +304,17 @@ export const RouteBuilder = (app) => {
   }
 
   const convertFlowToMW = (item) => {
+    if (item === undefined) {
+      return undefined
+    }
+
     const Flow = app.exModular.flow
     if (typeof item === 'string') {
       return Flow.flowMW(item)
     } else if (typeof item === 'function') {
       return item
     }
+
     throw new Error('convertFlowToMW: item is not a flow / function!')
   }
 
@@ -338,7 +341,9 @@ export const RouteBuilder = (app) => {
           }
 
           if (route.handler) {
-            handlers = _.concat(handlers, Wrap(convertFlowToMW(route.handler)))
+            handlers = _.concat(_.flattenDeep(handlers), Wrap(convertFlowToMW(route.handler)))
+          } else {
+            throw new Error(`No handler for route: ${route.method}, ${route.name} ${route.path}`)
           }
 
           if (route.after) {
@@ -347,6 +352,8 @@ export const RouteBuilder = (app) => {
             }
             handlers = _.concat(handlers, _.flattenDeep(route.after))
           }
+
+          handlers = _.compact(handlers)
 
           // replace flow names in handlers with mw functions:
           handlers = handlers.map((_handler) => convertFlowToMW(_handler))

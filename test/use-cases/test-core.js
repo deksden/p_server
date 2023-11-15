@@ -22,12 +22,12 @@ import { appInit } from '../../src/packages/app-init.mjs'
 
 import {
   loginAs,
-  UserAdmin,
   signupUser,
   noteListOpt
 } from '../client/client-api.mjs'
 // import { ExtMrp } from '../../src/ext-test/ext-test'
 import { ExtTest } from '../../src/ext-test/ext-test.mjs'
+import { UserAdmin } from '../client/client-const.mjs'
 // import * as ACCESS from '../../src/packages/const-access'
 
 chai.use(dirtyChai)
