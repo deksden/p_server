@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid'
+import moment from 'moment'
 
 /*
  Алгоритм:
@@ -13,7 +14,24 @@ import { v4 as uuid } from 'uuid'
 
 export const MrpPlan = (app) => {
 
-  // функция для обработки строки плана. Должна быть выполнена перед sendData (до отправки результатов клиенту),
+  // получить остатки продукта на указанную дату
+  const qntForDate = async (productId, date) => {
+    const Plan = app.exModular.models['MrpPlan']
+    const knex = Plan.storage.db
+    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
+    const aDate2 = aDate1.toString()
+    return knex('MrpPlan')
+      .sum({ res:'qnt' })
+      .where({ product: productId })
+      .where('date', '<=', aDate2)
+      .then((res) => {
+          return res[0].res
+      })
+      .catch((e) => { throw e })
+
+  }
+
+  // Функция для обработки строки плана. Должна быть выполнена перед sendData (до отправки результатов клиенту),
   // возможно - до saveData:
   const processPlan = (req, res, next) => {
     const fnName = 'MRP.processPlan'
@@ -23,8 +41,12 @@ export const MrpPlan = (app) => {
       return next(new Error(`Error detected on ${fnName}!`))
     }
 
-    const product = res.data
-    console.log(`product = ${JSON.stringify(product)}`)
+    // получаем сведения о продукте
+    const plan = res.data
+    console.log(`product = ${JSON.stringify(plan)}`)
+
+    // на каждую дату вычисляем на эту дату остаток товара на складе и планы продаж
+
 
     // основной алгоритм начинается здесь: обрабатываем строку сразу после ее сохранения в базу, но до отправки
     // результата на клиента (до обработчика sendData)
@@ -52,7 +74,7 @@ export const MrpPlan = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
-        format: 'YYYY/MM/DD',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {
@@ -80,6 +102,7 @@ export const MrpPlan = (app) => {
         format: '',
         default: ''
       }
-    ]
+    ],
+    qntForDate
   }
 }

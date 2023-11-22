@@ -50,7 +50,9 @@ export const processBeforeSaveToStorage = (Model, item, opts) => {
       Model.key = prop.name
     }
     if (item[prop.name] && prop.type === 'datetime') {
-      aItem[prop.name] = moment.utc(item[prop.name], 'DD-MM-YYYY').toDate()
+      const fmt = prop.format ? prop.format : 'DD-MM-YYYY'
+
+      aItem[prop.name] = moment.utc(item[prop.name], fmt).toDate()
     }
     if (prop.type === 'enum') {
       // ensure enum values are in range:

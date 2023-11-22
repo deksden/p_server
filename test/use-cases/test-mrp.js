@@ -41,6 +41,7 @@ import { ExtMrp } from '../../src/ext-mrp/ext-mrp.mjs'
 import { appInit } from '../../src/packages/app-init.mjs'
 import { expected, UserAdmin, UserFirst, UserSecond } from '../client/client-const.mjs'
 import { mrpPlanAdd } from '../client/client-mrp.mjs'
+import moment from 'moment'
 
 /**
 
@@ -96,6 +97,17 @@ describe('MRP: tests', function () {
       1-c3: проверить что он администратор
    */
 
+  describe('MRP unit tests:', function () {
+    it('1.1: MrpProduct.qntForDate', function () {
+      return createAdmin(context)
+        .then(() => app.exModular.services.seed('MrpPlan', 'test-mrp-plan1.json'))
+        .then(() => app.exModular.models.MrpPlan.qntForDate('bmx', '01-06-2018'))
+        .then((res) => {
+          expect(res).to.be.equal(32500)
+        })
+        .catch((e) => { throw e })
+    })
+  })
   describe('MRP us-1:', function () {
     it('1.1:', function () {
       return createAdmin(context)
