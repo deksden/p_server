@@ -35,7 +35,9 @@ export const MrpPlan = (app) => {
   // возможно - до saveData:
   const processPlan = async (req, res, next) => {
     const fnName = 'MRP.processPlan'
+    const Product = app.exModular.models['MrpProduct']
     const Plan = app.exModular.models['MrpPlan']
+    const ProductStock = app.exModular.models['MrpProductStock']
 
     console.log(`${fnName}:`)
     if (res.err) {
@@ -44,16 +46,25 @@ export const MrpPlan = (app) => {
 
     // получаем сведения о продукте
     const plan = res.data
-    console.log(`product = ${JSON.stringify(plan)}`)
+    plan.date = moment(plan.date, Plan.props.date.format)
+    console.log(`plan = ${JSON.stringify(plan)}`)
+
+    const product = await Product.findById(plan.product)
+    console.log(`product = ${JSON.stringify(product)}`)
 
     // на каждую дату вычисляем на эту дату остаток товара на складе и планы продаж
-    const planQnt = await Plan.qntForDate(plan.product, plan.date)
+    const planQnt = await Plan.qntForDate(plan.product, plan.date.format('DD-MM-YYYY'))
+    const stockQnt = await ProductStock.qntForDate(plan.product, plan.date.format('DD-MM-YYYY'))
+
+    // смотрим текущее сальдо между продажами и производством
+    const currentQnt = stockQnt - planQnt
+    console.log(`\nproduct "${product.caption}", ${plan.date}: stock ${stockQnt}, plan ${planQnt} = ${currentQnt}`)
 
     // основной алгоритм начинается здесь: обрабатываем строку сразу после ее сохранения в базу, но до отправки
     // результата на клиента (до обработчика sendData)
     console.log(`${fnName}: end`)
-    next()
   }
+  const Wrap = app.exModular.services.wrap
 
   return {
     name: 'MrpPlan',
@@ -61,7 +72,7 @@ export const MrpPlan = (app) => {
     description: 'План продаж',
 //    seedFileName: 'mrp-plan.json',
     icon: 'BarChart',
-    afterCreateBeg: [processPlan],
+    afterCreateBeg: [Wrap(processPlan)],
     props: [
       {
         name: 'id',
@@ -75,8 +86,7 @@ export const MrpPlan = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
-        format: 'DD-MM-YYYY',
-        default: null
+        format: 'DD-MM-YYYY'
       },
       {
         name: 'product',

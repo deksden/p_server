@@ -136,7 +136,11 @@ export const exModular = (app) => {
       model.storage = ex.storages.default
     }
     ex.models[model.name] = model.storage.modelFromSchema(model)
+
+    ex.models[model.name].props.map((prop) => ex.models[model.name].props[prop.name] = prop)
   }
+
+
   ex.initAdd = (item) => {
     ex.init.push(item)
   }

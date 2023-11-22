@@ -20,7 +20,13 @@ export const Validator = (app) => {
   }
 
   const mapPropToValidation = (Model, prop, propName, options) => {
-    if (prop.type === 'text') {
+    if (prop.type === 'datetime') {
+      let v = body(propName).isDate({format: prop.format}).withMessage(`${Model.name}.${prop.name} should be date`)
+      if (prop.default !== undefined) {
+        v = v.optional({ nullable: true })
+      }
+      return v
+    } else if (prop.type === 'text') {
       let v = body(propName).isString().withMessage(`${Model.name}.${prop.name} should be string`)
       if (prop.default !== undefined) {
         v = v.optional({ nullable: true })
