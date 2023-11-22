@@ -127,6 +127,19 @@ describe('MRP: tests', function () {
         })
         .catch((e) => { throw e })
     })
+    it('1.3: MrpProduct.prodDuration', function () {
+      return createAdmin(context)
+        .then(() => app.exModular.services.seed('MrpStage', 'test-mrp-stage1.json'))
+        .then(() => app.exModular.models.MrpProduct.prodDuration('bmx'))
+        .then((res) => {
+          expect(res).to.be.equal(31)
+        })
+        .then(() => app.exModular.models.MrpProduct.prodDuration('?'))
+        .then((res) => {
+          expect(res).to.be.null()
+        })
+        .catch((e) => { throw e })
+    })
   })
   describe('MRP us-1:', function () {
     it('1.1:', function () {

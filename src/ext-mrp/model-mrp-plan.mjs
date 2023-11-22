@@ -4,7 +4,7 @@ import moment from 'moment'
 /*
  Алгоритм:
 
- делаем обработчик - после сохранеения позиции плана вызываем модуль планирования для этой позиции.
+ Делаем обработчик - после сохранения позиции плана вызываем модуль планирования для этой позиции.
 
  Лог планирования сохраняем в переменную status
 
@@ -45,8 +45,9 @@ export const MrpPlan = (app) => {
     }
 
     // получаем сведения о продукте
-    const plan = res.data
-    plan.date = moment(plan.date, Plan.props.date.format)
+    const plan = await Plan.findById(res.data.id)
+    plan.date = moment(plan.date)
+    // plan.date = moment(plan.date, Plan.props.date.format)
     console.log(`plan = ${JSON.stringify(plan)}`)
 
     const product = await Product.findById(plan.product)
@@ -60,8 +61,16 @@ export const MrpPlan = (app) => {
     const currentQnt = stockQnt - planQnt
     console.log(`\nproduct "${product.caption}", ${plan.date}: stock ${stockQnt}, plan ${planQnt} = ${currentQnt}`)
 
-    // основной алгоритм начинается здесь: обрабатываем строку сразу после ее сохранения в базу, но до отправки
-    // результата на клиента (до обработчика sendData)
+    product.qntMin = 50000
+    if (currentQnt <= product.qntMin) {
+      // если текущее сальдо меньше минимального остатка на складе, нужно планировать партию продукции:
+      console.log(`Need production: minQnt ${product.qntMin}`)
+
+      // const plannedProd = Product.planProduction(product.id, plan.date, Math.abs(currentQnt))
+      const prodDuration = await Product.prodDuration(product.id)
+      // console.log(`Production qnt: ${plannedProd.qntForProd}, ${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
+    }
+
     console.log(`${fnName}: end`)
   }
   const Wrap = app.exModular.services.wrap

@@ -1,9 +1,27 @@
 import { v4 as uuid } from 'uuid'
 
 export const MrpProduct = (app) => {
+  /** Рассчитать длительность производства
+   * @param productId : идентификатор продукта для которого считаем длительность производства
+   * @returns {number} : длительность производства в днях (ссумируем длительность этапов)
+   */
+  const prodDuration = async (productId) => {
+    const Product = app.exModular.models['MrpProduct']
+    const knex = Product.storage.db
+    return knex('MrpStage')
+      .sum({ res:'duration' })
+      .where({ product: productId })
+      .then((res) => {
+          return res[0].res
+      })
+      .catch((e) => { throw e })
+
+  }
+
   return {
     name: 'MrpProduct',
     seedFileName: 'mrp-product.json',
+    prodDuration,
     props: [
       {
         name: 'id',
