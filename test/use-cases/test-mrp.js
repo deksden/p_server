@@ -98,12 +98,32 @@ describe('MRP: tests', function () {
    */
 
   describe('MRP unit tests:', function () {
-    it('1.1: MrpProduct.qntForDate', function () {
+    it('1.1: MrpPlan.qntForDate', function () {
       return createAdmin(context)
         .then(() => app.exModular.services.seed('MrpPlan', 'test-mrp-plan1.json'))
         .then(() => app.exModular.models.MrpPlan.qntForDate('bmx', '01-06-2018'))
         .then((res) => {
           expect(res).to.be.equal(32500)
+        })
+        .then(() => app.exModular.models.MrpPlan.qntForDate('?', '01-06-2018'))
+        .then((res) => {
+          expect(res).to.be.null()
+        })
+        .catch((e) => { throw e })
+    })
+    it('1.2: MrpProductStock.qntForDate', function () {
+      return createAdmin(context)
+        .then(() => app.exModular.models.MrpProductStock.qntForDate('bmx', '15-01-2018'))
+        .then((res) => {
+          expect(res).to.be.equal(3500)
+        })
+        .then(() => app.exModular.models.MrpProductStock.qntForDate('bmx', '26-01-2018'))
+        .then((res) => {
+          expect(res).to.be.equal(11500)
+        })
+        .then(() => app.exModular.models.MrpProductStock.qntForDate('?', '26-01-2018'))
+        .then((res) => {
+          expect(res).to.be.null()
         })
         .catch((e) => { throw e })
     })

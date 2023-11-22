@@ -33,8 +33,9 @@ export const MrpPlan = (app) => {
 
   // Функция для обработки строки плана. Должна быть выполнена перед sendData (до отправки результатов клиенту),
   // возможно - до saveData:
-  const processPlan = (req, res, next) => {
+  const processPlan = async (req, res, next) => {
     const fnName = 'MRP.processPlan'
+    const Plan = app.exModular.models['MrpPlan']
 
     console.log(`${fnName}:`)
     if (res.err) {
@@ -46,7 +47,7 @@ export const MrpPlan = (app) => {
     console.log(`product = ${JSON.stringify(plan)}`)
 
     // на каждую дату вычисляем на эту дату остаток товара на складе и планы продаж
-
+    const planQnt = await Plan.qntForDate(plan.product, plan.date)
 
     // основной алгоритм начинается здесь: обрабатываем строку сразу после ее сохранения в базу, но до отправки
     // результата на клиента (до обработчика sendData)

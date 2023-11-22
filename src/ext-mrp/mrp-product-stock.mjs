@@ -1,9 +1,27 @@
 import { v4 as uuid } from 'uuid'
+import moment from 'moment/moment.js'
 
 export const MrpProductStock = (app) => {
+  const qntForDate = async (productId, date) => {
+    const ProductStock = app.exModular.models['MrpProductStock']
+    const knex = ProductStock.storage.db
+    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
+    const aDate2 = aDate1.toString()
+    return knex(ProductStock.name)
+      .sum({ res:'qnt' })
+      .where({ product: productId })
+      .where('date', '<=', aDate2)
+      .then((res) => {
+          return res[0].res
+      })
+      .catch((e) => { throw e })
+
+  }
+
   return {
     name: 'MrpProductStock',
     seedFileName: 'mrp-product-stock.json',
+    qntForDate,
     props: [
       {
         name: 'id',
@@ -33,7 +51,7 @@ export const MrpProductStock = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
-        format: 'YYYY/MM/DD',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {
