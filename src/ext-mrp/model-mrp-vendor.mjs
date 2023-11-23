@@ -1,9 +1,71 @@
 import { v4 as uuid } from 'uuid'
+import _ from 'lodash'
+import moment from 'moment-business-days'
 
 export const MrpVendor = (app) => {
+  /**
+   * Рассчитать дату начала заказа с учетом времени доставки и производства (выполнения заказа)
+   * @param vendor    поставщик
+   * @param date        дата завершения заказа
+   * @return {moment}   дата начала заказа
+   */
+  const calculateOrderStartDate = (vendor, date) => {
+    const supplyStart = moment(date)
+    // вычтем из конечной даты длительность заказа
+    vendor.inWorkingDays
+      ? supplyStart.businessSubtract(vendor.orderDuration)
+      : supplyStart.subtract(vendor.orderDuration, 'days')
+    // вычтем длительность доставки:
+    vendor.deliveryInWorkingDays
+      ? supplyStart.businessSubtract(vendor.deliveryDuration)
+      : supplyStart.subtract(vendor.deliveryDuration, 'days')
+    return supplyStart
+  }
+
+  /**
+   * Выбрать поставщика
+   * @param resourceId  Ресурс
+   * @param date        Дата поставки
+   * @return (MrpVendor) выбранный поставщик
+   */
+  const selectVendor = async (resourceId, date) => {
+    const Vendor = app.exModular.models['MrpVendor']
+    const aDate = moment(date)
+
+    // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
+    console.log(`Select vendor: res=${resourceId}, date=${aDate.format('DD-MM-YYYY')}`)
+
+    const resVendors = await Vendor.findAll({
+      where: { resource: resourceId },
+      orderBy: [{ column: 'date', order: 'desc' }, { column: 'id', order: 'asc' }]
+    })
+
+    let selectedVendor = null
+
+    if (resVendors.some((vendor) => {
+      vendor.date = moment(vendor.date)
+
+      console.log(`testing vendor: ${vendor.caption} (from ${vendor.date.format('DD-MM-YYYY')})`)
+      // проверим этого вендора на пригодность по дате поставки:
+      const supplyStart = calculateOrderStartDate(vendor, date)
+      console.log(`calculated supplystart is ${supplyStart.format('DD-MM-YYYY')}`)
+      // теперь в supplyStart находится самая ранняя дата доставки для этого вендора
+      if (supplyStart.isSameOrAfter(vendor.date)) {
+        console.log('vendor selected')
+        selectedVendor = vendor
+        return true
+      }
+      return false
+    })) {
+      return selectedVendor
+    }
+    return null
+  }
+
   return {
     name: 'MrpVendor',
     seedFileName: 'mrp-vendor.json',
+    selectVendor,
     props: [
       {
         name: 'id',

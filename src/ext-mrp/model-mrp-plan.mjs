@@ -66,9 +66,9 @@ export const MrpPlan = (app) => {
       // если текущее сальдо меньше минимального остатка на складе, нужно планировать партию продукции:
       console.log(`Need production: minQnt ${product.qntMin}`)
 
-      // const plannedProd = Product.planProduction(product.id, plan.date, Math.abs(currentQnt))
+      const plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt))
       const prodDuration = await Product.prodDuration(product.id)
-      // console.log(`Production qnt: ${plannedProd.qntForProd}, ${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
+      console.log(`Production qnt: ${plannedProd.qntForProd}, ${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
     }
 
     console.log(`${fnName}: end`)

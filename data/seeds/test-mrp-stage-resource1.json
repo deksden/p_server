@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "stage": 1,
+    "resource": "hy",
+    "qnt": 160
+  },
+  {
+    "id": 2,
+    "stage": 1,
+    "resource": "hy",
+    "qnt": 50
+  },
+  {
+    "id": 3,
+    "stage": 1,
+    "resource": "hy",
+    "qnt": 35
+  }
+]

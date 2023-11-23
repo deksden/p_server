@@ -1,9 +1,26 @@
 import { v4 as uuid } from 'uuid'
+import moment from 'moment-business-days'
 
 export const MrpResourceStock = (app) => {
+  const qntForDate = async (resourceId, date) => {
+    const ResourceStock = app.exModular.models['MrpResourceStock']
+    const knex = ResourceStock.storage.db
+    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
+    const aDate2 = aDate1.toString()
+    return knex(ResourceStock.name)
+      .sum({ res:'qnt' })
+      .where({ resource: resourceId })
+      .where('date', '<=', aDate2)
+      .then((res) => {
+          return res[0].res
+      })
+      .catch((e) => { throw e })
+  }
+
   return {
     name: 'MrpResourceStock',
     seedFileName: 'mrp-resource-stock.json',
+    qntForDate,
     props: [
       {
         name: 'id',

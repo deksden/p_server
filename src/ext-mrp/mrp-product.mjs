@@ -1,4 +1,6 @@
 import { v4 as uuid } from 'uuid'
+import _ from 'lodash'
+import moment from 'moment-business-days'
 
 export const MrpProduct = (app) => {
   /** Рассчитать длительность производства
@@ -18,10 +20,107 @@ export const MrpProduct = (app) => {
 
   }
 
+  const planProduction = async (productId, date, qnt) => {
+    const Product = app.exModular.models['MrpProduct']
+    const Plan = app.exModular.models['MrpPlan']
+    const Stock = app.exModular.models['MrpProductStock']
+    const Stage = app.exModular.models['MrpStage']
+    const StageResource = app.exModular.models['MrpStageResource']
+    const Resource = app.exModular.models['MrpResource']
+    const ResourceStock = app.exModular.models['MrpResourceStock']
+
+    const product = await Product.findById(productId)
+    const ret = {}
+
+    const aDateFormat = Plan.props.date.format
+    if (typeof date === 'string') {
+      date = moment.utc(date, aDateFormat)
+    } else {
+      date = moment(date)
+    }
+    console.log(`\nPlanning production "${product.caption}": ${date.format(aDateFormat)}, qnt=${qnt}.`)
+
+    let qntForProd = product.qntStep
+    while (qntForProd < (qnt + product.qntMin)) {
+      qntForProd += product.qntStep
+    }
+    console.log(`qntForProd = ${qntForProd}`)
+    ret.qntForProd = qntForProd
+
+    // добавить запись о планах производства продукции в остатки
+    const aStock = Stock.create({
+      type: 'prod',
+      product: product.id,
+      date: date.format(aDateFormat),
+      qnt
+    })
+
+    // спланируем производство партии продукции
+    // рассчитаем дату начала этапа:
+    const duration = await Product.prodDuration(productId)
+    let startDate
+    const endDate = moment(date)
+    if (product.inWorkingDays) {
+      startDate = endDate.businessSubtract(duration)
+    } else {
+      startDate = endDate.subtract(duration, 'days')
+    }
+    console.log(`startDate: ${startDate.format(aDateFormat)}`)
+
+    // получим список этапов производства
+    // отсортируем список этапов по порядку (и по идентификаторам)
+    const stages = await Stage.findAll({ orderBy: ['order','id'], where: { product: productId }})
+    console.log(`Stages for product "${product.caption}": ${JSON.stringify(stages)}`)
+
+    // начальная дата производства и первого этапа:
+    let stageStart = moment(startDate)
+    // _.orderBy(stagesAPI.filterByProduct(productId), ['order', 'id'])
+    await Promise.all(stages.map(async (stage) => {
+      // для этого этапа получим список требуемых ресурсов
+      console.log(`stage: ${stage.order} "${stage.caption}"`)
+      const stageResources = await StageResource.findAll({ where: { stage: stage.id }})
+
+      // обработаем список ресурсов
+      await Promise.all(stageResources.map(async (stageResource) => {
+        // для каждого ресурса получим его количество на складе на начало этапа:
+        const stockQnt = await ResourceStock.qntForDate(stageResource.resource, stageStart)
+
+        // вычислим требуемое количество ресурса для данного этапа
+        const reqQnt = qnt / product.baseQnt * stageResource.qnt
+        const aResource = await Resource.findById(stageResource.resource)
+
+        console.log(`Resource: ${stageResource.resource} "${aResource.caption}" stock ${stockQnt} req ${reqQnt}`)
+
+        // если есть дефицит ресурсов - спланировать его закупку
+        if (reqQnt > (stockQnt - stageResource.resource.minStock)) {
+          // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
+          console.log(`resourcesAPI.planOrderRes(${aResource.id}, ${stageStart}, ${reqQnt + aResource.minStock - stockQnt})`)
+          await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - stockQnt))
+        }
+
+        // увеличить дату на длительность этапа:
+        product.inWorkingDays
+          ? startDate = startDate.buisnessAdd(stage.duration)
+          : startDate = startDate.add(stage.duration, 'days')
+
+        // списать ресурсы на производство датой окончания этапа:
+        const rStock = await ResourceStock.create({
+          resource: stageResource.resource.id,
+          type: 'prod',
+          date: startDate.format(aDateFormat),
+          qnt: -reqQnt,
+          comments: `product ${stageResource.resource.id} stage: ${stage.order} ${stage.caption}`
+        })
+      }))
+    }))
+    return ret
+  }
+
   return {
     name: 'MrpProduct',
     seedFileName: 'mrp-product.json',
     prodDuration,
+    planProduction,
     props: [
       {
         name: 'id',
