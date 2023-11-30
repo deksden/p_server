@@ -50,7 +50,7 @@ export const MrpResourceStock = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
-        format: 'YYYY/MM/DD',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {

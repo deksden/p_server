@@ -150,6 +150,42 @@ describe('MRP: tests', function () {
           product: 'bmx',
           qnt: 10000
         }))
+        .then(() => mrpPlanAdd(context, {
+          id: 2,
+          date: '01-04-2018',
+          product: 'bmx',
+          qnt: 8500
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 3,
+          date: '01-05-2018',
+          product: 'bmx',
+          qnt: 8000
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 4,
+          date: '01-06-2018',
+          product: 'bmx',
+          qnt: 6000
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 5,
+          date: '01-07-2018',
+          product: 'bmx',
+          qnt: 5500
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 6,
+          date: '01-08-2018',
+          product: 'bmx',
+          qnt: 6000
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 7,
+          date: '01-09-2018',
+          product: 'bmx',
+          qnt: 10500
+        }))
         .catch((e) => { throw e })
     })
   })

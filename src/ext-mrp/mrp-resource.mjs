@@ -15,9 +15,10 @@ export const MrpResource = (app) => {
     const Resource = app.exModular.models['MrpResource']
     const ResourceStock = app.exModular.models['MrpResourceStock']
 
-    const resource = Resource.findById(resourceId)
+    const resource = await Resource.findById(resourceId)
     const aDate = moment(date)
-    console.log(`Planning order: res ${resource.caption} ${aDate.format('DD-MM-YYYY')} qnt=${qnt}`)
+    const aDateFormat = ResourceStock.props.date.format
+    console.log(`Mrp.Resource.planOrderRes: resource="${resource.caption}", date="${aDate.format(aDateFormat)}, qnt=${qnt}`)
 
     // выбрать вендера для этой поставки:
     const vendor = await Vendor.selectVendor(resourceId, date)
@@ -35,7 +36,7 @@ export const MrpResource = (app) => {
     console.log(`Order qnt calculated: ${orderQnt}`)
 
     const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
-    console.log(`Ordered: ${startDate.format(defDateFormat)} qnt=${orderQnt} price=${vendor.invoicePrice}`)
+    console.log(`.end, ResourceStock.create: ${startDate.format(aDateFormat)} qnt=${orderQnt} price=${vendor.invoicePrice}`)
 
     // записать заказ ресурса в список партий:
     return await ResourceStock.create({
@@ -85,7 +86,8 @@ export const MrpResource = (app) => {
         scale: 0,
         format: '',
         default: 0
-      },
+      }
+      /*
       {
         name: 'minOrder',
         type: 'decimal',
@@ -121,9 +123,9 @@ export const MrpResource = (app) => {
         type: 'datetime',
         caption: 'Дата',
         description: 'Начальная дата появления ресурса',
-        format: 'YYYY/MM/DD',
+        format: 'DD-MM-YYYY',
         default: null
-      }
+      } */
     ]
   }
 }

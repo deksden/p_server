@@ -11,6 +11,7 @@ export const MrpVendor = (app) => {
    */
   const calculateOrderStartDate = (vendor, date) => {
     const supplyStart = moment(date)
+    console.log(`Vendor.calculateOrderStartDate: vendor ${vendor.caption} date="${supplyStart.format('DD-MM-YYYY')}"`)
     // вычтем из конечной даты длительность заказа
     vendor.inWorkingDays
       ? supplyStart.businessSubtract(vendor.orderDuration)
@@ -19,6 +20,7 @@ export const MrpVendor = (app) => {
     vendor.deliveryInWorkingDays
       ? supplyStart.businessSubtract(vendor.deliveryDuration)
       : supplyStart.subtract(vendor.deliveryDuration, 'days')
+    console.log(`Vendor.calculateOrderStartDate: end, supplyStart="${supplyStart.format('DD-MM-YYYY')}"`)
     return supplyStart
   }
 
@@ -33,7 +35,7 @@ export const MrpVendor = (app) => {
     const aDate = moment(date)
 
     // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
-    console.log(`Select vendor: res=${resourceId}, date=${aDate.format('DD-MM-YYYY')}`)
+    console.log(`MrpVendor.selectVendor: resource=${resourceId}, date=${aDate.format('DD-MM-YYYY')}`)
 
     const resVendors = await Vendor.findAll({
       where: { resource: resourceId },
@@ -66,6 +68,7 @@ export const MrpVendor = (app) => {
     name: 'MrpVendor',
     seedFileName: 'mrp-vendor.json',
     selectVendor,
+    calculateOrderStartDate,
     props: [
       {
         name: 'id',

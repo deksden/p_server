@@ -38,7 +38,7 @@ export const MrpProduct = (app) => {
     } else {
       date = moment(date)
     }
-    console.log(`\nPlanning production "${product.caption}": ${date.format(aDateFormat)}, qnt=${qnt}.`)
+    console.log(`\nMrpProduct.planProduction: product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}.`)
 
     let qntForProd = product.qntStep
     while (qntForProd < (qnt + product.qntMin)) {
@@ -48,6 +48,7 @@ export const MrpProduct = (app) => {
     ret.qntForProd = qntForProd
 
     // добавить запись о планах производства продукции в остатки
+    console.log(`Create Stock: type=prod, product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}`)
     const aStock = Stock.create({
       type: 'prod',
       product: product.id,
@@ -65,7 +66,7 @@ export const MrpProduct = (app) => {
     } else {
       startDate = endDate.subtract(duration, 'days')
     }
-    console.log(`startDate: ${startDate.format(aDateFormat)}`)
+    console.log(`duration=${duration}, startDate="${startDate.format(aDateFormat)}"`)
 
     // получим список этапов производства
     // отсортируем список этапов по порядку (и по идентификаторам)
@@ -89,10 +90,10 @@ export const MrpProduct = (app) => {
         const reqQnt = qnt / product.baseQnt * stageResource.qnt
         const aResource = await Resource.findById(stageResource.resource)
 
-        console.log(`Resource: ${stageResource.resource} "${aResource.caption}" stock ${stockQnt} req ${reqQnt}`)
+        console.log(`Resource: ${stageResource.resource} "${aResource.caption}" stock=${stockQnt}, resource.minStock=${aResource.minStock}, req=${reqQnt}`)
 
         // если есть дефицит ресурсов - спланировать его закупку
-        if (reqQnt > (stockQnt - stageResource.resource.minStock)) {
+        if (reqQnt > (stockQnt - aResource.minStock)) {
           // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
           console.log(`resourcesAPI.planOrderRes(${aResource.id}, ${stageStart}, ${reqQnt + aResource.minStock - stockQnt})`)
           await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - stockQnt))
@@ -113,6 +114,7 @@ export const MrpProduct = (app) => {
         })
       }))
     }))
+    console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
     return ret
   }
 

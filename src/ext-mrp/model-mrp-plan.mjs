@@ -61,7 +61,7 @@ export const MrpPlan = (app) => {
     const currentQnt = stockQnt - planQnt
     console.log(`\nproduct "${product.caption}", ${plan.date}: stock ${stockQnt}, plan ${planQnt} = ${currentQnt}`)
 
-    product.qntMin = 50000
+    // product.qntMin = 50000
     if (currentQnt <= product.qntMin) {
       // если текущее сальдо меньше минимального остатка на складе, нужно планировать партию продукции:
       console.log(`Need production: minQnt ${product.qntMin}`)
