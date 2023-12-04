@@ -86,8 +86,8 @@ export const MrpPlan = (app) => {
       {
         name: 'id',
         type: 'id',
-        caption: 'Id',
-        description: 'Идентификатор',
+        caption: 'Код',
+        description: 'Идентификатор записи',
         format: 'uuid',
         default: () => uuid()
       },
@@ -95,6 +95,7 @@ export const MrpPlan = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
+        description: 'Дата, на которую планируется выдать на склад указанное количество продукции',
         format: 'DD-MM-YYYY'
       },
       {
@@ -102,13 +103,13 @@ export const MrpPlan = (app) => {
         type: 'ref',
         model: 'MrpProduct',
         caption: 'Продукт',
-        description: 'Ссылка на продукт',
+        description: 'Продукция, производство которой планируется',
         default: null
       },
       {
         name: 'qnt',
         type: 'decimal',
-        caption: 'Количество',
+        caption: 'Количество продукции, которое планируется получить на склад в указанную дату',
         precision: 12,
         scale: 0,
         format: '',

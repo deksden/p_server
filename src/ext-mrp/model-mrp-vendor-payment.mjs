@@ -3,6 +3,8 @@ import { v4 as uuid } from 'uuid'
 export const MrpVendorPayment = (app) => {
   return {
     name: 'MrpVendorPayment',
+    caption: 'Схема оплаты',
+    description: 'Схема оплаты поставщику для формирования календарного графика платежей',
     seedFileName: 'mrp-vendor-payment.json',
     props: [
       {
@@ -26,7 +28,7 @@ export const MrpVendorPayment = (app) => {
         type: 'text',
         format: '',
         caption: 'Тип',
-        description: 'Тип затрат - оплата товара, доставки',
+        description: 'Тип затрат - оплата товара (invoice), доставки (delivery)',
         default: ''
       },
       {
@@ -34,14 +36,14 @@ export const MrpVendorPayment = (app) => {
         type: 'text',
         format: '',
         caption: 'Условие',
-        description: 'Вид условия оплаты - в процентах, фиксированная сумма',
+        description: 'Как указана величина платежа: фиксированная сумма (fixed) или в процентах от суммы счёта (percent)',
         default: ''
       },
       {
         name: 'value',
         type: 'decimal',
         caption: 'Значение',
-        description: 'Величина платежа, зависит от условия - процент, сумма',
+        description: 'Величина оплаты, указана в соответствии с условиями',
         precision: 12,
         scale: 2,
         format: '',
@@ -52,7 +54,7 @@ export const MrpVendorPayment = (app) => {
         type: 'text',
         format: '',
         caption: 'Валюта',
-        description: 'Валюта, в котором номинировано значения',
+        description: 'Валюта, в котором номинирован платёж',
         default: ''
       },
       {
@@ -60,14 +62,14 @@ export const MrpVendorPayment = (app) => {
         type: 'text',
         format: '',
         caption: 'База',
-        description: 'База, относительно которой указано значение - от суммы заказа',
+        description: 'База, относительно которой указан платёж - от суммы заказа',
         default: ''
       },
       {
         name: 'time',
         type: 'decimal',
         caption: 'Период',
-        description: 'Период в днях когда необходимо сделать платеж',
+        description: 'Период в днях от даты заказа, когда необходимо сделать платеж',
         precision: 12,
         scale: 0,
         format: '',

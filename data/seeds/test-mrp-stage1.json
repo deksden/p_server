@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "product": "bmx",
+    "product": 1,
     "order": 1,
     "caption": "BMX stage 1",
     "duration": 4,
@@ -9,7 +9,7 @@
   },
   {
     "id": 2,
-    "product": "bmx",
+    "product": 1,
     "order": 2,
     "caption": "BMX stage 2",
     "duration": 2,
@@ -17,7 +17,7 @@
   },
   {
     "id": 3,
-    "product": "bmx",
+    "product": 1,
     "order": 3,
     "caption": "BMX stage 3",
     "duration": 25,

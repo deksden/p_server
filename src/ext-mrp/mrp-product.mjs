@@ -21,6 +21,7 @@ export const MrpProduct = (app) => {
   }
 
   const planProduction = async (productId, date, qnt) => {
+    // получаем API всех нужных объектов в системе
     const Product = app.exModular.models['MrpProduct']
     const Plan = app.exModular.models['MrpPlan']
     const Stock = app.exModular.models['MrpProductStock']
@@ -29,10 +30,15 @@ export const MrpProduct = (app) => {
     const Resource = app.exModular.models['MrpResource']
     const ResourceStock = app.exModular.models['MrpResourceStock']
 
+    // загружаем сведения о продукции:
     const product = await Product.findById(productId)
+
     const ret = {}
 
+    // из свойств модели получаем формат даты, с которым работаем:
     const aDateFormat = Plan.props.date.format
+
+    // переводим формат переменной даты в объект moment
     if (typeof date === 'string') {
       date = moment.utc(date, aDateFormat)
     } else {
@@ -40,6 +46,7 @@ export const MrpProduct = (app) => {
     }
     console.log(`\nMrpProduct.planProduction: product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}.`)
 
+    // вычислим размер партии к производству на основании минимальной производственной партии и шага ее изменения
     let qntForProd = product.qntStep
     while (qntForProd < (qnt + product.qntMin)) {
       qntForProd += product.qntStep
@@ -47,7 +54,7 @@ export const MrpProduct = (app) => {
     console.log(`qntForProd = ${qntForProd}`)
     ret.qntForProd = qntForProd
 
-    // добавить запись о планах производства продукции в остатки
+    // добавить запись об этой производственной партии в остатки продукции:
     console.log(`Create Stock: type=prod, product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}`)
     const aStock = Stock.create({
       type: 'prod',
@@ -57,7 +64,7 @@ export const MrpProduct = (app) => {
     })
 
     // спланируем производство партии продукции
-    // рассчитаем дату начала этапа:
+    // рассчитаем дату начала производства:
     const duration = await Product.prodDuration(productId)
     let startDate
     const endDate = moment(date)
@@ -75,7 +82,6 @@ export const MrpProduct = (app) => {
 
     // начальная дата производства и первого этапа:
     let stageStart = moment(startDate)
-    // _.orderBy(stagesAPI.filterByProduct(productId), ['order', 'id'])
     await Promise.all(stages.map(async (stage) => {
       // для этого этапа получим список требуемых ресурсов
       console.log(`stage: ${stage.order} "${stage.caption}"`)
@@ -86,6 +92,10 @@ export const MrpProduct = (app) => {
         // для каждого ресурса получим его количество на складе на начало этапа:
         const stockQnt = await ResourceStock.qntForDate(stageResource.resource, stageStart)
 
+        // TODO: нужно получить список партий ресурсов на дату - из чего состоит остаток
+
+        // TODO:  почему startDate и stageStart перепутаны? Ресурсы на дату этапа или начала производства?
+
         // вычислим требуемое количество ресурса для данного этапа
         const reqQnt = qnt / product.baseQnt * stageResource.qnt
         const aResource = await Resource.findById(stageResource.resource)
@@ -95,22 +105,22 @@ export const MrpProduct = (app) => {
         // если есть дефицит ресурсов - спланировать его закупку
         if (reqQnt > (stockQnt - aResource.minStock)) {
           // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
-          console.log(`resourcesAPI.planOrderRes(${aResource.id}, ${stageStart}, ${reqQnt + aResource.minStock - stockQnt})`)
           await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - stockQnt))
         }
 
         // увеличить дату на длительность этапа:
         product.inWorkingDays
-          ? startDate = startDate.buisnessAdd(stage.duration)
+          ? startDate = startDate.businessAdd(stage.duration)
           : startDate = startDate.add(stage.duration, 'days')
 
+        // TODO: списываем из имеющихся партий ресурсов
         // списать ресурсы на производство датой окончания этапа:
         const rStock = await ResourceStock.create({
-          resource: stageResource.resource.id,
           type: 'prod',
+          resource: stageResource.resource,
           date: startDate.format(aDateFormat),
           qnt: -reqQnt,
-          comments: `product ${stageResource.resource.id} stage: ${stage.order} ${stage.caption}`
+          comments: `res ${aResource.caption} stage: ${stage.order} ${stage.caption}`
         })
       }))
     }))
@@ -120,6 +130,8 @@ export const MrpProduct = (app) => {
 
   return {
     name: 'MrpProduct',
+    caption: 'Продукция',
+    description: 'Продукция и базовые сведения о ней',
     seedFileName: 'mrp-product.json',
     prodDuration,
     planProduction,
@@ -137,7 +149,7 @@ export const MrpProduct = (app) => {
         type: 'text',
         format: '',
         caption: 'Название',
-        description: 'Название продукта',
+        description: 'Название продукции',
         default: ''
       },
       {
@@ -145,22 +157,22 @@ export const MrpProduct = (app) => {
         type: 'text',
         format: '',
         caption: 'Единица',
-        description: 'Единица измерения количества',
+        description: 'Единица измерения количества продукции',
         default: ''
       },
       {
         name: 'initialDate',
         type: 'datetime',
         caption: 'Дата',
-        description: 'Начальная дата появления продукта',
-        format: 'YYYY/MM/DD',
+        description: 'Начальная дата появления данной продукции',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {
         name: 'qntMin',
         type: 'decimal',
         caption: 'Количество',
-        description: 'Минимальная партия производства',
+        description: 'Минимальная партия для заказа в производство',
         precision: 12,
         scale: 0,
         format: '',
@@ -170,7 +182,7 @@ export const MrpProduct = (app) => {
         name: 'qntStep',
         type: 'decimal',
         caption: 'Шаг',
-        description: 'Минимальная партия производства',
+        description: 'Минимальный шаг изменения количества в заказе в производство',
         precision: 12,
         scale: 0,
         format: '',
@@ -180,7 +192,7 @@ export const MrpProduct = (app) => {
         name: 'baseQnt',
         type: 'decimal',
         caption: 'База',
-        description: 'Базовое количество',
+        description: 'Базовое количество продукции, относительно которого установлены нормы расхода (например, "на 100 штук")',
         precision: 12,
         scale: 0,
         format: '',
@@ -191,7 +203,7 @@ export const MrpProduct = (app) => {
         type: 'boolean',
         format: '',
         caption: 'Рабочие дни',
-        description: 'Длительность указана в рабочих днях',
+        description: 'Длительность этапов производства указана в рабочих днях',
         default: false
       },
       {
@@ -199,7 +211,7 @@ export const MrpProduct = (app) => {
         type: 'text',
         format: '',
         caption: 'Примечания',
-        description: 'Примечания',
+        description: 'Примечания о продукции в свободной форме',
         default: ''
       }
     ]

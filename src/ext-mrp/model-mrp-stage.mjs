@@ -3,6 +3,8 @@ import { v4 as uuid } from 'uuid'
 export const MrpStage = (app) => {
   return {
     name: 'MrpStage',
+    caption: 'Этап производства',
+    description: 'Этап производства продукции',
     seedFileName: 'mrp-stage.json',
     props: [
       {
@@ -18,7 +20,7 @@ export const MrpStage = (app) => {
         type: 'ref',
         model: 'MrpProduct',
         caption: 'Продукт',
-        description: 'Ссылка на продукт',
+        description: 'Ссылка на производимый на этом этапе продукт',
         default: null
       },
       {
@@ -43,7 +45,7 @@ export const MrpStage = (app) => {
         name: 'duration',
         type: 'decimal',
         caption: 'Длительность',
-        description: 'Длительность в днях этапа производства',
+        description: 'Длительность в днях этого этапа производства',
         precision: 6,
         scale: 0,
         format: '',

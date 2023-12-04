@@ -1,18 +1,18 @@
 [
   {
     "id": 1,
-    "product": "bmx",
+    "product": 1,
     "type": "initial",
-    "date": "01-01-2018",
-    "qnt": 3500,
+    "date": "01-07-2023",
+    "qnt": 1500,
     "price": 100
   },
   {
     "id": 2,
-    "product": "bmx",
+    "product": 1,
     "type": "in-production",
-    "date": "25-01-2018",
-    "qnt": 8000,
+    "date": "25-09-2023",
+    "qnt": 3000,
     "price": 0
   }
 ]

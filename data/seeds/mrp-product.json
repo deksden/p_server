@@ -1,13 +1,13 @@
 [
   {
-    "id": "bmx",
-    "caption": "Biomatrix",
+    "id": 1,
+    "caption": "Гель стерильный 2мл",
     "unit": "Ампула 2мл",
-    "initialDate": "01-01-2018",
+    "initialDate": "01-01-2022",
     "qntMin": 500,
     "qntStep": 1000,
-    "baseQnt": 1000,
-    "inWorkingDays": false,
-    "comments": "Гель Биоматрикс в ампулах"
+    "baseQnt": 200,
+    "inWorkingDays": true,
+    "comments": "Гель стерильный в ампулах 2мл, коробка 4шт"
   }
 ]

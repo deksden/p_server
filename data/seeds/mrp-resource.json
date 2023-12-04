@@ -1,8 +1,26 @@
 [
   {
-    "id": "hy",
-    "caption": "Hyaluronate Sodium",
-    "unit": "gr",
-    "minStock": 30
+    "id": "1",
+    "caption": "Hyaluronate Sodium - Гиалуроновая кислота",
+    "unit": "гр",
+    "minStock": 300
+  },
+  {
+    "id": "2",
+    "caption": "Питательная среда",
+    "unit": "мл",
+    "minStock": 4500
+  },
+  {
+    "id": "3",
+    "caption": "Ампула стерильная",
+    "unit": "шт",
+    "minStock": 5000
+  },
+  {
+    "id": "4",
+    "caption": "Коробка - гель стерильный",
+    "unit": "шт",
+    "minStock": 5000
   }
 ]

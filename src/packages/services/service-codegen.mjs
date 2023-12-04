@@ -167,6 +167,37 @@ export const Codegen = (app, opt) => {
     res.send(txt)
   }
 
+  const generateDocsForModel = (req, res) => {
+    if (!req.model) {
+      throw new app.exModular.services.errors.ServerInvalidParameters(
+        'modelName',
+        'string',
+        'req.model not found, use checkModelName middleware')
+    }
+
+    const model = req.model
+    let txt = `### ${model.name}${model.caption ? `: ${model.caption}`: ""}\n` +
+      `\n` +
+      `${model.description || ''}\n` +
+      `\n` +
+      `Свойства:` +
+      `\n`
+
+    model.props.map((prop) => {
+      let aType = prop.type
+
+      if (prop.type === 'ref') {
+        aType = `-> ${prop.model}`
+      }
+      txt = txt +
+        `* \`${prop.name}\`(${aType}): ${prop.caption || ''}. ${prop.description || ''}\n`
+    })
+
+    txt = txt + '\n\n'
+
+    res.send(txt)
+  }
+
   app.exModular.routes.Add({
     method: 'GET',
     name: 'codegen',
@@ -208,6 +239,15 @@ export const Codegen = (app, opt) => {
     description: 'Generate app imports',
     path: '/codegen/app/imports',
     handler: generateAppImports
+  })
+
+  app.exModular.routes.Add({
+    method: 'GET',
+    name: 'codegen',
+    description: 'Generate docs for model',
+    path: '/codegen/docs/model/:modelName',
+    validate: checkModelName,
+    handler: generateDocsForModel
   })
 
   return app

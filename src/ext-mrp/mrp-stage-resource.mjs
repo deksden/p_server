@@ -3,6 +3,8 @@ import { v4 as uuid } from 'uuid'
 export const MrpStageResource = (app) => {
   return {
     name: 'MrpStageResource',
+    caption: 'Нормы расхода',
+    description: 'Нормы расхода ресурсов на этапе производства',
     seedFileName: 'mrp-stage-resource.json',
     props: [
       {
@@ -18,7 +20,7 @@ export const MrpStageResource = (app) => {
         type: 'ref',
         model: 'MrpStage',
         caption: 'Этап',
-        description: 'Ссылка на этап',
+        description: 'Ссылка на этап производства, для которого уазана норма расхода',
         default: null
       },
       {
@@ -26,14 +28,14 @@ export const MrpStageResource = (app) => {
         type: 'ref',
         model: 'MrpResource',
         caption: 'Ресурс',
-        description: 'Ссылка на ресурс',
+        description: 'Ссылка на ресурс, для которого указана норма расхода на этапе производства',
         default: null
       },
       {
         name: 'qnt',
         type: 'decimal',
         caption: 'Количество',
-        description: 'Количество потребляемого ресурса на этом этапе',
+        description: 'Количество потребляемого ресурса на этом этапе, в отношении к resource.baseQnt',
         precision: 16,
         scale: 4,
         format: '',

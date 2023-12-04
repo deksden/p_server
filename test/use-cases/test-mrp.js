@@ -42,6 +42,8 @@ import { appInit } from '../../src/packages/app-init.mjs'
 import { expected, UserAdmin, UserFirst, UserSecond } from '../client/client-const.mjs'
 import { mrpPlanAdd } from '../client/client-mrp.mjs'
 import moment from 'moment'
+import path from 'path'
+import fs from 'fs'
 
 /**
 
@@ -99,40 +101,73 @@ describe('MRP: tests', function () {
 
   describe('MRP unit tests:', function () {
     it('1.1: MrpPlan.qntForDate', function () {
+      const aFile = 'test-mrp-plan1.json'
+      const fileName = path.join(process.env.SEEDS_DIR, aFile)
+      const data = JSON.parse(fs.readFileSync(fileName).toString())
+
+      const prodId = data[0].product
+      const date3 = data[2].date
+
+      const qnt1 = data[0].qnt
+      const qnt2 = data[1].qnt
+      const qnt3 = data[2].qnt
+
       return createAdmin(context)
-        .then(() => app.exModular.services.seed('MrpPlan', 'test-mrp-plan1.json'))
-        .then(() => app.exModular.models.MrpPlan.qntForDate('bmx', '01-06-2018'))
+        .then(() => app.exModular.services.seed('MrpPlan', aFile))
+        .then(() => app.exModular.models.MrpPlan.qntForDate(prodId, date3))
         .then((res) => {
-          expect(res).to.be.equal(32500)
+          expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
         })
-        .then(() => app.exModular.models.MrpPlan.qntForDate('?', '01-06-2018'))
+        .then(() => app.exModular.models.MrpPlan.qntForDate('?', date3))
         .then((res) => {
           expect(res).to.be.null()
         })
         .catch((e) => { throw e })
     })
     it('1.2: MrpProductStock.qntForDate', function () {
+      // load JSON data:
+      const fileName = path.join(process.env.SEEDS_DIR, 'mrp-product-stock.json')
+      const data = JSON.parse(fs.readFileSync(fileName).toString())
+
+      // get data from file:
+      const date1 = data[0].date
+      const qnt1 = data[0].qnt
+      const prodId = data[0].product
+
+      const date2 = data[1].date
+      const qnt2 = data[1].qnt
+
       return createAdmin(context)
-        .then(() => app.exModular.models.MrpProductStock.qntForDate('bmx', '15-01-2018'))
+        .then(() => app.exModular.models.MrpProductStock.qntForDate(prodId, date1))
         .then((res) => {
-          expect(res).to.be.equal(3500)
+          expect(res).to.be.equal(qnt1)
         })
-        .then(() => app.exModular.models.MrpProductStock.qntForDate('bmx', '26-01-2018'))
+        .then(() => app.exModular.models.MrpProductStock.qntForDate(prodId, date2))
         .then((res) => {
-          expect(res).to.be.equal(11500)
+          expect(res).to.be.equal(qnt1 + qnt2)
         })
-        .then(() => app.exModular.models.MrpProductStock.qntForDate('?', '26-01-2018'))
+        .then(() => app.exModular.models.MrpProductStock.qntForDate('?', date2))
         .then((res) => {
           expect(res).to.be.null()
         })
         .catch((e) => { throw e })
     })
     it('1.3: MrpProduct.prodDuration', function () {
+      const aFile = 'test-mrp-stage1.json'
+      const fileName = path.join(process.env.SEEDS_DIR, aFile)
+      const data = JSON.parse(fs.readFileSync(fileName).toString())
+
+      const prodId = data[0].product
+
+      const duration1 = data[0].duration
+      const duration2 = data[1].duration
+      const duration3 = data[2].duration
+
       return createAdmin(context)
-        .then(() => app.exModular.services.seed('MrpStage', 'test-mrp-stage1.json'))
-        .then(() => app.exModular.models.MrpProduct.prodDuration('bmx'))
+        .then(() => app.exModular.services.seed('MrpStage', aFile))
+        .then(() => app.exModular.models.MrpProduct.prodDuration(prodId))
         .then((res) => {
-          expect(res).to.be.equal(31)
+          expect(res).to.be.equal(duration1 + duration2 + duration3)
         })
         .then(() => app.exModular.models.MrpProduct.prodDuration('?'))
         .then((res) => {
@@ -141,50 +176,14 @@ describe('MRP: tests', function () {
         .catch((e) => { throw e })
     })
   })
-  describe('MRP us-1:', function () {
-    it('1.1:', function () {
+  describe('MRP us-1:',function () {
+    it('1.1:', async function () {
       return createAdmin(context)
         .then(() => mrpPlanAdd(context, {
           id: 1,
-          date: '01-03-2018',
-          product: 'bmx',
+          date: '01-09-2023',
+          product: 1,
           qnt: 10000
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 2,
-          date: '01-04-2018',
-          product: 'bmx',
-          qnt: 8500
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 3,
-          date: '01-05-2018',
-          product: 'bmx',
-          qnt: 8000
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 4,
-          date: '01-06-2018',
-          product: 'bmx',
-          qnt: 6000
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 5,
-          date: '01-07-2018',
-          product: 'bmx',
-          qnt: 5500
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 6,
-          date: '01-08-2018',
-          product: 'bmx',
-          qnt: 6000
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 7,
-          date: '01-09-2018',
-          product: 'bmx',
-          qnt: 10500
         }))
         .catch((e) => { throw e })
     })

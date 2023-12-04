@@ -2,7 +2,25 @@
   {
     "id": 1,
     "stage": 1,
-    "resource": "hy",
-    "qnt": 160
+    "resource": 1,
+    "qnt": 11
+  },
+  {
+    "id": 2,
+    "stage": 1,
+    "resource": 2,
+    "qnt": 389
+  },
+  {
+    "id": 3,
+    "stage": 1,
+    "resource": 3,
+    "qnt": 200
+  },
+  {
+    "id": 4,
+    "stage": 2,
+    "resource": 4,
+    "qnt": 50
   }
 ]

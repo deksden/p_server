@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "resource": "hy",
+    "resource": 1,
     "caption": "ContiPro",
     "address": "Czech Respublic",
     "date": "01-01-2017",
@@ -15,5 +15,56 @@
     "deliveryCompany": "DHL",
     "deliveryDuration": 15,
     "deliveryInWorkingDays": false
+  },
+  {
+    "id": 2,
+    "resource": 2,
+    "caption": "Вектор ФГУП",
+    "address": "НСО, Кольцово",
+    "date": "01-01-2020",
+    "invoicePrice": "9500",
+    "invoiceCurrency": "руб",
+    "orderDuration": 10,
+    "inWorkingDays": true,
+    "orderMin": 300,
+    "unit": "мл",
+    "orderStep": 200,
+    "deliveryCompany": "СДЭК",
+    "deliveryDuration": 5,
+    "deliveryInWorkingDays": false
+  },
+  {
+    "id": 3,
+    "resource": 3,
+    "caption": "Шотт ООО",
+    "address": "Нижегородская область, г. Завольжье",
+    "date": "01-01-2020",
+    "invoicePrice": "35",
+    "invoiceCurrency": "руб",
+    "orderDuration": 25,
+    "inWorkingDays": true,
+    "orderMin": 1000,
+    "unit": "шт",
+    "orderStep": 1000,
+    "deliveryCompany": "ДЛ",
+    "deliveryDuration": 10,
+    "deliveryInWorkingDays": false
+  },
+  {
+    "id": 4,
+    "resource": 4,
+    "caption": "Типография ООО",
+    "address": "Новосибирск",
+    "date": "01-01-2020",
+    "invoicePrice": "120",
+    "invoiceCurrency": "руб",
+    "orderDuration": 15,
+    "inWorkingDays": false,
+    "orderMin": 2000,
+    "unit": "шт",
+    "orderStep": 1000,
+    "deliveryCompany": "-",
+    "deliveryDuration": 1,
+    "deliveryInWorkingDays": true
   }
 ]

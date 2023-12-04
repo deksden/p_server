@@ -2,20 +2,21 @@
   {
     "id": 1,
     "type": "initial",
-    "resource": "hy",
-    "date": "20-11-2017",
+    "resource": 1,
+    "date": "10-02-2023",
     "qnt": 120,
-    "price": 10.80,
-    "vendor": "ContiPro",
-    "comments": ""
+    "price": 8500,
+    "vendor": 1,
+    "comments": "Начальный остаток по 8500"
   },
   {
     "id": "2",
     "type": "in-transfer",
-    "resource": "hy",
-    "date": "15-02-2018",
-    "qnt": 300,
-    "price": 10.80,
-    "comments": ""
+    "resource": 1,
+    "date": "15-09-2023",
+    "qnt": 500,
+    "vendor": 1,
+    "price": 8700,
+    "comments": "Поставка в транзите, 500гр по 8700"
   }
 ]

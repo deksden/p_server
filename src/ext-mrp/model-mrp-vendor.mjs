@@ -4,7 +4,7 @@ import moment from 'moment-business-days'
 
 export const MrpVendor = (app) => {
   /**
-   * Рассчитать дату начала заказа с учетом времени доставки и производства (выполнения заказа)
+   * Рассчитать дату начала заказа с учетом времени доставки и времени выполнения заказа поставщиком
    * @param vendor    поставщик
    * @param date        дата завершения заказа
    * @return {moment}   дата начала заказа
@@ -25,7 +25,7 @@ export const MrpVendor = (app) => {
   }
 
   /**
-   * Выбрать поставщика
+   * Выбрать поставщика, который может поставить ресурс на указанную дату
    * @param resourceId  Ресурс
    * @param date        Дата поставки
    * @return (MrpVendor) выбранный поставщик
@@ -35,7 +35,7 @@ export const MrpVendor = (app) => {
     const aDate = moment(date)
 
     // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
-    console.log(`MrpVendor.selectVendor: resource=${resourceId}, date=${aDate.format('DD-MM-YYYY')}`)
+    console.log(`MrpVendor.selectVendor(resource=${resourceId}, date=${aDate.format('DD-MM-YYYY')})`)
 
     const resVendors = await Vendor.findAll({
       where: { resource: resourceId },
@@ -47,16 +47,18 @@ export const MrpVendor = (app) => {
     if (resVendors.some((vendor) => {
       vendor.date = moment(vendor.date)
 
-      console.log(`testing vendor: ${vendor.caption} (from ${vendor.date.format('DD-MM-YYYY')})`)
+      console.log(`Testing vendor: ${vendor.id} - "${vendor.caption}" (from ${vendor.date.format('DD-MM-YYYY')})`)
       // проверим этого вендора на пригодность по дате поставки:
       const supplyStart = calculateOrderStartDate(vendor, date)
-      console.log(`calculated supplystart is ${supplyStart.format('DD-MM-YYYY')}`)
+      console.log(`calculated supplyStart is ${supplyStart.format('DD-MM-YYYY')}`)
       // теперь в supplyStart находится самая ранняя дата доставки для этого вендора
       if (supplyStart.isSameOrAfter(vendor.date)) {
-        console.log('vendor selected')
+        console.log('This vendor was selected.')
         selectedVendor = vendor
         return true
       }
+
+      console.log('Vendor not selected.')
       return false
     })) {
       return selectedVendor
@@ -66,6 +68,8 @@ export const MrpVendor = (app) => {
 
   return {
     name: 'MrpVendor',
+    caption: 'Поставщик',
+    description: 'Компания - поставщик ресурса, а также сведения о базовых условиях поставки',
     seedFileName: 'mrp-vendor.json',
     selectVendor,
     calculateOrderStartDate,
@@ -83,7 +87,7 @@ export const MrpVendor = (app) => {
         type: 'ref',
         model: 'MrpResource',
         caption: 'Ресурс',
-        description: 'Ссылка на ресурс',
+        description: 'Ссылка на ресурс, который поставляет данный поставщик',
         default: null
       },
       {
@@ -99,13 +103,13 @@ export const MrpVendor = (app) => {
         type: 'text',
         format: '',
         caption: 'Адрес',
-        description: 'Адрес поставщика',
+        description: 'Адрес поставщика, для документов',
         default: ''
       },
       {
         name: 'date',
         type: 'datetime',
-        format: 'YYYY/MM/DD',
+        format: 'DD-MM-YYYY',
         caption: 'Дата',
         description: 'Дата начала работы с поставщиком',
         default: null
@@ -125,14 +129,14 @@ export const MrpVendor = (app) => {
         type: 'text',
         format: '',
         caption: 'Валюта',
-        description: 'Валюта цены',
+        description: 'Валюта, в которой номинирована цена',
         default: ''
       },
       {
         name: 'orderDuration',
         type: 'decimal',
         caption: 'Длительность заказа',
-        description: 'Длительность выполнения заказа от размещения заказа до отгрузки',
+        description: 'Длительность выполнения заказа от даты размещения заказа до даты отгрузки',
         precision: 12,
         scale: 0,
         format: '',
@@ -143,14 +147,14 @@ export const MrpVendor = (app) => {
         type: 'boolean',
         format: '',
         caption: 'Рабочие дни',
-        description: 'Длительность выполнения заказа указана в рабочих днях',
+        description: 'Признак, что длительность выполнения заказа указана в рабочих днях',
         default: false
       },
       {
         name: 'orderMin',
         type: 'decimal',
         caption: 'Минимальное количество',
-        description: 'Минимальное количество ресурса в заказе',
+        description: 'Минимальное количество ресурса для заказа',
         precision: 12,
         scale: 2,
         format: '',
@@ -161,14 +165,14 @@ export const MrpVendor = (app) => {
         type: 'text',
         format: '',
         caption: 'Единица',
-        description: 'Единица измерения количества',
+        description: 'Единица измерения количества ресурса',
         default: ''
       },
       {
         name: 'orderStep',
         type: 'decimal',
         caption: 'Шаг количества',
-        description: 'Шаг изменения количества заказываемого ресурса',
+        description: 'Шаг изменения количества заказываемого ресурса, кратно которому можно менять размер заказа',
         precision: 12,
         scale: 2,
         format: '',
@@ -186,7 +190,7 @@ export const MrpVendor = (app) => {
         name: 'deliveryDuration',
         type: 'decimal',
         caption: 'Длительность доставки',
-        description: 'Длительность доставки партии ресурса',
+        description: 'Длительность доставки партии ресурса от даты передачи в доставку до даты поступления на склад заказчика, в днях',
         precision: 12,
         scale: 0,
         format: '',
@@ -197,7 +201,7 @@ export const MrpVendor = (app) => {
         type: 'boolean',
         format: '',
         caption: 'Доставка, рабочие дни',
-        description: 'Длительность доставки заказа указана в рабочих днях',
+        description: 'Признак, что длительность доставки заказа указана в рабочих днях',
         default: false
       }
     ]

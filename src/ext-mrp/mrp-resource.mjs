@@ -18,7 +18,7 @@ export const MrpResource = (app) => {
     const resource = await Resource.findById(resourceId)
     const aDate = moment(date)
     const aDateFormat = ResourceStock.props.date.format
-    console.log(`Mrp.Resource.planOrderRes: resource="${resource.caption}", date="${aDate.format(aDateFormat)}, qnt=${qnt}`)
+    console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
     const vendor = await Vendor.selectVendor(resourceId, date)
@@ -50,6 +50,8 @@ export const MrpResource = (app) => {
 
   return {
     name: 'MrpResource',
+    caption: 'Ресурсы',
+    description: 'Ресурсы - это материалы и сырье, необходимые для производства продукции',
     seedFileName: 'mrp-resource.json',
     planOrderRes,
     props: [
@@ -66,7 +68,7 @@ export const MrpResource = (app) => {
         type: 'text',
         format: '',
         caption: 'Название',
-        description: 'Название продукта',
+        description: 'Название ресурса',
         default: ''
       },
       {
@@ -74,14 +76,14 @@ export const MrpResource = (app) => {
         type: 'text',
         format: '',
         caption: 'Единица',
-        description: 'Единица измерения количества',
+        description: 'Учётная единица измерения количества ресурса в системе, в которой учитываем его количество',
         default: ''
       },
       {
         name: 'minStock',
         type: 'decimal',
         caption: 'Мин остаток',
-        description: 'Минимальный складской остаток',
+        description: 'Минимальный складской остаток ресурса, который должен остаться на складе',
         precision: 12,
         scale: 0,
         format: '',

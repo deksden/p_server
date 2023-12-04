@@ -33,7 +33,7 @@ export const Note = (app) => {
         name: 'createdAt',
         type: 'datetime',
         caption: 'Дата',
-        format: 'date',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {

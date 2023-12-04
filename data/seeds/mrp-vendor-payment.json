@@ -52,5 +52,71 @@
         "time": 20,
         "base": "invoiceSum",
         "caption": "unsorted expences"
+      },
+      {
+        "id": 6,
+        "vendor": 2,
+        "type": "invoice",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "оплата счета 100% предоплата"
+      },
+      {
+        "id": 7,
+        "vendor": 2,
+        "type": "delivery",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "оплата доставки 100% предоплата"
+      },
+      {
+        "id": 8,
+        "vendor": 3,
+        "type": "invoice",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "ампулы - оплата счета, 100% предоплата"
+      },
+      {
+        "id": 9,
+        "vendor": 3,
+        "type": "delivery",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "ампулы - оплата доставки, 100% предоплата"
+      },
+      {
+        "id": 10,
+        "vendor": 4,
+        "type": "invoice",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "упаковка - оплата ресурса, 100% предоплата"
+      },
+      {
+        "id": 11,
+        "vendor": 4,
+        "type": "delivery",
+        "term": "percent",
+        "value": 100,
+        "currency": "руб",
+        "time": 0,
+        "base": "invoiceSum",
+        "caption": "упаковка - оплата доставки, 100% предоплата"
       }
     ]

@@ -20,6 +20,8 @@ export const MrpProductStock = (app) => {
 
   return {
     name: 'MrpProductStock',
+    caption: 'Остатки продукции',
+    description: 'Сведения об остатках продукции, включают в себя остатки на складе, остатки в незавершенном производстве, поступления из производства (в результате планирования)',
     seedFileName: 'mrp-product-stock.json',
     qntForDate,
     props: [
@@ -44,13 +46,14 @@ export const MrpProductStock = (app) => {
         type: 'text',
         format: '',
         caption: 'Тип',
-        description: 'Тип остаток - начальные, в процессе производства',
+        description: 'Тип остатков: - начальные (initial), в процессе производства (in-production)',
         default: ''
       },
       {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
+        description: 'Дата фиксации данных остатков, для остатков в незавернешшном производстве - дата завершения производства и передачи готовой продукции на склад',
         format: 'DD-MM-YYYY',
         default: null
       },
@@ -58,6 +61,7 @@ export const MrpProductStock = (app) => {
         name: 'qnt',
         type: 'decimal',
         caption: 'Количество',
+        description: 'Количество продукции',
         precision: 12,
         scale: 0,
         format: '',
@@ -66,8 +70,8 @@ export const MrpProductStock = (app) => {
       {
         name: 'price',
         type: 'decimal',
-        caption: 'Цена',
-        description: 'Себестоимость продукта',
+        caption: 'Себестоимость',
+        description: 'Материальная себестоимость продукции',
         precision: 12,
         scale: 2,
         format: '',
