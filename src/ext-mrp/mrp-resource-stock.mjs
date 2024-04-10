@@ -20,6 +20,8 @@ export const MrpResourceStock = (app) => {
   return {
     name: 'MrpResourceStock',
     seedFileName: 'mrp-resource-stock.json',
+    caption: 'Остатки ресурсов',
+    icon: 'BarChart',
     qntForDate,
     props: [
       {

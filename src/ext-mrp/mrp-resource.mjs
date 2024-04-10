@@ -53,6 +53,7 @@ export const MrpResource = (app) => {
     caption: 'Ресурсы',
     description: 'Ресурсы - это материалы и сырье, необходимые для производства продукции',
     seedFileName: 'mrp-resource.json',
+    icon: 'BarChart',
     planOrderRes,
     props: [
       {

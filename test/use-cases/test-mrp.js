@@ -183,7 +183,7 @@ describe('MRP: tests', function () {
           id: 1,
           date: '01-09-2023',
           product: 1,
-          qnt: 10000
+          qnt: 5000
         }))
         .catch((e) => { throw e })
     })

@@ -6,6 +6,7 @@ export const MrpStage = (app) => {
     caption: 'Этап производства',
     description: 'Этап производства продукции',
     seedFileName: 'mrp-stage.json',
+    icon: 'BarChart',
     props: [
       {
         name: 'id',

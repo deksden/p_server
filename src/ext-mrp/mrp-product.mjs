@@ -133,6 +133,7 @@ export const MrpProduct = (app) => {
     caption: 'Продукция',
     description: 'Продукция и базовые сведения о ней',
     seedFileName: 'mrp-product.json',
+    icon: 'BarChart',
     prodDuration,
     planProduction,
     props: [

@@ -71,6 +71,7 @@ export const MrpVendor = (app) => {
     caption: 'Поставщик',
     description: 'Компания - поставщик ресурса, а также сведения о базовых условиях поставки',
     seedFileName: 'mrp-vendor.json',
+    icon: 'BarChart',
     selectVendor,
     calculateOrderStartDate,
     props: [

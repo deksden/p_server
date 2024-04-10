@@ -23,6 +23,7 @@ export const MrpProductStock = (app) => {
     caption: 'Остатки продукции',
     description: 'Сведения об остатках продукции, включают в себя остатки на складе, остатки в незавершенном производстве, поступления из производства (в результате планирования)',
     seedFileName: 'mrp-product-stock.json',
+    icon: 'BarChart',
     qntForDate,
     props: [
       {

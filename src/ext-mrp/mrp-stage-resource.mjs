@@ -6,6 +6,7 @@ export const MrpStageResource = (app) => {
     caption: 'Нормы расхода',
     description: 'Нормы расхода ресурсов на этапе производства',
     seedFileName: 'mrp-stage-resource.json',
+    icon: 'BarChart',
     props: [
       {
         name: 'id',

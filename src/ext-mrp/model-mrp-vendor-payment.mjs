@@ -6,6 +6,7 @@ export const MrpVendorPayment = (app) => {
     caption: 'Схема оплаты',
     description: 'Схема оплаты поставщику для формирования календарного графика платежей',
     seedFileName: 'mrp-vendor-payment.json',
+    icon: 'BarChart',
     props: [
       {
         name: 'id',

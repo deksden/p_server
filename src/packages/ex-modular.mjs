@@ -106,6 +106,8 @@ export const exModular = (app) => {
       if (!model.storage || model.storage === 'default') {
         model.storage = ex.storages.default
       }
+      model.nameKebab = _.kebabCase(model.name)
+
       return model.schemaInit()
         .catch((e) => { throw e })
     })).catch((e) => { throw e })
