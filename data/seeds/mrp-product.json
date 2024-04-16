@@ -9,5 +9,15 @@
     "baseQnt": 200,
     "inWorkingDays": true,
     "comments": "Гель стерильный в ампулах 2мл, коробка 4шт"
-  }
-]
+  },
+  {
+    "id": 2,
+    "caption": "Гель стерильный 5мл",
+    "unit": "Флакон 5мл",
+    "initialDate": "01-03-2022",
+    "qntMin": 1000,
+    "qntStep": 1000,
+    "baseQnt": 90,
+    "inWorkingDays": true,
+    "comments": "Гель стерильный во флаконе 5мл, коробка 3шт"
+  }]

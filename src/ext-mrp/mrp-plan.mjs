@@ -77,7 +77,7 @@ export const MrpPlan = (app) => {
 
   return {
     name: 'MrpPlan',
-    caption: 'MRP Plan',
+    caption: 'План',
     description: 'План продаж',
 //    seedFileName: 'mrp-plan.json',
     icon: 'BarChart',
@@ -104,6 +104,9 @@ export const MrpPlan = (app) => {
         model: 'MrpProduct',
         caption: 'Продукт',
         description: 'Продукция, производство которой планируется',
+        defOptions: {
+          wide: 'wide'
+        },
         default: null
       },
       {

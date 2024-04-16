@@ -103,6 +103,7 @@ export const MrpProduct = (app) => {
         console.log(`Resource: ${stageResource.resource} "${aResource.caption}" stock=${stockQnt}, resource.minStock=${aResource.minStock}, req=${reqQnt}`)
 
         // если есть дефицит ресурсов - спланировать его закупку
+        // TODO: учесть толерантность к дефициту ресурса при работе на грани minStock:
         if (reqQnt > (stockQnt - aResource.minStock)) {
           // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
           await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - stockQnt))

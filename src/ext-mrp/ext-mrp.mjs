@@ -7,16 +7,15 @@
  This module initialize "MRP" extension module.
 
 */
-import { MrpPlan } from './model-mrp-plan.mjs'
-import { MrpVendor } from './model-mrp-vendor.mjs'
-import { MrpVendorPayment } from './model-mrp-vendor-payment.mjs'
-import { MrpStage } from './model-mrp-stage.mjs'
-import { MrpProductStock } from './mrp-product-stock.mjs'
-import { MrpProduct } from './mrp-product.mjs'
-import { MrpResourceStock } from './mrp-resource-stock.mjs'
-import { MrpResource } from './mrp-resource.mjs'
-import { MrpStageResource } from './mrp-stage-resource.mjs'
-
+import { MrpPlan } from './mrp-plan'
+import { MrpVendor } from './mrp-vendor'
+import { MrpVendorPayment } from './mrp-vendor-payment'
+import { MrpStage } from './mrp-stage'
+import { MrpProductStock } from './mrp-product-stock'
+import { MrpProduct } from './mrp-product'
+import { MrpResourceStock } from './mrp-resource-stock'
+import { MrpResource } from './mrp-resource'
+import { MrpStageResource } from './mrp-stage-resource'
 // import { InitExtTest } from './init-mrp.mjs'
 
 const packageName = 'ExtMrp'

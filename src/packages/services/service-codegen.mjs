@@ -90,6 +90,42 @@ export const Codegen = (app, opt) => {
     res.send(txt.join('\n'))
   }
 
+  const getOptions = (prop, stage) => {
+    prop.options = {}
+    if (prop.defOptions) {
+      if (prop.defOptions.wide && prop.defOptions.wide === 'default') {
+        prop.options.wide = ''
+      } else if (prop.defOptions.wide && prop.defOptions.wide === 'wide') {
+        prop.options.wide = ' className={classes.wide}'
+      } else if (prop.defOptions.wide && prop.defOptions.wide === 'fullWide') {
+        prop.options.wide = ' fullWidth'
+      }
+    }
+
+    if (stage === 'filter' && prop.filterOptions) {
+      if (prop.filterOptions.wide && prop.filterOptions.wide === 'default') {
+        prop.options.wide = ''
+      } else if (prop.filterOptions.wide && prop.filterOptions.wide === 'wide') {
+        prop.options.wide = ' className={classes.wide}'
+      } else if (prop.filterOptions.wide && prop.filterOptions.wide === 'fullWide') {
+        prop.options.wide = ' fullWidth'
+      }
+    }
+
+    if (stage === 'edit' && prop.editOptions) {
+      if (prop.editOptions.wide && prop.editOptions.wide === 'default') {
+        prop.options.wide = ''
+      } else if (prop.editOptions.wide && prop.editOptions.wide === 'wide') {
+        prop.options.wide = ' className={classes.wide}'
+      } else if (prop.editOptions.wide && prop.editOptions.wide === 'fullWide') {
+        prop.options.wide = ' fullWidth'
+      }
+    }
+
+    // construct options string
+    prop.optionsString = `${prop.options.wide}`
+  }
+
   const generateModelEditCode = (req, res) => {
     if (!req.model) {
       throw new app.exModular.services.errors.ServerInvalidParameters(
@@ -103,29 +139,31 @@ export const Codegen = (app, opt) => {
         prop.caption = prop.name
       }
 
+      getOptions(prop, 'edit')
+
       switch (prop.type) {
         case 'id':
           txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' disabled className={classes.wide} />')
           break
         case 'text':
-          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}' ${prop.optionsString} />`)
           break
         case 'decimal':
-          txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
           break
         case 'datetime':
-          txt.push('<DateInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<DateInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
           break
         case 'boolean':
-          txt.push('<BooleanInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<BooleanInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
           break
         case 'ref':
           txt.push(`<ReferenceInput source='${prop.name}' label='${prop.caption}' reference='${prop.model}'>`)
-          txt.push(`  <TextInput source='caption' label='caption' />`)
+          txt.push(`  <SelectInput optionText='caption' label='${prop.caption}' ${prop.optionsString} />`)
           txt.push(`</ReferenceInput>`)
           break
         default:
-          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption  + '\'' + prop.optionsString + ' />')
       }
     })
     res.send(txt.join('\n'))
@@ -151,24 +189,24 @@ export const Codegen = (app, opt) => {
           // txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' disabled className={classes.wide} />\n'
           break
         case 'text':
-          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}' ${prop.optionsString} />`)
           break
         case 'decimal':
-          txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption  + '\'' + prop.optionsString + ' />')
           break
         case 'datetime':
-          txt.push('<DateInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<DateInput source=\'' + prop.name + '\' label=\'' + prop.caption  + '\'' + prop.optionsString + ' />')
           break
         case 'boolean':
-          txt.push('<BooleanInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<BooleanInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
           break
         case 'ref':
           txt.push(`<ReferenceInput source='${prop.name}' label='${prop.caption}' reference='${prop.model}'>`)
-          txt.push(`  <TextInput source='caption' label='caption' />`)
+          txt.push(`  <SelectInput optionText='caption' label='caption' ${prop.optionsString} />`)
           txt.push(`</ReferenceInput>`)
           break
         default:
-          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' />')
+          txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
       }
     })
     res.send(txt.join('\n'))
@@ -210,6 +248,7 @@ export const Codegen = (app, opt) => {
           break
         case 'ref':
           data.ReferenceInput = {}
+          data.SelectInput = {}
           data.ReferenceField = {}
           break
         case 'refs':

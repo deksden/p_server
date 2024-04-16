@@ -22,5 +22,29 @@
     "stage": 2,
     "resource": 4,
     "qnt": 50
+  },
+  {
+    "id": 5,
+    "stage": 3,
+    "resource": 1,
+    "qnt": 9
+  },
+  {
+    "id": 6,
+    "stage": 3,
+    "resource": 2,
+    "qnt": 81
+  },
+  {
+    "id": 7,
+    "stage": 3,
+    "resource": 5,
+    "qnt": 90
+  },
+  {
+    "id": 8,
+    "stage": 4,
+    "resource": 6,
+    "qnt": 30
   }
 ]

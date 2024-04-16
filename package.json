@@ -40,6 +40,7 @@
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
     "node-fetch": "^3.3.2",
+    "specifier-resolution-node": "^1.1.1",
     "sqlite3": "^5.1.6",
     "uuid": "^9.0.1",
     "validator": "^13.11.0",

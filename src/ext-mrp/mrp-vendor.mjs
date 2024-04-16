@@ -89,6 +89,9 @@ export const MrpVendor = (app) => {
         model: 'MrpResource',
         caption: 'Ресурс',
         description: 'Ссылка на ресурс, который поставляет данный поставщик',
+        defOptions: {
+          wide: "wide"
+        },
         default: null
       },
       {
@@ -97,6 +100,9 @@ export const MrpVendor = (app) => {
         format: '',
         caption: 'Название',
         description: 'Наименование поставщика',
+        defOptions: {
+          wide: "fullWide"
+        },
         default: ''
       },
       {
@@ -105,6 +111,9 @@ export const MrpVendor = (app) => {
         format: '',
         caption: 'Адрес',
         description: 'Адрес поставщика, для документов',
+        defOptions: {
+          wide: "fullWide"
+        },
         default: ''
       },
       {
@@ -185,6 +194,9 @@ export const MrpVendor = (app) => {
         format: '',
         caption: 'Доставка',
         description: 'Способ доставки партий заказываемого ресурса, например, транспортная компания',
+        defOptions: {
+          wide: "wide"
+        },
         default: ''
       },
       {
