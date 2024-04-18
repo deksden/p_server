@@ -56,7 +56,7 @@ export const MrpResource = (app) => {
     console.log(`.end, ResourceStock.create: ${startDate.format(aDateFormat)} qnt=${orderQnt} price=${vendor.invoicePrice}`)
 
     // записать заказ ресурса в список партий:
-    const aResStock = await ResourceStock.create({
+    let aResStock = await ResourceStock.create({
       type: 'order',
       resource: resourceId,
       date: startDate,
@@ -64,7 +64,8 @@ export const MrpResource = (app) => {
       price: vendor.invoicePrice,
       vendor: vendor.id
     })
-    return await ResourceStock.update(aResStock.id, { batchId: aResStock.id })
+    aResStock = await ResourceStock.update(aResStock.id, { batchId: aResStock.id })
+    return aResStock
   }
 
   return {

@@ -47,12 +47,12 @@
     "winston": "^3.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.22.15",
-    "@babel/core": "^7.22.20",
-    "@babel/node": "^7.22.19",
+    "@babel/cli": "^7.24.1",
+    "@babel/core": "^7.24.4",
+    "@babel/node": "^7.23.9",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.22.20",
-    "@babel/register": "^7.22.15",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/register": "^7.23.7",
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "babel-eslint": "^10.1.0",

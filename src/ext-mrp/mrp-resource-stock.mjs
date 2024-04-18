@@ -1,24 +1,25 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
+import _ from 'lodash'
 
 export const MrpResourceStock = (app) => {
-  /** Получить остатки ресурса на указанную дату
+  /** Получить остатки ресурса на указанную дату - общее количество и перечень партий,
+   * из которых состоит остаток;
    *
-   * @param resourceId {}
-   * @param date
-   * @return {Promise<Number>}
+   * @param resourceId {id} идентификатор ресурса
+   * @param date {datetime} дата, на которую считается остаток ресурса (включительно)
+   * @return {Promise<Object>} промис разрешается в объект с полями qnt и batches
    */
   const qntForDate = async (resourceId, date) => {
     const ResourceStock = app.exModular.models['MrpResourceStock']
     const knex = ResourceStock.storage.db
-    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate())
-    const aDate2 = aDate1.toString()
+    const aDateFormat = ResourceStock.props.date.format
 
     // получить общее количество ресурса на указанную дату на остатке:
-    const aQnt = await knex(ResourceStock.name)
+    const qnt = await knex(ResourceStock.name)
       .sum({ res:'qnt' })
       .where({ resource: resourceId })
-      .where('date', '<=', aDate2)
+      .where('date', '<=', moment.utc(date, aDateFormat).toDate())
       .then((res) => {
           return res[0].res
       })
@@ -26,16 +27,22 @@ export const MrpResourceStock = (app) => {
 
     // теперь получим общее количество ресурса на остатке в разрезе партий:
     const batches = await knex(ResourceStock.name)
-      .select('batchId', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
-      .sum({ res:'qnt' })
-      .groupBy('batchId', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .select('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .sum({ qnt: 'qnt' })
+      .groupBy('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .orderBy([
+        { column: 'dateExp', order: 'asc'},
+        { column: 'date', order: 'asc'},
+        { column: 'id', order: 'asc'}
+      ])
       .where({ resource: resourceId })
-      .where('date', '<=', aDate2)
+      .where('date', '<=', moment.utc(date, aDateFormat).toDate())
       .catch((e) => { throw e })
 
-    console.log('== batches:')
-    console.log(JSON.stringify(batches))
-    return aQnt
+    return {
+      qnt,
+      batches: _.cloneDeep(batches)
+    }
   }
 
   return {
