@@ -31,6 +31,20 @@ export const MrpResource = (app) => {
     // TODO: принять решение: будет заказываться новая партия, или можно будет использовать подходящую партию из
     //  ранее заказанных? В заказываемых партиях необходимо сохранить требуемое количество ресурса (помимо заказываемого
     //  количества)
+
+    // получим все партии продукта, которые заказывались у этого вендора, от последних до первых;
+    // нам нужна только последняя партия на самом деле:
+    const orders = await ResourceStock.findAll({
+      where: { resource: resourceId, type: 'order'},
+      orderBy: [{ column: 'date', order: 'desc' }]
+    })
+
+    console.log(` Testing last orders: ${ JSON.stringify(orders)}`)
+
+    // смотрим последний заказ, вычисляем дату поступления на склад, сверяем с нашей потребностью;
+    // если дата поступления отличается менее чем на 25% по сроку, то увеличим заказ:
+
+
     // рассчитаем количество ресурса для заказа:
     let orderQnt = vendor.orderMin
     while (orderQnt < qnt) {
@@ -42,13 +56,15 @@ export const MrpResource = (app) => {
     console.log(`.end, ResourceStock.create: ${startDate.format(aDateFormat)} qnt=${orderQnt} price=${vendor.invoicePrice}`)
 
     // записать заказ ресурса в список партий:
-    return await ResourceStock.create({
+    const aResStock = await ResourceStock.create({
       type: 'order',
       resource: resourceId,
       date: startDate,
       qnt: orderQnt,
-      price: vendor.invoicePrice
+      price: vendor.invoicePrice,
+      vendor: vendor.id
     })
+    return await ResourceStock.update(aResStock.id, { batchId: aResStock.id })
   }
 
   return {
@@ -88,6 +104,16 @@ export const MrpResource = (app) => {
         type: 'decimal',
         caption: 'Мин остаток',
         description: 'Минимальный складской остаток ресурса, который должен остаться на складе',
+        precision: 12,
+        scale: 0,
+        format: '',
+        default: 0
+      },
+      {
+        name: 'expDuration',
+        type: 'decimal',
+        caption: 'Срок годности',
+        description: 'Длительность срока годности продукта по-умолчанию',
         precision: 12,
         scale: 0,
         format: '',

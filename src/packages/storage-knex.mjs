@@ -16,7 +16,7 @@ export const checkIsFullVirtual = (Model) => {
 
 export const processBeforeSaveToStorage = (Model, item, opts) => {
   // console.log(`processBeforeSaveToStorage(${Model.name}, ${JSON.stringify(item)})\n`)
-  const aItem = _.merge({}, item)
+  let aItem = _.merge({}, item)
   opts = opts || { defaults: true }
 
   // check if all keys are defined in model
@@ -83,6 +83,9 @@ export const processBeforeSaveToStorage = (Model, item, opts) => {
     }
   })
   // console.log(`processBeforeSaveToStorage result:\n${JSON.stringify(aItem)}`)
+  if (Model.beforeSave && (typeof Model.beforeSave === 'function')) {
+    aItem = Model.beforeSave(aItem)
+  }
   return aItem
 }
 
@@ -119,7 +122,7 @@ export const processAfterLoadFromStorage = (Model, item) => {
     return item
   }
 
-  const aItem = _.merge({}, item)
+  let aItem = _.merge({}, item)
 
   const aKeys = Object.keys(aItem)
   const propKeys = Model.props.map((prop) => prop.name)
@@ -204,10 +207,10 @@ export const processAfterLoadFromStorage = (Model, item) => {
     }
   })
 
-  // after processing all props process getters on final property values:
-  // getters.map((getter) => { aItem[getter.name] = getter.getter(aItem) })
-
   // console.log(`processAfterLoadFromStorage result:\n${JSON.stringify(aItem)}`)
+  if (Model.afterLoad && (typeof Model.afterLoad === 'function')) {
+    aItem = Model.afterLoad(aItem)
+  }
   return aItem
 }
 
@@ -681,7 +684,7 @@ export default (app) => {
     return knex(Model.name)
       .where(Model.key, aId)
       .update(aItem)
-      .then((res) => Model.findById(aItem.id ? aItem.id : aId))
+      .then(() => Model.findById(aItem.id ? aItem.id : aId))
       .catch((err) => { throw err })
   }
 

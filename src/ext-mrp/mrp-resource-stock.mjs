@@ -2,12 +2,20 @@ import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
 
 export const MrpResourceStock = (app) => {
+  /** Получить остатки ресурса на указанную дату
+   *
+   * @param resourceId {}
+   * @param date
+   * @return {Promise<Number>}
+   */
   const qntForDate = async (resourceId, date) => {
     const ResourceStock = app.exModular.models['MrpResourceStock']
     const knex = ResourceStock.storage.db
-    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
+    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate())
     const aDate2 = aDate1.toString()
-    return knex(ResourceStock.name)
+
+    // получить общее количество ресурса на указанную дату на остатке:
+    const aQnt = await knex(ResourceStock.name)
       .sum({ res:'qnt' })
       .where({ resource: resourceId })
       .where('date', '<=', aDate2)
@@ -15,6 +23,19 @@ export const MrpResourceStock = (app) => {
           return res[0].res
       })
       .catch((e) => { throw e })
+
+    // теперь получим общее количество ресурса на остатке в разрезе партий:
+    const batches = await knex(ResourceStock.name)
+      .select('batchId', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .sum({ res:'qnt' })
+      .groupBy('batchId', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .where({ resource: resourceId })
+      .where('date', '<=', aDate2)
+      .catch((e) => { throw e })
+
+    console.log('== batches:')
+    console.log(JSON.stringify(batches))
+    return aQnt
   }
 
   return {
@@ -31,6 +52,14 @@ export const MrpResourceStock = (app) => {
         description: 'Идентификатор',
         format: 'uuid',
         default: () => uuid()
+      },
+      {
+        name: 'batchId',
+        type: 'text',
+        caption: 'Партия',
+        description: 'Партия ресурсов',
+        format: 'uuid',
+        default: ''
       },
       {
         name: 'type',
@@ -83,6 +112,22 @@ export const MrpResourceStock = (app) => {
         default: null
       },
       {
+        name: 'dateProd',
+        type: 'datetime',
+        caption: 'Дата производства',
+        description: 'Дата производства этой партии ресурса',
+        format: 'DD-MM-YYYY',
+        default: null
+      },
+      {
+        name: 'dateExp',
+        type: 'datetime',
+        caption: 'Дата годности',
+        description: 'Срок годности этой партии ресурса',
+        format: 'DD-MM-YYYY',
+        default: null
+      },
+      {
         name: 'comments',
         type: 'text',
         format: '',
@@ -90,6 +135,12 @@ export const MrpResourceStock = (app) => {
         description: 'Примечания',
         default: ''
       }
-    ]
+    ],
+    beforeSave: (aItem) => {
+      if (aItem.qnt >= 0 && (aItem.batchId === undefined || aItem.batchId === null || aItem.batchId === '')) {
+        aItem.batchId = aItem.id
+      }
+      return aItem
+    }
   }
 }

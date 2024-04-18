@@ -115,11 +115,11 @@ export const MrpProduct = (app) => {
           : startDate = startDate.add(stage.duration, 'days')
 
         // TODO: списываем из имеющихся партий ресурсов
-        // списать ресурсы на производство датой окончания этапа:
+        // списать ресурсы на производство датой _начала_ (-окончания-) этапа:
         const rStock = await ResourceStock.create({
           type: 'prod',
           resource: stageResource.resource,
-          date: startDate.format(aDateFormat),
+          date: stageStart.format(aDateFormat), // startDate.format(aDateFormat),
           qnt: -reqQnt,
           comments: `res ${aResource.caption} stage: ${stage.order} ${stage.caption}`
         })

@@ -54,7 +54,8 @@ export const exModular = (app) => {
     if (!ex.storages || !ex.models) {
       throw new Error('.storages should be initialized before initializing model')
     }
-    return ex.services.serial(Object.keys(ex.models).map((modelName) => () => ex.models[modelName].dataClear()))
+    // return ex.services.serial(Object.keys(ex.models).map((modelName) => () => ex.models[modelName].dataClear()))
+    return Promise.all(Object.keys(ex.models).map((modelName) => ex.models[modelName].dataClear()))
       .then(() => app.exModular.initAll())
       .catch((e) => { throw e })
   }

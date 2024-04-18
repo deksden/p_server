@@ -66,5 +66,39 @@
     "deliveryCompany": "-",
     "deliveryDuration": 1,
     "deliveryInWorkingDays": true
+  },
+  {
+    "id": 5,
+    "resource": 5,
+    "caption": "Шотт ООО",
+    "address": "Нижегородская область, г. Завольжье",
+    "date": "01-01-2020",
+    "invoicePrice": "75",
+    "invoiceCurrency": "руб",
+    "orderDuration": 25,
+    "inWorkingDays": true,
+    "orderMin": 500,
+    "unit": "шт",
+    "orderStep": 500,
+    "deliveryCompany": "ДЛ",
+    "deliveryDuration": 10,
+    "deliveryInWorkingDays": false
+  },
+  {
+    "id": 6,
+    "resource": 6,
+    "caption": "Типография ООО",
+    "address": "Новосибирск",
+    "date": "01-01-2020",
+    "invoicePrice": "110",
+    "invoiceCurrency": "руб",
+    "orderDuration": 15,
+    "inWorkingDays": false,
+    "orderMin": 2000,
+    "unit": "шт",
+    "orderStep": 1000,
+    "deliveryCompany": "-",
+    "deliveryDuration": 1,
+    "deliveryInWorkingDays": true
   }
 ]

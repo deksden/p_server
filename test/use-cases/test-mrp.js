@@ -183,7 +183,13 @@ describe('MRP: tests', function () {
           id: 1,
           date: '01-09-2023',
           product: 1,
-          qnt: 5000
+          qnt: 25000
+        }))
+        .then(() => mrpPlanAdd(context, {
+          id: 2,
+          date: '01-09-2023',
+          product: 2,
+          qnt: 10000
         }))
         .catch((e) => { throw e })
     })
