@@ -47,13 +47,13 @@ export const MrpVendor = (app) => {
     if (resVendors.some((vendor) => {
       vendor.date = moment(vendor.date)
 
-      console.log(`Testing vendor: ${vendor.id} - "${vendor.caption}" (from ${vendor.date.format('DD-MM-YYYY')})`)
+      console.log(`  Testing vendor: ${vendor.id} - "${vendor.caption}" (from ${vendor.date.format('DD-MM-YYYY')})`)
       // проверим этого вендора на пригодность по дате поставки:
       const supplyStart = calculateOrderStartDate(vendor, date)
-      console.log(`calculated supplyStart is ${supplyStart.format('DD-MM-YYYY')}`)
+      console.log(`  calculated supplyStart is ${supplyStart.format('DD-MM-YYYY')}`)
       // теперь в supplyStart находится самая ранняя дата доставки для этого вендора
       if (supplyStart.isSameOrAfter(vendor.date)) {
-        console.log('This vendor was selected.')
+        console.log(`  This vendor "${vendor.caption}" was selected.`)
         selectedVendor = vendor
         return true
       }

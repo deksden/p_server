@@ -103,6 +103,16 @@ export const MrpResourceStock = (app) => {
         default: 0
       },
       {
+        name: 'qntReq',
+        type: 'decimal',
+        caption: 'Требуемое количество',
+        description: 'Для операции заказа ресурса: сохраняем потребность в оргинальном требуемом количестве ресурса, которое может быть меньше объема заказа в ".qnt"',
+        precision: 12,
+        scale: 0,
+        format: '',
+        default: 0
+      },
+      {
         name: 'price',
         type: 'decimal',
         caption: 'Цена',
