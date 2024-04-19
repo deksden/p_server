@@ -216,7 +216,17 @@ export const MrpVendor = (app) => {
         caption: 'Доставка, рабочие дни',
         description: 'Признак, что длительность доставки заказа указана в рабочих днях',
         default: false
-      }
+      },
+      {
+        name: 'expDuration',
+        type: 'decimal',
+        caption: 'Длительность годности',
+        description: 'Длительность годности ресурса от даты производства, в днях .inWorkingDays',
+        precision: 12,
+        scale: 0,
+        format: '',
+        default: 0
+      },
     ]
   }
 }

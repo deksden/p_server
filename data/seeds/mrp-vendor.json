@@ -14,7 +14,8 @@
     "orderStep": 500,
     "deliveryCompany": "DHL",
     "deliveryDuration": 15,
-    "deliveryInWorkingDays": false
+    "deliveryInWorkingDays": false,
+    "expDuration": 365
   },
   {
     "id": 2,
@@ -31,7 +32,8 @@
     "orderStep": 200,
     "deliveryCompany": "СДЭК",
     "deliveryDuration": 5,
-    "deliveryInWorkingDays": false
+    "deliveryInWorkingDays": false,
+    "expDuration": 60
   },
   {
     "id": 3,

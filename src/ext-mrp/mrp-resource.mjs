@@ -39,7 +39,7 @@ export const MrpResource = (app) => {
       orderBy: [{ column: 'date', order: 'desc' }]
     })
 
-    console.log(` Testing last orders: ${ JSON.stringify(orders)}`)
+    console.log(` Order res. last orders: \n ${ JSON.stringify(orders)}`)
 
     // смотрим последний заказ, вычисляем дату поступления на склад, сверяем с нашей потребностью;
     // если дата поступления отличается менее чем на 25% по сроку, то увеличим заказ:
@@ -53,16 +53,42 @@ export const MrpResource = (app) => {
     console.log(`Order qnt calculated: ${orderQnt}`)
 
     const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
-    console.log(`.end, ResourceStock.create: ${startDate.format(aDateFormat)} qnt=${orderQnt} price=${vendor.invoicePrice}`)
+    console.log(` ResourceStock.create:
+      ${startDate.format(aDateFormat)}
+      qnt=${orderQnt}
+      price=${vendor.invoicePrice}`)
 
-    // записать заказ ресурса в список партий:
+    // указать срок годности, для этого к дате начала заказа прибавить срок производства, и срок годности:
+    let expDate = null
+    if (vendor.expDuration && vendor.expDuration > 0) {
+      // если для вендора указана длительность годности каждой партии сырья, то проставим срок годности:
+      if (vendor.inWorkingDays) {
+        expDate = moment(startDate).businessAdd(vendor.orderDuration)
+        expDate = moment(startDate).businessAdd(vendor.expDuration)
+      } else {
+        expDate = moment(startDate).add(vendor.orderDuration, 'days')
+        expDate = moment(startDate).add(vendor.expDuration, 'days')
+      }
+    }
+
+    // указать расчетную дату производства, для этого добавить к дате начала заказа срок производства:
+    let prodDate = null
+    if (vendor.inWorkingDays) {
+      prodDate = moment(startDate).businessAdd(vendor.orderDuration)
+    } else {
+      prodDate = moment(startDate).add(vendor.orderDuration, 'days')
+    }
+    // записать поступающий заказ в список партий: поступление заказа записываем целевой датой
     let aResStock = await ResourceStock.create({
       type: 'order',
       resource: resourceId,
-      date: startDate,
+      date: aDate.format(aDateFormat),
+      dateOrder: startDate.format(aDateFormat),
       qnt: orderQnt,
       price: vendor.invoicePrice,
-      vendor: vendor.id
+      vendor: vendor.id,
+      dateExp: expDate,
+      dateProd: prodDate
     })
     aResStock = await ResourceStock.update(aResStock.id, { batchId: aResStock.id })
     return aResStock

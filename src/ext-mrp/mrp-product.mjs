@@ -81,11 +81,12 @@ export const MrpProduct = (app) => {
       const fnStage = async (stage, stages) => {
         // для этого этапа получим список требуемых ресурсов
         console.log(`stage: ${stage.order} "${stage.caption}"`)
-        const stageResources = _.cloneDeep(await StageResource.findAll({ where: { stage: stage.id }}))
+        const stageResources = await StageResource.findAll({ where: { stage: stage.id }})
 
         // обработаем список ресурсов
         console.log('resources for stage:')
         for (const stageResource of stageResources ) {
+          // определим функцию, которая будет обрабатывать ресурсы каждого этапа:
           const fnStageResource = async (stageResource, stageResources) => {
             console.log(` - stageResource=${JSON.stringify(stageResource)}`)
             let resStock = await ResourceStock.qntForDate(stageResource.resource, stageStart.format(aDateFormat))
@@ -124,43 +125,71 @@ export const MrpProduct = (app) => {
             let restQnt = reqQnt // остаток ресурсов для списания
             let ndx = 0 // текущий индекс в списке партий ресурсов
             const maxBatches = resStock.batches.length
+            console.log(`Start while restQnt (${restQnt})`)
             while (restQnt > 0) {
               if (ndx>=maxBatches) {
                 throw new Error('Invalid batches ndx!')
               }
               // берем текущую партию
               const aBatch = resStock.batches[ndx]
+              console.log(`* processing batch[${ndx}]:
+                  qnt: ${aBatch.qnt}
+                  batchId: ${aBatch.batchId}
+                  vendor: ${aBatch.vendor}`)
               if (aBatch.qnt >= restQnt) {
                 // если текущей партии сырья хватает, чтобы покрыть остаток списываемых ресурсов, то:
                 aBatch.qnt = aBatch.qnt - restQnt // скорректируем размер партии ресурсов
-                await ResourceStock.create({ // зафиксируем списание ресурсов из этой партии
+
+                const aResStock = { // зафиксируем списание ресурсов из этой партии
                   type: 'prod',
                   resource: stageResource.resource,
                   date: stageStart.format(aDateFormat), // startDate.format(aDateFormat),
                   qnt: -restQnt,
                   comments: `stage: ${stage.order} ${stage.caption}`,
                   batchId: aBatch.batchId,
-                  dateProd: aBatch.dateProd,
-                  dateExp: aBatch.dateExp,
+                  dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
+                  dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
                   vendor: aBatch.vendor
-                })
+                }
+                console.log(`ResStock.create (1 - batch big):
+                  type: prod
+                  resource ${aResStock.resource}
+                  date: ${aResStock.date}
+                  qnt: ${aResStock.qnt}
+                  batchId: ${aResStock.batchId}
+                  dateProd: ${aResStock.dateProd}
+                  dateExp: ${aResStock.dateExp}
+                  price: ${aResStock.price}
+                  vendor: ${aResStock.vendor}`)
+                await ResourceStock.create(aResStock)
                 restQnt = 0
               } else {
                 // если текущей партии ресурсов не хватает на текущее количество ресурсов к списанию,
                 // то списать в размере остатка ресурсов из этой партии:
-                await ResourceStock.create({ // зафиксируем списание ресурсов из этой партии
+                const aResStock = { // зафиксируем списание ресурсов из этой партии
                   type: 'prod',
                   resource: stageResource.resource,
                   date: stageStart.format(aDateFormat), // startDate.format(aDateFormat),
                   qnt: -aBatch.qnt,
                   comments: `stage: ${stage.order} ${stage.caption}`,
                   batchId: aBatch.batchId,
-                  dateProd: aBatch.dateProd,
-                  dateExp: aBatch.dateExp,
+                  dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
+                  dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
                   vendor: aBatch.vendor
-                })
+                }
+                console.log(`ResStock.create (2 - batch low):
+                  type: prod
+                  resource ${aResStock.resource}
+                  date: ${aResStock.date}
+                  qnt: ${aResStock.qnt}
+                  batchId: ${aResStock.batchId}
+                  dateProd: ${aResStock.dateProd}
+                  dateExp: ${aResStock.dateExp}
+                  price: ${aResStock.price}
+                  vendor: ${aResStock.vendor}`)
+                await ResourceStock.create(aResStock)
                 restQnt -= aBatch.qnt // уменьшим количество ресурсов к списанию на размер текущей партии
                 aBatch.qnt = 0 // зафиксируем, что эта партия списана
                 ndx += 1 // переходим к следующей партии
@@ -168,9 +197,13 @@ export const MrpProduct = (app) => {
             }
             // Цикл закончен, restQnt должен быть нулевым
           }
+
+          // вызовем определенную выше функцию для текущего этапа в цикле обработки ресурсов этапа:
           await fnStageResource(stageResource, stageResources)
         }
       }
+
+      // вызовем функцию в цикле обработки этапов:
       await fnStage(stage, stages)
     }
 

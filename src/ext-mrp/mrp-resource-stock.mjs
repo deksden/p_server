@@ -29,7 +29,7 @@ export const MrpResourceStock = (app) => {
     const batches = await knex(ResourceStock.name)
       .select('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
       .sum({ qnt: 'qnt' })
-      .groupBy('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'vendor')
+      .groupBy('batchId')
       .orderBy([
         { column: 'dateExp', order: 'asc'},
         { column: 'date', order: 'asc'},
@@ -41,7 +41,7 @@ export const MrpResourceStock = (app) => {
 
     return {
       qnt,
-      batches: _.cloneDeep(batches)
+      batches: _.filter(batches, (itm) => (itm.qnt > 0))
     }
   }
 
@@ -88,6 +88,7 @@ export const MrpResourceStock = (app) => {
         name: 'date',
         type: 'datetime',
         caption: 'Дата',
+        description: 'Дата учетной операции на складе - поступление или списание, остатки ресурса на складе меняются в эту дату',
         format: 'DD-MM-YYYY',
         default: null
       },
@@ -95,6 +96,7 @@ export const MrpResourceStock = (app) => {
         name: 'qnt',
         type: 'decimal',
         caption: 'Количество',
+        description: 'Количество ресурса в операции, для поступления число больше нуля, для расхода ресурса - меньше нуля',
         precision: 12,
         scale: 0,
         format: '',
@@ -104,7 +106,7 @@ export const MrpResourceStock = (app) => {
         name: 'price',
         type: 'decimal',
         caption: 'Цена',
-        description: 'Себестоимость ресурса',
+        description: 'Стоимость единицы ресурса',
         precision: 12,
         scale: 2,
         format: '',
@@ -115,7 +117,15 @@ export const MrpResourceStock = (app) => {
         type: 'ref',
         model: 'MrpVendor',
         caption: 'Поставщик',
-        description: 'Ссылка на поставщика',
+        description: 'Ссылка на поставщика ресурса, для расходных операций указывается поставщик той партии, которая списыввается этой операцией',
+        default: null
+      },
+      {
+        name: 'dateOrder',
+        type: 'datetime',
+        caption: 'Дата заказа',
+        description: 'Дата размещения заказа поставщику',
+        format: 'DD-MM-YYYY',
         default: null
       },
       {
