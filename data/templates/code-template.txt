@@ -18,12 +18,16 @@ const useStyles = makeStyles({
 /** Fragment: field-defs, model: {{name}} */
 /** FragmentEnd */
 
-const {{name}}Filter = (props) => (
-  <Filter {...props}>
-    <div /** Fragment: filter-fields, model: {{name}} */ />
-    <div /** FragmentEnd */ />
-  </Filter>
-)
+const {{name}}Filter = (props) => {
+  const classes = useStyles()
+
+  return(
+    <Filter {...props}>
+      <div /** Fragment: filter-fields, model: {{name}} */ />
+      <div /** FragmentEnd */ />
+    </Filter>
+  )
+}
 
 export const {{name}}List = props => (
   <List {...props} title='{{caption}}' filters={<{{name}}Filter />}>

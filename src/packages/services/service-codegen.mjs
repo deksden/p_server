@@ -92,13 +92,15 @@ export const Codegen = (app, opt) => {
 
   const getOptions = (prop, stage) => {
     prop.options = {}
+    prop.options.wide = ''
+
     if (prop.defOptions) {
       if (prop.defOptions.wide && prop.defOptions.wide === 'default') {
         prop.options.wide = ''
       } else if (prop.defOptions.wide && prop.defOptions.wide === 'wide') {
-        prop.options.wide = ' className={classes.wide}'
+        prop.options.wide = 'className={classes.wide}'
       } else if (prop.defOptions.wide && prop.defOptions.wide === 'fullWide') {
-        prop.options.wide = ' fullWidth'
+        prop.options.wide = 'fullWidth'
       }
     }
 
@@ -106,9 +108,9 @@ export const Codegen = (app, opt) => {
       if (prop.filterOptions.wide && prop.filterOptions.wide === 'default') {
         prop.options.wide = ''
       } else if (prop.filterOptions.wide && prop.filterOptions.wide === 'wide') {
-        prop.options.wide = ' className={classes.wide}'
+        prop.options.wide = 'className={classes.wide}'
       } else if (prop.filterOptions.wide && prop.filterOptions.wide === 'fullWide') {
-        prop.options.wide = ' fullWidth'
+        prop.options.wide = 'fullWidth'
       }
     }
 
@@ -116,14 +118,14 @@ export const Codegen = (app, opt) => {
       if (prop.editOptions.wide && prop.editOptions.wide === 'default') {
         prop.options.wide = ''
       } else if (prop.editOptions.wide && prop.editOptions.wide === 'wide') {
-        prop.options.wide = ' className={classes.wide}'
+        prop.options.wide = 'className={classes.wide}'
       } else if (prop.editOptions.wide && prop.editOptions.wide === 'fullWide') {
-        prop.options.wide = ' fullWidth'
+        prop.options.wide = 'fullWidth'
       }
     }
 
     // construct options string
-    prop.optionsString = `${prop.options.wide}`
+    prop.optionsString = `${prop.options.wide ? ' ' + prop.options.wide : ''}`
   }
 
   const generateModelEditCode = (req, res) => {
@@ -146,7 +148,7 @@ export const Codegen = (app, opt) => {
           txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' disabled className={classes.wide} />')
           break
         case 'text':
-          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}' ${prop.optionsString} />`)
+          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}'${prop.optionsString} />`)
           break
         case 'decimal':
           txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\'' + prop.optionsString + ' />')
@@ -159,7 +161,7 @@ export const Codegen = (app, opt) => {
           break
         case 'ref':
           txt.push(`<ReferenceInput source='${prop.name}' label='${prop.caption}' reference='${prop.model}'>`)
-          txt.push(`  <SelectInput optionText='caption' label='${prop.caption}' ${prop.optionsString} />`)
+          txt.push(`  <SelectInput optionText='caption' label='${prop.caption}'${prop.optionsString} />`)
           txt.push(`</ReferenceInput>`)
           break
         default:
@@ -189,7 +191,7 @@ export const Codegen = (app, opt) => {
           // txt.push('<TextInput source=\'' + prop.name + '\' label=\'' + prop.caption + '\' disabled className={classes.wide} />\n'
           break
         case 'text':
-          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}' ${prop.optionsString} />`)
+          txt.push(`<TextInput source='${prop.name}' label='${prop.caption}'${prop.optionsString} />`)
           break
         case 'decimal':
           txt.push('<NumberInput source=\'' + prop.name + '\' label=\'' + prop.caption  + '\'' + prop.optionsString + ' />')
@@ -202,7 +204,7 @@ export const Codegen = (app, opt) => {
           break
         case 'ref':
           txt.push(`<ReferenceInput source='${prop.name}' label='${prop.caption}' reference='${prop.model}'>`)
-          txt.push(`  <SelectInput optionText='caption' label='caption' ${prop.optionsString} />`)
+          txt.push(`  <SelectInput optionText='caption' label='caption'${prop.optionsString} />`)
           txt.push(`</ReferenceInput>`)
           break
         default:
@@ -334,7 +336,7 @@ export const Codegen = (app, opt) => {
   const generateAppImports = (req, res) => {
     let txt = []
     let txt2 = []
-    txt2.push('import TableChartIcon from \'@material-ui/icons/TableChart\'')
+    // txt2.push('import TableChartIcon from \'@material-ui/icons/TableChart\'')
     let models = Object.keys(app.exModular.models)
     const icons = []
 
@@ -347,7 +349,11 @@ export const Codegen = (app, opt) => {
 
       txt.push(`import { ${Model.name}List, ${Model.name}Edit, ${Model.name}Create } from './resources/${_.kebabCase(Model.name)}'`)
 
-      if (Model.icon && icons.indexOf(Model.icon) === -1) {
+      if (Model.icon === undefined || Model.icon === null || Model.icon === '') {
+        Model.icon = 'TableChart'
+      }
+
+      if (icons.indexOf(Model.icon) === -1) {
         txt2.push(`import ${Model.icon}Icon from '@material-ui/icons/${Model.icon}'`)
         icons.push(Model.icon)
       }
