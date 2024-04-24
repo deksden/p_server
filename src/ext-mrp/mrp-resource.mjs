@@ -64,9 +64,6 @@ export const MrpResource = (app) => {
       // посчитаем разницу в днях между датой поступления и датой заказа
       const orderDuration = moment(order.date).diff(moment(order.dateOrder), 'days')
 
-      // сравним с датой поступления этой партии:
-      const thisOrderDiff = moment(date).diff(moment(order.date), 'days')
-
       // если дата заказа попадает в дату прошлого заказа, или дата заказа меньше
       // чем через 1/3 длительности от даты прошлого заказа:
       if ((startDate.isBetween(order.dateOrder, order.date, undefined, '[]')) ||
