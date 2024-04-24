@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
+import { dateAddDays } from '../packages/moment-utils.mjs'
 
 export const MrpResource = (app) => {
 
@@ -91,22 +92,12 @@ export const MrpResource = (app) => {
     let expDate = null
     if (vendor.expDuration && vendor.expDuration > 0) {
       // если для вендора указана длительность годности каждой партии сырья, то проставим срок годности:
-      if (vendor.inWorkingDays) {
-        expDate = moment(startDate).businessAdd(vendor.orderDuration)
-        expDate = moment(startDate).businessAdd(vendor.expDuration)
-      } else {
-        expDate = moment(startDate).add(vendor.orderDuration, 'days')
-        expDate = moment(startDate).add(vendor.expDuration, 'days')
-      }
+      expDate= dateAddDays(startDate, vendor.expDuration, vendor.inWorkingDays)
     }
 
     // указать расчетную дату производства, для этого добавить к дате начала заказа срок производства:
-    let prodDate = null
-    if (vendor.inWorkingDays) {
-      prodDate = moment(startDate).businessAdd(vendor.orderDuration)
-    } else {
-      prodDate = moment(startDate).add(vendor.orderDuration, 'days')
-    }
+    let prodDate = dateAddDays(startDate, vendor.orderDuration, vendor.inWorkingDays)
+
     // записать поступающий заказ в список партий: поступление заказа записываем целевой датой
     let aResStock = await ResourceStock.create({
       type: 'order',
