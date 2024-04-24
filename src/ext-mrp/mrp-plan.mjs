@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
+import { makeMoment } from '../packages/moment-utils.mjs'
 
 /*
  Алгоритм:
@@ -46,8 +47,7 @@ export const MrpPlan = (app) => {
 
     // получаем сведения о продукте
     const plan = await Plan.findById(res.data.id)
-    plan.date = moment(plan.date)
-    // plan.date = moment(plan.date, Plan.props.date.format)
+    plan.date = makeMoment(plan.date, Plan.props.date.format)
     console.log(`plan = ${JSON.stringify(plan)}`)
 
     const product = await Product.findById(plan.product)
@@ -66,9 +66,11 @@ export const MrpPlan = (app) => {
       // если текущее сальдо меньше минимального остатка на складе, нужно планировать партию продукции:
       console.log(`Need production: minQnt ${product.qntMin}`)
 
-      const plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt))
+      const ctx = { plan }
+
+      const plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt), ctx)
       const prodDuration = await Product.prodDuration(product.id)
-      console.log(`Production qnt: ${plannedProd.qntForProd}, ${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
+      console.log(`Plan prod: qnt: ${plannedProd.qntForProd}, duration=${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
     }
 
     console.log(`${fnName}: end`)

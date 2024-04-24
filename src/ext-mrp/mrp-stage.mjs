@@ -4,7 +4,7 @@ export const MrpStage = (app) => {
   return {
     name: 'MrpStage',
     caption: 'Этап производства',
-    description: 'Этап производства продукции',
+    description: 'Описание этапа производства продукции',
     seedFileName: 'mrp-stage.json',
     icon: 'BarChart',
     props: [

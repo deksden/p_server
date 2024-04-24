@@ -1,11 +1,12 @@
 import { v4 as uuid } from 'uuid'
 import _ from 'lodash'
 import moment from 'moment-business-days'
+import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/moment-utils.mjs'
 
 export const MrpProduct = (app) => {
   /** Рассчитать длительность производства
-   * @param productId {number}: идентификатор продукта для которого считаем длительность производства
-   * @returns {number} : длительность производства в днях (ссумируем длительность этапов)
+   * @param productId {string}: идентификатор продукта для которого считаем длительность производства
+   * @returns {Promise<number>} : длительность производства в днях (ссумируем длительность этапов)
    */
   const prodDuration = async (productId) => {
     const Product = app.exModular.models['MrpProduct']
@@ -17,10 +18,17 @@ export const MrpProduct = (app) => {
           return res[0].res
       })
       .catch((e) => { throw e })
-
   }
 
-  const planProduction = async (productId, date, qnt) => {
+  /** Выполнить планирование производства партии продукции
+   *
+   * @param productId {string}: код продукта
+   * @param date {string|moment}: дата готовности продукта к передаче на склад
+   * @param qnt {number}: количество продукта для производства
+   * @param ctx {object}: объект контекста, ctx.plan
+   * @return {Promise<Awaited<{}>>}
+   */
+  const planProduction = async (productId, date, qnt, ctx) => {
     // получаем API всех нужных объектов в системе
     const Product = app.exModular.models['MrpProduct']
     const Plan = app.exModular.models['MrpPlan']
@@ -29,6 +37,7 @@ export const MrpProduct = (app) => {
     const StageResource = app.exModular.models['MrpStageResource']
     const Resource = app.exModular.models['MrpResource']
     const ResourceStock = app.exModular.models['MrpResourceStock']
+    const ProductStage = app.exModular.models['MrpProductStage']
 
     // загружаем сведения о продукции:
     const product = await Product.findById(productId)
@@ -37,13 +46,8 @@ export const MrpProduct = (app) => {
 
     // из свойств модели получаем формат даты, с которым работаем:
     const aDateFormat = Plan.props.date.format
+    date = makeMoment(date, aDateFormat)
 
-    // переводим формат переменной даты в объект moment
-    if (typeof date === 'string') {
-      date = moment.utc(date, aDateFormat)
-    } else {
-      date = moment(date)
-    }
     console.log(`\nMrpProduct.planProduction: product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}.`)
 
     // вычислим размер партии к производству на основании минимальной производственной партии и шага ее изменения,
@@ -55,33 +59,56 @@ export const MrpProduct = (app) => {
     console.log(`qntForProd = ${qntForProd}`)
     ret.qntForProd = qntForProd
 
+    // очистим данные о запланированных этапах производства:
+    await ProductStage.removeAll({ where: { plan: ctx.plan.id }})
+
     // спланируем производство партии продукции
     // рассчитаем дату начала производства:
     const duration = await Product.prodDuration(productId)
-    let startDate
-    const endDate = moment(date)
-    if (product.inWorkingDays) {
-      startDate = endDate.businessSubtract(duration)
-    } else {
-      startDate = endDate.subtract(duration, 'days')
-    }
+    const endDate = date
+    let startDate  = dateSubtractDays(endDate, duration, product.inWorkingDays)
     console.log(`duration=${duration}, startDate="${startDate.format(aDateFormat)}"`)
 
     // получим список этапов производства
     // отсортируем список этапов по порядку (и по идентификаторам)
-    const stages = _.cloneDeep(await Stage.findAll({ orderBy: ['order','id'], where: { product: productId }}))
+    const stages = await Stage.findAll({ orderBy: ['order','id'], where: { product: productId }})
     console.log(`Stages for product "${product.caption}": ${JSON.stringify(stages)}`)
 
     // начальная дата производства и первого этапа:
     let stageStart = moment(startDate)
     // await Promise.all(stages.map(async (stage)=> Promise.resolve().then( async () => {
+    let stageEnd = null
+    let prodResSumm = 0
 
     // перебираем все этапы производства:
     for (const stage of stages) {
       const fnStage = async (stage, stages) => {
+        // рассчитать дату завершения этапа
+        stageEnd = dateAddDays(stageStart, stage.duration, product.inWorkingDays)
+
+        // сделаем запись о запланированном этапе производства
+        let productStage = {
+          plan: ctx.plan.id,
+          stage: stage.id,
+          dateStart: stageStart.format(aDateFormat),
+          dateEnd: stageEnd.format(aDateFormat)
+        }
+
+        productStage = await ProductStage.create(productStage)
+        console.log(`ProductStage: (created)
+          id:${productStage.id}
+          plan:${productStage.plan}
+          stage:${productStage.stage}
+          dateStart:${printMoment(productStage.dateStart)}
+          dateEnd:${printMoment(productStage.dateEnd)}
+          price:${productStage.price}`)
+
         // для этого этапа получим список требуемых ресурсов
         console.log(`stage: ${stage.order} "${stage.caption}"`)
         const stageResources = await StageResource.findAll({ where: { stage: stage.id }})
+
+        // будем запоминать общую стоимость потребленных ресурсов на этом этапе:
+        let stageResSumm = 0
 
         // обработаем список ресурсов
         console.log('resources for stage:')
@@ -116,12 +143,13 @@ export const MrpProduct = (app) => {
             }
 
             // увеличить дату на длительность этапа:
-            product.inWorkingDays
-              ? startDate = startDate.businessAdd(stage.duration)
-              : startDate = startDate.add(stage.duration, 'days')
+            // product.inWorkingDays
+            //   ? startDate = startDate.businessAdd(stage.duration)
+            //   : startDate = startDate.add(stage.duration, 'days')
+            startDate = moment(endDate)
 
             // списываем из имеющихся партий ресурсов
-            // списать ресурсы на производство датой _начала_ (-окончания-) этапа:
+            // списать ресурсы на производство датой _начала_ этапа:
             let restQnt = reqQnt // остаток ресурсов для списания
             let ndx = 0 // текущий индекс в списке партий ресурсов
             const maxBatches = resStock.batches.length
@@ -152,6 +180,10 @@ export const MrpProduct = (app) => {
                   price: aBatch.price,
                   vendor: aBatch.vendor
                 }
+
+                // зафиксируем сумму потребленных ресурсов:
+                stageResSumm += aBatch.price * restQnt
+
                 console.log(`ResStock.create (1 - batch big):
                   type: prod
                   resource ${aResStock.resource}
@@ -179,6 +211,10 @@ export const MrpProduct = (app) => {
                   price: aBatch.price,
                   vendor: aBatch.vendor
                 }
+
+                // зафиксируем стоимость потребленных ресурсов
+                stageResSumm += aBatch.price * aBatch.qnt
+
                 console.log(`ResStock.create (2 - batch low):
                   type: prod
                   resource ${aResStock.resource}
@@ -201,20 +237,37 @@ export const MrpProduct = (app) => {
           // вызовем определенную выше функцию для текущего этапа в цикле обработки ресурсов этапа:
           await fnStageResource(stageResource, stageResources)
         }
+
+        console.log(`ResSumm = ${stageResSumm}, qntForProd = ${qntForProd}, price = ${stageResSumm / qntForProd}`)
+        // зафиксируем то, что мы рассчитали для этого этапа:
+        productStage.price = stageResSumm / qntForProd
+        productStage = await ProductStage.update(productStage.id, productStage)
+
+        prodResSumm += stageResSumm
+        stageResSumm = 0
+
+        console.log(`ProductStage: (updated)
+          id:${productStage.id}
+          plan:${productStage.plan}
+          stage:${productStage.stage}
+          dateStart:${printMoment(productStage.dateStart)}
+          dateEnd:${printMoment(productStage.dateEnd)}
+          price:${productStage.price}`)
       }
 
       // вызовем функцию в цикле обработки этапов:
       await fnStage(stage, stages)
+      stageStart = dateAddDays(stageStart, stage.duration, product.inWorkingDays)
     }
 
     // добавить запись об этой производственной партии в остатки продукции:
     console.log(`Create Stock: type=prod, product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}`)
-    // TODO: посчитать стоимость всех ресурсов в учётной валюте и записать их здесь в переменную price:
     await Stock.create({
       type: 'prod',
       product: productId,
       date: date.format(aDateFormat),
-      qnt: qntForProd
+      qnt: qntForProd,
+      price: prodResSumm / qntForProd
     })
     console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
     return Promise.resolve(ret)

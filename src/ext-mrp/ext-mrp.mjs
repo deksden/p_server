@@ -16,6 +16,7 @@ import { MrpProduct } from './mrp-product'
 import { MrpResourceStock } from './mrp-resource-stock'
 import { MrpResource } from './mrp-resource'
 import { MrpStageResource } from './mrp-stage-resource'
+import { MrpProductStage } from './mrp-product-stage.mjs'
 // import { InitExtTest } from './init-mrp.mjs'
 
 const packageName = 'ExtMrp'
@@ -36,6 +37,7 @@ export const ExtMrp = (app, opt) => {
       MrpStageResource,
       MrpProductStock,
       MrpProduct,
+      MrpProductStage,
       MrpResource,
       MrpResourceStock
     ]
