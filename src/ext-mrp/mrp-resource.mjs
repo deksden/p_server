@@ -19,10 +19,12 @@ export const MrpResource = (app) => {
   }
 
   /** Запланировать заказ ресурсов
-   * @param resourceId  ресурс для заказа
-   * @param date        дата когда он должен поступить на склад
-   * @param qnt         количество ресурсов, которое в указанную дату должно быть на складе
-   * @return (Promise:<MrpResourceStock>) промис, который разрешается в запись о заказанной партии (записана в базу)
+   * @param resourceId  {string} id ресурса для заказа
+   * @param date {date|datetime|moment}   дата когда ресурс должен поступить на склад
+   * @param qnt {number}  количество ресурса, которое в указанную дату должно поступить. Количество ресурса в заказе может быть иным
+   * @return (Promise:<MrpResourceStock>) промис, который разрешается в запись о сделанном заказе ресурса (дата
+   * поступления будет целевая, а количество ресурса может быть увеличено в соответствии с требованиями поставщика
+   * по минимальной партии к заказу и шагу увеличения партии)
   */
   const planOrderRes = async (resourceId, date, qnt) => {
     // подключим нужные API:
@@ -34,9 +36,6 @@ export const MrpResource = (app) => {
     const aDate = moment(date)
     const aDateFormat = ResourceStock.props.date.format
 
-    // рассчитаем количество ресурса для заказа:
-
-
     console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
@@ -45,10 +44,6 @@ export const MrpResource = (app) => {
     if (!vendor) {
       throw new Error('Vendor not found')
     }
-
-    // TODO: принять решение: будет заказываться новая партия, или можно будет использовать подходящую партию из
-    //  ранее заказанных? В заказываемых партиях необходимо сохранить требуемое количество ресурса (помимо заказываемого
-    //  количества)
 
     // получим все партии продукта, которые заказывались у этого вендора, от последних до первых;
     // нам нужна только последняя партия на самом деле:
@@ -59,19 +54,26 @@ export const MrpResource = (app) => {
 
     console.log(` Order res. last orders: \n ${ JSON.stringify(orders)}`)
 
+    const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
+
     // смотрим последний заказ, вычисляем дату поступления на склад, сверяем с нашей потребностью;
     // если дата поступления отличается менее чем на 25% по сроку, то увеличим заказ:
     console.log('Анализируем последние заказы:')
     for (const order of orders) {
       console.log(`  order: ${JSON.stringify(order)}`)
       // посчитаем разницу в днях между датой поступления и датой заказа
-      const orderDiff = moment(order.date).diff(moment(order.dateOrder), 'days')
+      const orderDuration = moment(order.date).diff(moment(order.dateOrder), 'days')
 
       // сравним с датой поступления этой партии:
       const thisOrderDiff = moment(date).diff(moment(order.date), 'days')
 
-      if (thisOrderDiff <= orderDiff / 2) {
-        console.log('  Не заказывать новую партию, а увеличить эту партию')
+      // если дата заказа попадает в дату прошлого заказа, или дата заказа меньше
+      // чем через 1/3 длительности от даты прошлого заказа:
+      if ((startDate.isBetween(order.dateOrder, order.date, undefined, '[]')) ||
+          (startDate.isAfter(order.date) && (startDate.diff(order.date) <= orderDuration / 3))
+      ) {
+        // будем увеличивать прошлый заказ:
+        console.log('  Не заказывать новую партию, а увеличить последнюю заказанную партию')
         order.qnt = getOrderQnt(vendor.orderMin, vendor.orderStep, qnt + order.qntReq)
         order.qntReq += qnt
         console.log(`  новое количество в заказе - ${order.qnt}`)
@@ -80,9 +82,9 @@ export const MrpResource = (app) => {
       console.log('  не подходит')
     }
 
+    // заказываем новую партию:
     const orderQnt = getOrderQnt(vendor.orderMin, vendor.orderStep, qnt)
 
-    const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
     console.log(` ResourceStock.create:
       ${startDate.format(aDateFormat)}
       qnt=${orderQnt}

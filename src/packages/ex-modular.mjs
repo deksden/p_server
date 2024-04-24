@@ -13,6 +13,7 @@ export const exModular = (app) => {
   ex.access = {}
   ex.session = {}
   ex.init = []
+  ex.seedVariantFolder = ''
 
   ex.storages.byName = (name) => {
     if (name === 'default') {

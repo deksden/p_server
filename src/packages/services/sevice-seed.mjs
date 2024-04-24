@@ -14,7 +14,11 @@ export const Seed = (app) => {
     // eslint-disable-next-line no-useless-catch
     try {
       if (!fs.existsSync(fileName)) {
-        fileName = path.join(process.env.SEEDS_DIR, fileName)
+        if (app.exModular.seedVariantFolder) {
+          fileName = path.join(process.env.SEEDS_DIR, app.exModular.seedVariantFolder, fileName)
+        } else {
+          fileName = path.join(process.env.SEEDS_DIR, fileName)
+        }
       }
 
       const Model = app.exModular.models[modelName]

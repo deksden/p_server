@@ -178,6 +178,8 @@ describe('MRP: tests', function () {
   })
   describe('MRP us-1:', function () {
     it('1.1:', async function () {
+      const Models = app.exModular.models
+
       return createAdmin(context)
         .then(() => mrpPlanAdd(context, {
           id: 1,
@@ -191,6 +193,10 @@ describe('MRP: tests', function () {
           product: 2,
           qnt: 10000
         }))
+        .then(() => Models.MrpResourceStock.findOne({ where: { resource: 1, type: 'order' }, orderBy: [{ column: 'date', order: 'asc' }] }))
+        .then((res) => {
+          expect(res.resource).to.be.equal(1)
+        })
         .catch((e) => { throw e })
     })
   })
