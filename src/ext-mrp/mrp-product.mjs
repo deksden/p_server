@@ -387,7 +387,92 @@ export const MrpProduct = (app) => {
         wrapText: false
       }
     },
+    THL: { // table header, left cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'thick' },
+        left: { style: 'thick' },
+        right: { style: 'thin' }
+      }
+    },
+    TH: { // table header, regular cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'thick' },
+        left: { style: 'thin' },
+        right: { style: 'thin' }
+      }
+    },
+    THR: { // table header, right cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'thick' },
+        left: { style: 'thin' },
+        right: { style: 'thick' }
+      }
+    },
+    TFRL: { // table first row, left cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'dotted' },
+        left: { style: 'thick' }
+      }
+    },
+    TFR: { // table first row, regular cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'dotted' }
+      }
+    },
+    TFRR: { // table first row, right cell
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'dotted' },
+        right: { style: 'thick' }
+      }
+    },
+    TLRL: { // table last row, left cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'thick' },
+        left: { style: 'thick' }
+      }
+    },
+    TLR: { // table last row, regular cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'thick' }
+      }
+    },
+    TLRR: { // table last row, right cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'thick' },
+        right: { style: 'thick' }
+      }
+    },
+    TRL: { // table (regular) row, left cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'dotted' },
+        left: { style: 'thick' }
+      }
+    },
+    TR: { // table (regular) row, regular cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'dotted' }
+      }
+    },
+    TRR: { // table (regular) row, right cell
+      border: {
+        top: { style: 'dotted' },
+        bottom: { style: 'dotted' },
+        right: { style: 'thick' }
+      }
+    }
   }
+
 
   // =================================================================================================================
   /** Отчет о производстве партии продукции
@@ -418,18 +503,10 @@ export const MrpProduct = (app) => {
       where: { plan: ctx.plan.id }
     })
 
-    // STEP 1: Create a new workbook
+    // STEP: Create a new workbook
     const wb = XLSX.utils.book_new();
 
-    // STEP 2: Create data rows and styles
-    let data = [
-      ['Product:', product.caption, 'Qnt:', plan.qnt,''],
-      ['','','','',''],
-      ['Stages:','','','',''],
-      ['N', 'Caption', 'Date start', 'Date end', 'Price']
-    ]
-
-    // STEP 3: Create worksheet with rows; Add worksheet to workbook
+    // STEP: Create worksheet with rows; Add worksheet to workbook
     const ws = newSheet()
     let c = null
 
@@ -449,11 +526,11 @@ export const MrpProduct = (app) => {
     for (const productStage of productStages) {
       productStage.Stage = await Stage.findById(productStage.stage)
       // запишем заголовок
-      c = setCell(ws, aRow, 0, `Этап #${productStage.Stage.order}`, theme.Normal)
-      c = setCell(ws, aRow, 1, `${productStage.Stage.caption}`, theme.Normal)
-      c = setCell(ws, aRow, 2, `Дата нач: ${makeMoment(productStage.dateStart).format('DD-MM-YYYY')}`, theme.Normal)
-      c = setCell(ws, aRow, 3, `Дата ок: ${makeMoment(productStage.dateEnd).format('DD-MM-YYYY')}`, theme.Normal)
-      c = setCell(ws, aRow, 4, `Цена: ${productStage.price}`, theme.Normal)
+      c = setCell(ws, aRow, 0, `Этап #${productStage.Stage.order}`, theme.THL)
+      c = setCell(ws, aRow, 1, `${productStage.Stage.caption}`, theme.TH)
+      c = setCell(ws, aRow, 2, `Дата нач: ${makeMoment(productStage.dateStart).format('DD-MM-YYYY')}`, theme.TH)
+      c = setCell(ws, aRow, 3, `Дата ок: ${makeMoment(productStage.dateEnd).format('DD-MM-YYYY')}`, theme.TH)
+      c = setCell(ws, aRow, 4, `Цена: ${productStage.price}`, theme.THR)
       aRow += 1
 
       // запишем все строки данных о расходе сырья
@@ -463,26 +540,35 @@ export const MrpProduct = (app) => {
       })
 
       // запишем заголовок:
-      c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
-      c = setCell(ws, aRow, 1, 'Расход', theme.Normal)
-      c = setCell(ws, aRow, 2, 'Норма расход', theme.Normal)
-      c = setCell(ws, aRow, 3, 'база нормы', theme.Normal)
-      c = setCell(ws, aRow, 4, 'на ед', theme.Normal)
-      c = setCell(ws, aRow, 5, 'Сумма', theme.Normal)
-      c = setCell(ws, aRow, 6, 'Сумма на ед', theme.Normal)
+      c = setCell(ws, aRow, 0, 'Ресурс', theme.THL)
+      c = setCell(ws, aRow, 1, 'Расход', theme.TH)
+      c = setCell(ws, aRow, 2, 'Норма расход', theme.TH)
+      c = setCell(ws, aRow, 3, 'база нормы', theme.TH)
+      c = setCell(ws, aRow, 4, 'на ед', theme.TH)
+      c = setCell(ws, aRow, 5, 'Сумма', theme.TH)
+      c = setCell(ws, aRow, 6, 'Сумма на ед', theme.THR)
       aRow += 1
 
-      for (const resourceStock of resourceStocks) {
+      let styleSelector = 'FR' // first row, left cell
+      if (resourceStocks.length === 1) {
+        styleSelector = 'LR'
+      }
+      for (const [index, resourceStock] of resourceStocks.entries()) {
         resourceStock.Resource = await Resource.findById(resourceStock.resource)
         // запишем данные о расходе сырья
-        c = setCell(ws, aRow, 0, `${resourceStock.Resource.caption}`, theme.Normal)
-        c = setCell(ws, aRow, 1, `${resourceStock.qnt}`, theme.Normal)
-        // c = setCell(ws, aRow, 2, `${resourceStock.}`, theme.Normal)
-        // c = setCell(ws, aRow, 3, `${resourceStock.Resource.}`, theme.Normal)
-        // c = setCell(ws, aRow, 4, 'на ед', theme.Normal)
-        c = setCell(ws, aRow, 5, `${resourceStock.price}`, theme.Normal)
-        // c = setCell(ws, aRow, 6, 'Сумма на ед', theme.Normal)
+        c = setCell(ws, aRow, 0, `${resourceStock.Resource.caption}`, theme[`T${styleSelector}L`])
+        c = setCell(ws, aRow, 1, `${resourceStock.qnt}`, theme[`T${styleSelector}`])
+        c = setCell(ws, aRow, 2, ``, theme[`T${styleSelector}`])
+        c = setCell(ws, aRow, 3, ``, theme[`T${styleSelector}`])
+        c = setCell(ws, aRow, 4, '', theme[`T${styleSelector}`])
+        c = setCell(ws, aRow, 5, `${resourceStock.price}`, theme[`T${styleSelector}R`])
         aRow += 1
+
+        // настроить селектор стиля ячейки
+        styleSelector = 'R'
+        if (index === resourceStocks.length-2) {
+          styleSelector = 'LR'
+        }
       }
       aRow += 1
     }
