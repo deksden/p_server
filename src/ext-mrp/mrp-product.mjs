@@ -2,6 +2,14 @@ import { v4 as uuid } from 'uuid'
 import _ from 'lodash'
 import moment from 'moment-business-days'
 import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/moment-utils.mjs'
+import path from 'path'
+// import * as XLSX from 'xlsx-js-style'
+/* load 'fs' for readFile and writeFile support */
+// import * as fs from 'fs'
+
+import XLSX from 'xlsx-js-style'
+
+// XLSX.set_fs(fs)
 
 export const MrpProduct = (app) => {
   /** Рассчитать длительность производства
@@ -32,7 +40,7 @@ export const MrpProduct = (app) => {
     // получаем API всех нужных объектов в системе
     const Product = app.exModular.models['MrpProduct']
     const Plan = app.exModular.models['MrpPlan']
-    const Stock = app.exModular.models['MrpProductStock']
+    const ProductStock = app.exModular.models['MrpProductStock']
     const Stage = app.exModular.models['MrpStage']
     const StageResource = app.exModular.models['MrpStageResource']
     const Resource = app.exModular.models['MrpResource']
@@ -102,6 +110,7 @@ export const MrpProduct = (app) => {
           dateStart:${printMoment(productStage.dateStart)}
           dateEnd:${printMoment(productStage.dateEnd)}
           price:${productStage.price}`)
+        ctx.productStage = productStage
 
         // для этого этапа получим список требуемых ресурсов
         console.log(`stage: ${stage.order} "${stage.caption}"`)
@@ -178,7 +187,8 @@ export const MrpProduct = (app) => {
                   dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
                   dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
-                  vendor: aBatch.vendor
+                  vendor: aBatch.vendor,
+                  productStage: productStage.id
                 }
 
                 // зафиксируем сумму потребленных ресурсов:
@@ -193,7 +203,8 @@ export const MrpProduct = (app) => {
                   dateProd: ${aResStock.dateProd}
                   dateExp: ${aResStock.dateExp}
                   price: ${aResStock.price}
-                  vendor: ${aResStock.vendor}`)
+                  vendor: ${aResStock.vendor}
+                  productStage: ${aResStock.productStage}`)
                 await ResourceStock.create(aResStock)
                 restQnt = 0
               } else {
@@ -209,7 +220,8 @@ export const MrpProduct = (app) => {
                   dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
                   dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
-                  vendor: aBatch.vendor
+                  vendor: aBatch.vendor,
+                  productStage: productStage.id
                 }
 
                 // зафиксируем стоимость потребленных ресурсов
@@ -224,7 +236,8 @@ export const MrpProduct = (app) => {
                   dateProd: ${aResStock.dateProd}
                   dateExp: ${aResStock.dateExp}
                   price: ${aResStock.price}
-                  vendor: ${aResStock.vendor}`)
+                  vendor: ${aResStock.vendor}
+                  productStage: ${aResStock.productStage}`)
                 await ResourceStock.create(aResStock)
                 restQnt -= aBatch.qnt // уменьшим количество ресурсов к списанию на размер текущей партии
                 aBatch.qnt = 0 // зафиксируем, что эта партия списана
@@ -262,16 +275,327 @@ export const MrpProduct = (app) => {
 
     // добавить запись об этой производственной партии в остатки продукции:
     console.log(`Create Stock: type=prod, product="${product.caption}", date="${date.format(aDateFormat)}", qnt=${qnt}`)
-    await Stock.create({
+    ctx.productStock =await ProductStock.create({
       type: 'prod',
       product: productId,
+      plan: ctx.plan.id,
       date: date.format(aDateFormat),
       qnt: qntForProd,
       price: prodResSumm / qntForProd
     })
     console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
+
+    console.log(`== Gen XLSX reports:`)
+
+    await reportProductStock(ctx)
+
+    // вывести все калькуляции по всем продуктам:
+    const products = await Product.findAll()
+    for( const product of products ) {
+      const c = { product }
+      await reportProductResources(c)
+    }
+
     return Promise.resolve(ret)
   }
+
+  const setCell = (sheet, R,  C, data, style) => {
+    let cell = sheet["!data"] != null ? sheet["!data"]?.[R]?.[C] : sheet[XLSX.utils.encode_cell({r:R, c:C})]
+
+    if (cell) {
+      cell.v = data
+    } else {
+      // такой ячейки еще нет
+      // добавим новый объект на страничку и вернем ячейку
+      cell = XLSX.utils.sheet_add_aoa(
+        sheet,
+        [[data]],
+        {origin: XLSX.utils.encode_cell({r:R, c:C}) }
+      )[XLSX.utils.encode_cell({r:R, c:C})]
+    }
+
+    if (style) {
+      cell.s = _.assign(cell.s, _.cloneDeep(style))
+    }
+    return cell
+  }
+
+  const getCell = (sheet, R,  C) => {
+    const cell = sheet["!data"] != null ? sheet["!data"]?.[R]?.[C] : sheet[XLSX.utils.encode_cell({r:R, c:C})]
+
+    if (cell) {
+      return cell
+    } else {
+      XLSX.utils.sheet_add_aoa(sheet, [['']], {origin: XLSX.utils.encode_cell({r:R, c:C}) })
+      return sheet["!data"] != null ? sheet["!data"]?.[R]?.[C] : sheet[XLSX.utils.encode_cell({r:R, c:C})]
+    }
+  }
+
+  const setStyle = (sheet, R, C, style) => {
+    const c = getCell(sheet,R, C)
+    if (style) {
+      c.s = _.assign(c.s, style)
+    }
+    return c
+  }
+
+  const newSheet = () => XLSX.utils.json_to_sheet([{'':''}])
+
+  const theme = {
+    H1: {
+      font: {
+        name: 'Tahoma',
+        sz: 16,
+        bold: true
+        // color: { rgb: 'FF0000' }
+      },
+      alignment : {
+        horizontal: 'left',
+        wrapText: false
+      }
+    },
+    H2: {
+      font: {
+        name: 'Tahoma',
+        sz: 14,
+        bold: true
+      },
+      alignment : {
+        horizontal: 'left',
+        wrapText: false
+      }
+    },
+    H3: {
+      font: {
+        name: 'Tahoma',
+        sz: 12,
+        bold: true
+      },
+      alignment : {
+        horizontal: 'left',
+        wrapText: false
+      }
+    },
+    Normal: {
+      font: {
+        name: 'Tahoma',
+        sz: 10,
+        bold: false
+      },
+      alignment : {
+        horizontal: 'left',
+        wrapText: false
+      }
+    },
+  }
+
+  // =================================================================================================================
+  /** Отчет о производстве партии продукции
+   *
+    * @param ctx {object} : объект контекста, ожидаем внутри ctx.plan
+   * @return {Promise<Awaited<string>>}
+   */
+  const reportProductStock = async (ctx) => {
+    // получаем API всех нужных объектов в системе
+    const Product = app.exModular.models['MrpProduct']
+    const Plan = app.exModular.models['MrpPlan']
+    // const Stock = app.exModular.models['MrpProductStock']
+    const Stage = app.exModular.models['MrpStage']
+    // const StageResource = app.exModular.models['MrpStageResource']
+    const Resource = app.exModular.models['MrpResource']
+    const ResourceStock = app.exModular.models['MrpResourceStock']
+    const ProductStage = app.exModular.models['MrpProductStage']
+
+    // проверим контекст
+    if (!ctx.plan || !ctx.productStock) {
+      throw new Error(`Report: ctx in invalid. Check for ctx.plan and ctx.productStock exists!`)
+    }
+
+    // загружаем сведения о продукции:
+    const plan = await Plan.findById(ctx.plan.id)
+    const product = await Product.findById(ctx.plan.product)
+    const productStages = await ProductStage.findAll({
+      where: { plan: ctx.plan.id }
+    })
+
+    // STEP 1: Create a new workbook
+    const wb = XLSX.utils.book_new();
+
+    // STEP 2: Create data rows and styles
+    let data = [
+      ['Product:', product.caption, 'Qnt:', plan.qnt,''],
+      ['','','','',''],
+      ['Stages:','','','',''],
+      ['N', 'Caption', 'Date start', 'Date end', 'Price']
+    ]
+
+    // STEP 3: Create worksheet with rows; Add worksheet to workbook
+    const ws = newSheet()
+    let c = null
+
+    c = setCell(ws, 0,0, 'Отчет о производстве партии продукции', theme.H1)
+    // c.t = 's'
+    c = setCell(ws,  2, 1, 'План:', theme.Normal)
+    c.s.alignment.horizontal = 'right'
+    c = setCell(ws,  2, 2, `(#${ctx.plan.id}) от "${makeMoment(ctx.plan.date).format('DD-MM-YYYY')}"`, theme.Normal)
+
+    c = setCell(ws,  3, 1, 'Количество к производству:', theme.Normal)
+    c.s.alignment.horizontal = 'right'
+    c = setCell(ws,  3, 2, `${ctx.productStock.qnt}`, theme.Normal)
+
+    // Табличные данные:
+    // берем перечень этапов производства:
+    let aRow = 5 // текущий номер строки в отчёте
+    for (const productStage of productStages) {
+      productStage.Stage = await Stage.findById(productStage.stage)
+      // запишем заголовок
+      c = setCell(ws, aRow, 0, `Этап #${productStage.Stage.order}`, theme.Normal)
+      c = setCell(ws, aRow, 1, `${productStage.Stage.caption}`, theme.Normal)
+      c = setCell(ws, aRow, 2, `Дата нач: ${makeMoment(productStage.dateStart).format('DD-MM-YYYY')}`, theme.Normal)
+      c = setCell(ws, aRow, 3, `Дата ок: ${makeMoment(productStage.dateEnd).format('DD-MM-YYYY')}`, theme.Normal)
+      c = setCell(ws, aRow, 4, `Цена: ${productStage.price}`, theme.Normal)
+      aRow += 1
+
+      // запишем все строки данных о расходе сырья
+      c = setCell(ws, aRow, 0, `Расход сырья на этапе:`, theme.Normal)
+      const resourceStocks = await ResourceStock.findAll({
+        where: { type: 'prod', productStage: productStage.id }
+      })
+
+      // запишем заголовок:
+      c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
+      c = setCell(ws, aRow, 1, 'Расход', theme.Normal)
+      c = setCell(ws, aRow, 2, 'Норма расход', theme.Normal)
+      c = setCell(ws, aRow, 3, 'база нормы', theme.Normal)
+      c = setCell(ws, aRow, 4, 'на ед', theme.Normal)
+      c = setCell(ws, aRow, 5, 'Сумма', theme.Normal)
+      c = setCell(ws, aRow, 6, 'Сумма на ед', theme.Normal)
+      aRow += 1
+
+      for (const resourceStock of resourceStocks) {
+        resourceStock.Resource = await Resource.findById(resourceStock.resource)
+        // запишем данные о расходе сырья
+        c = setCell(ws, aRow, 0, `${resourceStock.Resource.caption}`, theme.Normal)
+        c = setCell(ws, aRow, 1, `${resourceStock.qnt}`, theme.Normal)
+        // c = setCell(ws, aRow, 2, `${resourceStock.}`, theme.Normal)
+        // c = setCell(ws, aRow, 3, `${resourceStock.Resource.}`, theme.Normal)
+        // c = setCell(ws, aRow, 4, 'на ед', theme.Normal)
+        c = setCell(ws, aRow, 5, `${resourceStock.price}`, theme.Normal)
+        // c = setCell(ws, aRow, 6, 'Сумма на ед', theme.Normal)
+        aRow += 1
+      }
+      aRow += 1
+    }
+
+    // STEP 4: Write Excel file
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet")
+    const fileName = path.join(process.env.REPORT_DIR, `report-plan-${plan.id}.xlsx`)
+    XLSX.writeFile(wb, fileName)
+
+    return Promise.resolve(fileName)
+  }
+
+  /** Отчёт о нормах расхода сырья на выпуск продукта
+   *
+   * @param ctx {object} : нужен только объект product
+   * @return {Promise<Awaited<string>>}
+   */
+  const reportProductResources = async (ctx) => {
+    // получаем API всех нужных объектов в системе
+    const Product = app.exModular.models['MrpProduct']
+    // const Plan = app.exModular.models['MrpPlan']
+    // const Stock = app.exModular.models['MrpProductStock']
+    const Stage = app.exModular.models['MrpStage']
+    const StageResource = app.exModular.models['MrpStageResource']
+    const Resource = app.exModular.models['MrpResource']
+    // const ResourceStock = app.exModular.models['MrpResourceStock']
+    // const ProductStage = app.exModular.models['MrpProductStage']
+
+    // проверим контекст
+    if (!ctx.product) {
+      throw new Error(`Report: ctx in invalid. Check required properties!`)
+    }
+
+    let product = null
+    // загружаем сведения о продукции:
+    if (!ctx.product.id && !ctx.product.caption) {
+      // нам дали не продукт в контексте, а его код
+      product = await Product.findById(ctx.product)
+    } else {
+      // в контексте лежит полное описание продукта
+      product = _.clone(ctx.product)
+    }
+
+    // STEP: Create a new workbook
+    const wb = XLSX.utils.book_new();
+
+    // STEP: Create worksheet with rows; Add worksheet to workbook
+    const ws = newSheet()
+    let c = null
+
+    // STEP: ШАПКА ОТЧЁТА
+    c = setCell(ws, 0,0, 'Нормы расхода сырья и материалов', theme.H1)
+    // c.t = 's'
+    c = setCell(ws,  1, 0, `Продукция: ${product.caption}`, theme.Normal)
+    // c.s.alignment.horizontal = 'right'
+    c = setCell(ws,  2, 0, `Дата:`, theme.Normal)
+    c = setCell(ws,  2, 1, `${makeMoment(product.date).format('DD-MM-YYYY')}`, theme.Normal)
+    c = setCell(ws,  2, 2, `Ед: ${product.unit}`, theme.Normal)
+    // c.s.alignment.horizontal = 'right'
+
+    // получим этапы:
+    const stages = await Stage.findAll({
+      where: { product: product.id },
+      orderBy: ['order']
+    })
+
+    const daysLabel = product.inWorkingDays ? 'р.д.' : 'д'
+
+    // Табличные данные:
+    // берем перечень этапов производства:
+    let aRow = 4 // текущий номер строки в отчёте
+    for (const stage of stages) {
+      // запишем заголовок
+      c = setCell(ws, aRow, 0, `Этап #${stage.order}`, theme.Normal)
+      c = setCell(ws, aRow, 1, `${stage.caption}`, theme.Normal)
+      c = setCell(ws, aRow, 2, `Дл: ${stage.duration} ${daysLabel}`, theme.Normal)
+      c = setCell(ws, aRow, 3, `${stage.comments}`, theme.Normal)
+      aRow += 1
+
+      // запишем все строки данных о расходе сырья
+      const stageResources = await StageResource.findAll({
+        where: { stage: stage.id }
+      })
+
+      // запишем заголовок:
+      c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
+      c = setCell(ws, aRow, 1, 'Норма', theme.Normal)
+      c = setCell(ws, aRow, 2, 'база нормы', theme.Normal)
+      c = setCell(ws, aRow, 3, 'На ед', theme.Normal)
+      c = setCell(ws, aRow, 4, 'Цена', theme.Normal)
+      aRow += 1
+
+      for (const stageResource of stageResources) {
+        stageResource.Resource = await Resource.findById(stageResource.resource)
+        // запишем данные о расходе сырья
+        c = setCell(ws, aRow, 0, `${stageResource.Resource.caption}`, theme.Normal)
+        c = setCell(ws, aRow, 1, `${stageResource.qnt}`, theme.Normal)
+        // c = setCell(ws, aRow, 2, `${resourceStock.}`, theme.Normal)
+        // c = setCell(ws, aRow, 3, `${resourceStock.Resource.}`, theme.Normal)
+        c = setCell(ws, aRow, 4, `${stageResource.price}`, theme.Normal)
+        aRow += 1
+      }
+      aRow += 1
+    }
+
+    // STEP 4: Write Excel file
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet")
+    const fileName = path.join(process.env.REPORT_DIR, `product-resource-${product.id}.xlsx`)
+    XLSX.writeFile(wb, fileName)
+
+    return Promise.resolve(fileName)
+  }
+
 
   return {
     name: 'MrpProduct',

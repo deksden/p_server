@@ -42,6 +42,16 @@ export const MrpStageResource = (app) => {
         format: '',
         default: 0
       },
+      {
+        name: 'price',
+        type: 'decimal',
+        caption: 'Цена',
+        description: 'Плановая стоимость единицы ресурса',
+        precision: 12,
+        scale: 2,
+        format: '',
+        default: 0
+      }
     ]
   }
 }

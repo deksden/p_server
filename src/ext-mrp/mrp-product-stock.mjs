@@ -43,6 +43,14 @@ export const MrpProductStock = (app) => {
         default: null
       },
       {
+        name: 'plan',
+        type: 'ref',
+        model: 'MrpPlan',
+        caption: 'План',
+        description: 'Ссылка на позицию плана с которой связана эта операция',
+        default: null
+      },
+      {
         name: 'type',
         type: 'text',
         format: '',
