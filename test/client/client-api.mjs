@@ -1,4 +1,4 @@
-import * as ACCESS from '../../src/packages/const-access.mjs'
+import * as ACCESS from '../../src/packages/const/const-access.mjs'
 import { expected, UserAdmin, UserFirst, UserSecond } from './client-const.mjs'
 
 export const signupUser = (context, user, expectedCode) => context.request.post(`${context.apiRoot}/auth/signup`)

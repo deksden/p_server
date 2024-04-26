@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import * as ACCESS from '../const-access.mjs'
+import * as ACCESS from '../const/const-access.mjs'
 
 export const MeAccess = (app, options) => {
   if (!options) {

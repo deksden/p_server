@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-import sqliteStorage from './storage-knex-sqlite.mjs'
+import sqliteStorage from './storage/storage-knex-sqlite.mjs'
 
 import { exModular } from './ex-modular.mjs'
 
@@ -30,13 +30,13 @@ import { AccessObject } from './models/model-access-object.mjs'
 import { PermissionUser } from './models/model-permission-user.mjs'
 import { PermissionUserGroup } from './models/model-permission-user-group.mjs'
 
-import { AuthJwt as Auth } from './auth-jwt.mjs'
-import { AccessSimple as Access } from './access-simple.mjs'
+import { AuthJwt as Auth } from './auth/auth-jwt.mjs'
+import { AccessSimple as Access } from './auth/access-simple.mjs'
 
 import { InitAccess } from './init-access.mjs'
-import { SignupOpen } from './signup-open.mjs'
-import { AuthPassword } from './auth-password.mjs'
-import { AuthSocial } from './auth-social.mjs'
+import { SignupOpen } from './auth/signup-open.mjs'
+import { AuthPassword } from './auth/auth-password.mjs'
+import { AuthSocial } from './auth/auth-social.mjs'
 import { Me } from './me.mjs'
 import { UserDomain } from './models/model-user-domain.mjs'
 import { UserSocial } from './models/model-user-social.mjs'

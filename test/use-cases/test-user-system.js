@@ -35,7 +35,7 @@ import {
   // userDelete,
   // userSave
 } from '../client/client-api.mjs'
-import * as ACCESS from '../../src/packages/const-access.mjs'
+import * as ACCESS from '../../src/packages/const/const-access.mjs'
 import { ExtTest } from '../../src/ext-test/ext-test.mjs'
 import { expected, UserAdmin, UserFirst, UserSecond } from '../client/client-const.mjs'
 

@@ -1,6 +1,6 @@
 // import * as ACCESS from './const-access'
 import _ from 'lodash'
-import { SessionType } from './const-session.mjs'
+import { SessionType } from '../const/const-session.mjs'
 
 const packageName = 'auth-social'
 

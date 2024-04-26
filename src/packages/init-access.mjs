@@ -1,4 +1,4 @@
-import * as ACCESS from './const-access.mjs'
+import * as ACCESS from './const/const-access.mjs'
 import { AccessObjectType } from './models/model-access-object.mjs'
 
 export const InitAccess = (app) => () => {

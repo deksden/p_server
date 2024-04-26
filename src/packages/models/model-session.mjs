@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 // import _ from 'lodash'
-import { SessionType } from '../const-session.mjs'
+import { SessionType } from '../const/const-session.mjs'
 
 export const Session = (app) => {
   const Model = {
