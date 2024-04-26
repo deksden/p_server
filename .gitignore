@@ -109,3 +109,5 @@ bin
 
 *.sqlite
 .DS_Store
+
+/data/reports/
