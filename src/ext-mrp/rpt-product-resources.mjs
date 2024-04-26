@@ -7,7 +7,7 @@ import {
   setCell,
   setCellFormat,
   setColumnWidth,
-  setHeader,
+  setHeader, setStyle,
   setTableRow,
   theme
 } from '../packages/utils/xlsx-utils.mjs'
@@ -83,6 +83,8 @@ export const reportProductResources = async (ctx) => {
   // Табличные данные:
   // берем перечень этапов производства:
   let aRow = 5 // текущий номер строки в отчёте
+  let gtSumm = 0
+
   for (const stage of stages) {
     // запишем заголовок
     // let data = [
@@ -109,52 +111,82 @@ export const reportProductResources = async (ctx) => {
 
     // запишем заголовок:
     let data = [
-      'Ресурс',
-      'Норма расх',
-      'База нормы',
-      'На 1 шт',
-      'Цена'
+      'Ресурс',           // 0
+      'Норма расхода',    // 1
+      'Ед изм',           // 2
+      'База нормы',       // 3
+      'Продукт, ед изм',  // 4
+      'Расход на шт',     // 5
+      'Цена',             // 6
+      'Сумма'             // 6
+
     ]
     setHeader(ws,aRow, 0, data, theme)
-    // c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
-    // c = setCell(ws, aRow, 1, 'Норма', theme.Normal)
-    // c = setCell(ws, aRow, 2, 'база нормы', theme.Normal)
-    // c = setCell(ws, aRow, 3, 'На ед', theme.Normal)
-    // c = setCell(ws, aRow, 4, 'Цена', theme.Normal)
     aRow += 1
 
     let rts = 'FR'
     if (stageResources.length === 1) rts = 'LR'
 
+    let tSumm = 0
     for (const [ndx, stageResource] of stageResources.entries()) {
       stageResource.Resource = await Resource.findById(stageResource.resource)
       // запишем данные о расходе сырья
+      const summ = stageResource.qnt / stageResource.baseQnt * stageResource.price
       data = [
         `${stageResource.Resource.caption}`,
         `${stageResource.qnt}`,
-        ``,
-        ``,
-        `${stageResource.price}`
+        `${stageResource.Resource.unit}`,
+        `${stageResource.baseQnt}`,
+        `${product.unit}`,
+        `${stageResource.qnt / stageResource.baseQnt}`,
+        `${stageResource.price}`,
+        `${summ}`
       ]
       setTableRow(ws,aRow,0,data,theme,rts)
       setCellFormat(ws, aRow, 1, theme.TypeNumber, theme.FormatNumberDecimals)
-      setCellFormat(ws, aRow, 4, theme.TypeNumber, theme.FormatNumberDecimals)
-      // c = setCell(ws, aRow, 0, `${stageResource.Resource.caption}`, theme.Normal)
-      // c = setCell(ws, aRow, 1, `${stageResource.qnt}`, theme.Normal)
-      // c = setCell(ws, aRow, 2, `${resourceStock.}`, theme.Normal)
-      // c = setCell(ws, aRow, 3, `${resourceStock.Resource.}`, theme.Normal)
-      // c = setCell(ws, aRow, 4, `${stageResource.price}`, theme.Normal)
+      setCellFormat(ws, aRow, 3, theme.TypeNumber, theme.FormatNumberDecimals)
+      setCellFormat(ws, aRow, 5, theme.TypeNumber, '# ##0.0000')
+      setCellFormat(ws, aRow, 6, theme.TypeNumber, theme.FormatNumberDecimals)
+      setCellFormat(ws, aRow, 7, theme.TypeNumber, theme.FormatNumberDecimals)
       aRow += 1
       rts = 'R'
       if (ndx === stageResources.length-2) rts = 'LR'
+
+      tSumm += summ
     }
+
+    c = setCell(ws, aRow, 6, 'Итого:', theme.Normal)
+    c.s.alignment.horizontal = 'right'
+    c = setCell(ws, aRow, 7, `${tSumm}`, theme.Normal)
+    setCellFormat(ws, aRow, 7, theme.TypeNumber, theme.FormatNumberDecimals)
+    setStyle(ws,aRow,7, {
+      alignment: {
+        horizontal: 'right'
+      },
+      font: {
+        underline: true
+      }
+    })
+
+    gtSumm += tSumm
     aRow += 1
   }
 
+  c = setCell(ws, aRow, 6, 'ИТОГО:', theme.Normal)
+  c.s.font.bold = true
+  c.s.alignment.horizontal = 'right'
+  c = setCell(ws, aRow, 7, `${gtSumm}`, theme.Normal)
+  setCellFormat(ws, aRow, 7, theme.TypeNumber, theme.FormatNumberDecimals)
+  c.s.font.bold = true
+  c.s.font.underline = true
+  c.s.alignment.horizontal = 'right'
+
   // set column width
   setColumnWidth(ws, 0, 35)
-  setColumnWidth(ws, 1, 25)
+  setColumnWidth(ws, 1, 20)
   setColumnWidth(ws, 2, 12)
+  setColumnWidth(ws, 3, 12)
+  setColumnWidth(ws, 4, 12)
 
   // STEP 4: Write Excel file
   XLSX.utils.book_append_sheet(wb, ws, "Sheet")

@@ -4,8 +4,8 @@
     "stage": 1,
     "resource": 1,
     "qnt": 2,
-    "baseQnt": 10,
-    "price": 9500
+    "baseQnt": 100,
+    "price": 950
   },
   {
     "id": 2,
@@ -13,7 +13,7 @@
     "resource": 2,
     "qnt": 105,
     "baseQnt": 50,
-    "price": 950
+    "price": 9.5
   },
   {
     "id": 3,
@@ -29,35 +29,38 @@
     "resource": 4,
     "qnt": 102,
     "baseQnt": 400,
-    "price": 30
+    "price": 110
   },
   {
     "id": 5,
     "stage": 3,
     "resource": 1,
     "qnt": 6,
-    "baseQnt": 10,
-    "price": 9500
+    "baseQnt": 100,
+    "price": 950
   },
   {
     "id": 6,
     "stage": 3,
     "resource": 2,
     "qnt": 130,
-    "baseQnt": 10
+    "baseQnt": 10,
+    "price": 9.5
   },
   {
     "id": 7,
     "stage": 3,
     "resource": 5,
     "qnt": 105,
-    "baseQnt": 100
+    "baseQnt": 100,
+    "price": 65
   },
   {
     "id": 8,
     "stage": 4,
     "resource": 6,
     "qnt": 102,
-    "baseQnt": 600
+    "baseQnt": 600,
+    "price": 140
   }
 ]

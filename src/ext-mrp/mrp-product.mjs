@@ -3,6 +3,7 @@ import moment from 'moment-business-days'
 import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/utils/moment-utils.mjs'
 import { reportProductStock } from './rpt-product-stock.mjs'
 import { reportProductResources } from './rpt-product-resources.mjs'
+import { reportResourceOrders } from './rpt-resource-orders.mjs'
 
 // XLSX.set_fs(fs)
 
@@ -287,6 +288,9 @@ export const MrpProduct = (app) => {
       c.app = app
       await reportProductResources(c)
     }
+
+    ctx.app = app
+    await reportResourceOrders(ctx)
 
     return Promise.resolve(ret)
   }

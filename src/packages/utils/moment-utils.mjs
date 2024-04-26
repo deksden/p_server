@@ -47,23 +47,21 @@ export const dateSubtractDays = function (date, daysCount, isWorkingDays) {
  * @param format {string}: формат для перевода даты, если она является строкой; если NULL то будем использовать DD-MM-YYYY
  * @return {moment} возвращаем в любом случае moment
  */
-export const makeMoment = function (date, format) {
-  const aDateFormat = format | 'DD-MM-YYYY'
-
+export const makeMoment = function (date, format='DD-MM-YYYY') {
   // переводим формат переменной даты в объект moment
   if (typeof date === 'string') {
-    return moment.utc(date, aDateFormat)
+    return moment.utc(date, format)
   } else {
     return moment(date)
   }
 }
 
-export const printMoment = function (date, format) {
-  const aDateFormat = format | 'DD-MM-YYYY'
+export const printMoment = function (date, format='DD-MM-YYYY') {
+  if (!date) return ''
 
   if (typeof date === 'string') {
-    return moment.utc(date, aDateFormat).format(aDateFormat)
+    return moment.utc(date, format).format(format)
   } else {
-    return moment(date).format(aDateFormat)
+    return moment(date).format(format)
   }
 }

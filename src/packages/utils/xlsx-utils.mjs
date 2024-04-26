@@ -53,6 +53,12 @@ export const theme = {
       bottom: { style: 'thick' },
       left: { style: 'thick' },
       right: { style: 'thin' }
+    },
+    font: {
+      bold: true
+    },
+    alignment: {
+      horizontal: 'center',
     }
   },
   TH: { // table header, regular cell
@@ -61,6 +67,12 @@ export const theme = {
       bottom: { style: 'thick' },
       left: { style: 'thin' },
       right: { style: 'thin' }
+    },
+    font: {
+      bold: true
+    },
+    alignment: {
+      horizontal: 'center',
     }
   },
   THR: { // table header, right cell
@@ -69,6 +81,12 @@ export const theme = {
       bottom: { style: 'thick' },
       left: { style: 'thin' },
       right: { style: 'thick' }
+    },
+    font: {
+      bold: true
+    },
+    alignment: {
+      horizontal: 'center',
     }
   },
   TFRL: { // table first row, left cell
@@ -301,14 +319,17 @@ export const setColumnWidth = (ws, C, width, unit='wch') => {
  * @param R {number}
  * @param C {number}
  * @param cell_type {string}
- * @param style {string} формат ячейки
+ * @param cellFormat {string} формат ячейки
  * @return {Cell} возвращает ячейку
  */
-export const setCellFormat = (ws, R, C, cell_type, style= null) => {
+export const setCellFormat = (ws, R, C, cell_type, cellFormat= null, style = null) => {
   const c = getCell(ws, R,C)
   c.t = cell_type
-  c.z = style
 
+  if (cellFormat) c.z = cellFormat
+  if (style) c.s = style
+
+  return c
 }
 
 export const getCell = (sheet, R,  C) => {
