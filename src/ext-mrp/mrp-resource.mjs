@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays } from '../packages/moment-utils.mjs'
+import { dateAddDays } from '../packages/utils/moment-utils.mjs'
 
 export const MrpResource = (app) => {
 

@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
-import { makeMoment } from '../packages/moment-utils.mjs'
+import { makeMoment } from '../packages/utils/moment-utils.mjs'
 
 /*
  Алгоритм:

@@ -1,6 +1,6 @@
 // =================================================================================================================
 import XLSX from 'xlsx-js-style'
-import { makeMoment } from '../packages/moment-utils.mjs'
+import { makeMoment } from '../packages/utils/moment-utils.mjs'
 import path from 'path'
 import {
   newSheet,
@@ -10,7 +10,7 @@ import {
   setHeader,
   setTableRow,
   theme
-} from '../packages/xlsx-utils.mjs'
+} from '../packages/utils/xlsx-utils.mjs'
 
 /** Отчет о производстве партии продукции
  *

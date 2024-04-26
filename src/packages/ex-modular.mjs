@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import {isFunction} from "./is-function.mjs";
+import {isFunction} from "./utils/is-function.mjs";
 
 export const exModular = (app) => {
   const ex = {}

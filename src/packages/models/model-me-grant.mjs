@@ -159,7 +159,7 @@ export const MeGrant = (app, options) => {
       .catch((e) => { throw e })
   }
 
-  Model.beforeSave = (req, res, next) => {
+  Model.beforeSaveMW = (req, res, next) => {
     if (!Array.isArray(res.data)) {
       throw Error('beforeSave: res.data should have an array of removed records')
     }

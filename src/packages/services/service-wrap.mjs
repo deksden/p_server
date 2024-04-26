@@ -1,4 +1,4 @@
-import { isPromise } from '../is-promise.mjs'
+import { isPromise } from '../utils/is-promise.mjs'
 
 export const Wrap = (app) => (fn) => (req, res, next) => {
   const processErr = (next, err) => {

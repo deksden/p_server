@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/moment-utils.mjs'
+import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/utils/moment-utils.mjs'
 import { reportProductStock } from './rpt-product-stock.mjs'
 import { reportProductResources } from './rpt-product-resources.mjs'
 

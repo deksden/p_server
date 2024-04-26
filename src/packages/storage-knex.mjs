@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import fs from 'fs'
 import moment from 'moment'
-import { isPromise } from './is-promise.mjs'
+import { isPromise } from './utils/is-promise.mjs'
 
 export const checkIsFullVirtual = (Model) => {
   // check if model have only calculated fields
