@@ -470,9 +470,143 @@ export const MrpProduct = (app) => {
         bottom: { style: 'dotted' },
         right: { style: 'thick' }
       }
+    },
+    CellBorderFullThick: {
+      border: {
+        top: { style: 'thick' },
+        bottom: { style: 'thick' },
+        left: { style: 'thick' },
+        right: { style: 'thick' }
+      }
     }
   }
 
+  /** добавить строчку заголовков на лист. Строки заголовка будут оформлены соответствующими стилями
+   *
+   * @param ws {WorkSheet} лист из XLS книги
+   * @param R {number} куда добавить заголовок - ряд первой ячейки заголовка
+   * @param C {number} куда добавить заголовок - столбец первой ячейки заголовка
+   * @param data {Array<string>} ячейки заголовка, массив строк
+   * @param theme {Object} тема, которая будет использоваться для оформления ячеек. Ожидаем
+   *  объект с ключами THL, TH и THR соответственно для левой ячейки заголовка, остальных ячеек заголовка и
+   *  правой ячейки заголовка. Можно передать единственный стиль, тогда он будет применён для всех ячеек.
+   *  Если стиль NULL, то будет использован для всех ячеек стиль с толстой рамкой вокруг.
+   */
+  const setHeader = (ws, R, C, data, theme) => {
+    // проверить параметры
+    if (!Array.isArray(data)) {
+      throw new Error('data should be an array')
+    }
+
+    let t = theme
+    if (!theme || !theme.THL || !theme.THR || !theme.THR) {
+      // если стиль не указан, или передан единственный стиль
+      if (!theme) {
+        // стиль не передан, определим стиль сами одинаково для всех ячеек,
+        // как толстые рамки вокруг всей ячейки:
+        t = {}
+        t.THL = {
+          border: {
+            top: { style: 'thick' },
+            bottom: { style: 'thick' },
+            left: { style: 'thick' },
+            right: { style: 'thick' }
+          }
+        }
+      } else {
+        // нам передали стиль какой-то стиль, но не в формате ключей ячеек заголовка
+        t.THL = theme
+      }
+
+      // остальные ячейки сделаем как THL
+      t.TH = t.THL
+      t.THR = t.THL
+    }
+
+    let styleSelector = 'THL'
+    let c = null
+    for (const [ndx, d] of data.entries()) {
+      c = setCell(ws,R, C+ndx, d, theme[styleSelector])
+      styleSelector = 'TH'
+      if (ndx === data.length-2) {
+        styleSelector = 'THR'
+      }
+    }
+  }
+
+  /** Записать строку таблицы в лист книги XLS
+   *
+    * @param ws {WorkSheet}
+   * @param R {number} строка
+   * @param C {number} столбец
+   * @param data {Array<string>} массив строк со значениями ячеек
+   * @param theme {Object} тема. Может быть темой с ключами для ячеек, темой одной ячейки или NULL.
+   * @param rowThemeSelector {string} селектора темы строки таблицы: FR для первого ряда, R для обычного
+   * ряда и LR для последней строки
+   */
+  const setTableRow = (ws, R, C, data, theme, rowThemeSelector) => {
+    let t = theme
+    if (!theme ||
+      !theme.TFRL || !theme.TFR || !theme.TFRR ||
+      !theme.TLRL || !theme.TLR || !theme.TLRR ||
+      !theme.TRL || !theme.TR || !theme.TRR )
+    {
+      // если стиль не указан, или передан единственный стиль
+      if (!theme) {
+        // стиль не передан, определим стиль сами одинаково для всех ячеек,
+        // как толстые рамки вокруг всей ячейки:
+        t = {}
+        t.TFRL = {
+          border: {
+            top: { style: 'thick' },
+            bottom: { style: 'thick' },
+            left: { style: 'thick' },
+            right: { style: 'thick' }
+          }
+        }
+      } else {
+        // нам передали стиль какой-то стиль, но не в формате ключей ячеек заголовка
+        t.TFRL = theme
+      }
+
+      // остальные ячейки сделаем как TFRL
+      t.TFR = t.TFRL
+      t.TFRR = t.TFRL
+      t.TLRL = t.TFRL
+      t.TLR = t.TFRL
+      t.TLRR = t.TFRL
+      t.TRL = t.TFRL
+      t.TR = t.TFRL
+      t.TRR = t.TFRL
+    }
+
+    let sel = null
+    for (const [ndx, d] of data.entries()) {
+      // составим селектор для темы
+      if (ndx === 0) {
+        sel = `T${rowThemeSelector}L`
+      } else if (ndx === data.length - 1) {
+        sel = `T${rowThemeSelector}R`
+      } else {
+        sel = `T${rowThemeSelector}`
+      }
+
+      setCell(ws, R, C+ndx, d, theme[sel])
+    }
+  }
+
+  const setColumnWidth = (ws, C, width, unit='wch') => {
+    // создадим объект для хранения метаданных
+    if(!ws["!cols"]) ws["!cols"] = [];
+
+    // если ширину этого столбца еще не определяли:
+    if(!ws["!cols"][C]) {
+      ws["!cols"][C] = {}
+      ws["!cols"][C][unit] = width
+    } else {
+      ws["!cols"][C][unit] = width
+    }
+  }
 
   // =================================================================================================================
   /** Отчет о производстве партии продукции
@@ -526,11 +660,14 @@ export const MrpProduct = (app) => {
     for (const productStage of productStages) {
       productStage.Stage = await Stage.findById(productStage.stage)
       // запишем заголовок
-      c = setCell(ws, aRow, 0, `Этап #${productStage.Stage.order}`, theme.THL)
-      c = setCell(ws, aRow, 1, `${productStage.Stage.caption}`, theme.TH)
-      c = setCell(ws, aRow, 2, `Дата нач: ${makeMoment(productStage.dateStart).format('DD-MM-YYYY')}`, theme.TH)
-      c = setCell(ws, aRow, 3, `Дата ок: ${makeMoment(productStage.dateEnd).format('DD-MM-YYYY')}`, theme.TH)
-      c = setCell(ws, aRow, 4, `Цена: ${productStage.price}`, theme.THR)
+      let data = [
+        `Этап #${productStage.Stage.order}`,
+        `${productStage.Stage.caption}`,
+        `Дата нач: ${makeMoment(productStage.dateStart).format('DD-MM-YYYY')}`,
+        `Дата ок: ${makeMoment(productStage.dateEnd).format('DD-MM-YYYY')}`,
+        `Цена: ${productStage.price}`
+      ]
+      setHeader(ws, aRow, 0, data, theme)
       aRow += 1
 
       // запишем все строки данных о расходе сырья
@@ -540,13 +677,16 @@ export const MrpProduct = (app) => {
       })
 
       // запишем заголовок:
-      c = setCell(ws, aRow, 0, 'Ресурс', theme.THL)
-      c = setCell(ws, aRow, 1, 'Расход', theme.TH)
-      c = setCell(ws, aRow, 2, 'Норма расход', theme.TH)
-      c = setCell(ws, aRow, 3, 'база нормы', theme.TH)
-      c = setCell(ws, aRow, 4, 'на ед', theme.TH)
-      c = setCell(ws, aRow, 5, 'Сумма', theme.TH)
-      c = setCell(ws, aRow, 6, 'Сумма на ед', theme.THR)
+      data = [
+        'Ресурс',
+        'Расход',
+        'Норма расхода',
+        'База нормы',
+        'На ед',
+        'Сумма',
+        'Сумма на ед'
+      ]
+      setHeader(ws, aRow,0, data, theme)
       aRow += 1
 
       let styleSelector = 'FR' // first row, left cell
@@ -556,12 +696,15 @@ export const MrpProduct = (app) => {
       for (const [index, resourceStock] of resourceStocks.entries()) {
         resourceStock.Resource = await Resource.findById(resourceStock.resource)
         // запишем данные о расходе сырья
-        c = setCell(ws, aRow, 0, `${resourceStock.Resource.caption}`, theme[`T${styleSelector}L`])
-        c = setCell(ws, aRow, 1, `${resourceStock.qnt}`, theme[`T${styleSelector}`])
-        c = setCell(ws, aRow, 2, ``, theme[`T${styleSelector}`])
-        c = setCell(ws, aRow, 3, ``, theme[`T${styleSelector}`])
-        c = setCell(ws, aRow, 4, '', theme[`T${styleSelector}`])
-        c = setCell(ws, aRow, 5, `${resourceStock.price}`, theme[`T${styleSelector}R`])
+        data = [
+        `${resourceStock.Resource.caption}`,
+        `${resourceStock.qnt}`,
+        ``,
+        ``,
+        '',
+        `${resourceStock.price}`
+        ]
+        setTableRow(ws, aRow, 0, data, theme, styleSelector)
         aRow += 1
 
         // настроить селектор стиля ячейки
@@ -572,6 +715,11 @@ export const MrpProduct = (app) => {
       }
       aRow += 1
     }
+
+    // set column width
+    setColumnWidth(ws, 0, 35)
+    setColumnWidth(ws, 1, 25)
+    setColumnWidth(ws, 2, 12)
 
     // STEP 4: Write Excel file
     XLSX.utils.book_append_sheet(wb, ws, "Sheet")
@@ -621,12 +769,11 @@ export const MrpProduct = (app) => {
 
     // STEP: ШАПКА ОТЧЁТА
     c = setCell(ws, 0,0, 'Нормы расхода сырья и материалов', theme.H1)
-    // c.t = 's'
+
     c = setCell(ws,  1, 0, `Продукция: ${product.caption}`, theme.Normal)
     // c.s.alignment.horizontal = 'right'
-    c = setCell(ws,  2, 0, `Дата:`, theme.Normal)
-    c = setCell(ws,  2, 1, `${makeMoment(product.date).format('DD-MM-YYYY')}`, theme.Normal)
-    c = setCell(ws,  2, 2, `Ед: ${product.unit}`, theme.Normal)
+    c = setCell(ws,  2, 0, `Дата: ${makeMoment(product.date).format('DD-MM-YYYY')}`, theme.Normal)
+    c = setCell(ws,  2, 1, `Ед: ${product.unit}`, theme.Normal)
     // c.s.alignment.horizontal = 'right'
 
     // получим этапы:
@@ -642,11 +789,22 @@ export const MrpProduct = (app) => {
     let aRow = 4 // текущий номер строки в отчёте
     for (const stage of stages) {
       // запишем заголовок
+      // let data = [
+      //   `Этап #${stage.order}`,
+      //   `${stage.caption}`,
+      //   `Дл: ${stage.duration} ${daysLabel}`,
+      //   `${stage.comments}`
+      // ]
+      // setHeader(ws, aRow, 0, data, theme)
       c = setCell(ws, aRow, 0, `Этап #${stage.order}`, theme.Normal)
-      c = setCell(ws, aRow, 1, `${stage.caption}`, theme.Normal)
-      c = setCell(ws, aRow, 2, `Дл: ${stage.duration} ${daysLabel}`, theme.Normal)
-      c = setCell(ws, aRow, 3, `${stage.comments}`, theme.Normal)
-      aRow += 1
+      c.s.font.bold = true
+      c = setCell(ws, aRow+1, 0, `${stage.caption}`, theme.Normal)
+      c.s.font.bold = true
+      c = setCell(ws, aRow, 1, `Длит.: ${stage.duration} ${daysLabel}`, theme.Normal)
+      c.s.font.bold = true
+      c = setCell(ws, aRow+1, 1, `${stage.comments}`, theme.Normal)
+      c.s.font.bold = true
+      aRow += 2
 
       // запишем все строки данных о расходе сырья
       const stageResources = await StageResource.findAll({
@@ -654,25 +812,51 @@ export const MrpProduct = (app) => {
       })
 
       // запишем заголовок:
-      c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
-      c = setCell(ws, aRow, 1, 'Норма', theme.Normal)
-      c = setCell(ws, aRow, 2, 'база нормы', theme.Normal)
-      c = setCell(ws, aRow, 3, 'На ед', theme.Normal)
-      c = setCell(ws, aRow, 4, 'Цена', theme.Normal)
+      let data = [
+        'Ресурс',
+        'Норма расх',
+        'База нормы',
+        'На 1 шт',
+        'Цена'
+      ]
+      setHeader(ws,aRow, 0, data, theme)
+      // c = setCell(ws, aRow, 0, 'Ресурс', theme.Normal)
+      // c = setCell(ws, aRow, 1, 'Норма', theme.Normal)
+      // c = setCell(ws, aRow, 2, 'база нормы', theme.Normal)
+      // c = setCell(ws, aRow, 3, 'На ед', theme.Normal)
+      // c = setCell(ws, aRow, 4, 'Цена', theme.Normal)
       aRow += 1
 
-      for (const stageResource of stageResources) {
+      let rts = 'FR'
+      if (stageResources.length === 1) rts = 'LR'
+
+      for (const [ndx, stageResource] of stageResources.entries()) {
         stageResource.Resource = await Resource.findById(stageResource.resource)
         // запишем данные о расходе сырья
-        c = setCell(ws, aRow, 0, `${stageResource.Resource.caption}`, theme.Normal)
-        c = setCell(ws, aRow, 1, `${stageResource.qnt}`, theme.Normal)
+        data = [
+          `${stageResource.Resource.caption}`,
+          `${stageResource.qnt}`,
+          ``,
+          ``,
+          `${stageResource.price}`
+        ]
+        setTableRow(ws,aRow,0,data,theme,rts)
+        // c = setCell(ws, aRow, 0, `${stageResource.Resource.caption}`, theme.Normal)
+        // c = setCell(ws, aRow, 1, `${stageResource.qnt}`, theme.Normal)
         // c = setCell(ws, aRow, 2, `${resourceStock.}`, theme.Normal)
         // c = setCell(ws, aRow, 3, `${resourceStock.Resource.}`, theme.Normal)
-        c = setCell(ws, aRow, 4, `${stageResource.price}`, theme.Normal)
+        // c = setCell(ws, aRow, 4, `${stageResource.price}`, theme.Normal)
         aRow += 1
+        rts = 'R'
+        if (ndx === stageResources.length-2) rts = 'LR'
       }
       aRow += 1
     }
+
+    // set column width
+    setColumnWidth(ws, 0, 35)
+    setColumnWidth(ws, 1, 25)
+    setColumnWidth(ws, 2, 12)
 
     // STEP 4: Write Excel file
     XLSX.utils.book_append_sheet(wb, ws, "Sheet")
