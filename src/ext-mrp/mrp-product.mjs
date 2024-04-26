@@ -126,7 +126,7 @@ export const MrpProduct = (app) => {
             console.log(`  - batches: ${JSON.stringify(resStock.batches)}`)
 
             // вычислим требуемое количество ресурса для данного этапа
-            const reqQnt = qnt / product.baseQnt * stageResource.qnt
+            const reqQnt = qnt / stageResource.baseQnt * stageResource.qnt
             const aResource = await Resource.findById(stageResource.resource)
 
             console.log(`Resource: id ${stageResource.resource}
@@ -141,15 +141,10 @@ export const MrpProduct = (app) => {
               // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
               await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - resStock.qnt))
 
-              // TODO: что делать, если заказ ресурса невозможен
               // обновляем данные о ресурсах, потому что заказаны недостающие ресурсы:
               resStock = await ResourceStock.qntForDate(stageResource.resource, stageStart)
             }
 
-            // увеличить дату на длительность этапа:
-            // product.inWorkingDays
-            //   ? startDate = startDate.businessAdd(stage.duration)
-            //   : startDate = startDate.add(stage.duration, 'days')
             startDate = moment(endDate)
 
             // списываем из имеющихся партий ресурсов
@@ -357,16 +352,16 @@ export const MrpProduct = (app) => {
         format: '',
         default: 0
       },
-      {
-        name: 'baseQnt',
-        type: 'decimal',
-        caption: 'База',
-        description: 'Базовое количество продукции, относительно которого установлены нормы расхода (например, "на 100 штук")',
-        precision: 12,
-        scale: 0,
-        format: '',
-        default: 0
-      },
+      // {
+      //   name: 'baseQnt',
+      //   type: 'decimal',
+      //   caption: 'База',
+      //   description: 'Базовое количество продукции, относительно которого установлены нормы расхода (например, "на 100 штук")',
+      //   precision: 12,
+      //   scale: 0,
+      //   format: '',
+      //   default: 0
+      // },
       {
         name: 'inWorkingDays',
         type: 'boolean',

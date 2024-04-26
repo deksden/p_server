@@ -6,7 +6,6 @@
     "initialDate": "01-01-2022",
     "qntMin": 5000,
     "qntStep": 1000,
-    "baseQnt": 200,
     "inWorkingDays": true,
     "comments": "Гель стерильный в ампулах 2мл, коробка 4шт"
   },
@@ -17,7 +16,6 @@
     "initialDate": "01-03-2022",
     "qntMin": 2000,
     "qntStep": 1000,
-    "baseQnt": 90,
     "inWorkingDays": true,
     "comments": "Гель стерильный во флаконе 5мл, коробка 3шт"
   }]

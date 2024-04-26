@@ -3,36 +3,42 @@
     "id": "1",
     "caption": "Hyaluronate Sodium - Гиалуроновая кислота",
     "unit": "гр",
-    "minStock": 300
+    "minStock": 300,
+    "expDuration": 365
   },
   {
     "id": "2",
     "caption": "Питательная среда",
     "unit": "мл",
-    "minStock": 4500
+    "minStock": 4500,
+    "expDuration": 60
   },
   {
     "id": "3",
     "caption": "Ампула стерильная",
     "unit": "шт",
-    "minStock": 5000
+    "minStock": 5000,
+    "expDuration": 3650
   },
   {
     "id": "4",
-    "caption": "Коробка - гель стерильный",
+    "caption": "Коробка для ампул",
     "unit": "шт",
-    "minStock": 5000
+    "minStock": 5000,
+    "expDuration": 3650
   },
   {
     "id": "5",
     "caption": "Флакон стерильная",
     "unit": "шт",
-    "minStock": 3000
+    "minStock": 3000,
+    "expDuration": 3650
   },
   {
     "id": "6",
-    "caption": "Коробка - флакон стерильный",
+    "caption": "Коробка для флаконов",
     "unit": "шт",
-    "minStock": 5000
+    "minStock": 5000,
+    "expDuration": 3650
   }
 ]

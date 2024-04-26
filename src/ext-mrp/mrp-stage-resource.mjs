@@ -33,12 +33,31 @@ export const MrpStageResource = (app) => {
         default: null
       },
       {
+        name: 'date',
+        type: 'datetime',
+        caption: 'Дата',
+        description: 'Дата с которой действует эта норма',
+        format: 'DD-MM-YYYY',
+        default: '01-01-1900'
+      },
+
+      {
         name: 'qnt',
         type: 'decimal',
         caption: 'Количество',
         description: 'Количество потребляемого ресурса на этом этапе, в отношении к resource.baseQnt',
         precision: 16,
         scale: 4,
+        format: '',
+        default: 0
+      },
+      {
+        name: 'baseQnt',
+        type: 'decimal',
+        caption: 'База',
+        description: 'Базовое количество продукции в штуках, относительно которого установлены нормы расхода (например, "на 100 штук")',
+        precision: 12,
+        scale: 0,
         format: '',
         default: 0
       },
