@@ -139,6 +139,14 @@ export const MrpResourceStock = (app) => {
         default: null
       },
       {
+        name: 'stageResource',
+        type: 'ref',
+        model: 'MrpStageResource',
+        caption: 'Ресурсы этап',
+        description: 'Ссылка на нормы расхода ресурса этапа производства, по которым был списан этот ресурс',
+        default: null
+      },
+      {
         name: 'dateOrder',
         type: 'datetime',
         caption: 'Дата заказа',

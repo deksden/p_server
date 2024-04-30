@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
 import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/utils/moment-utils.mjs'
-import { reportProductStock } from './rpt-product-stock.mjs'
-import { reportProductResources } from './rpt-product-resources.mjs'
-import { reportResourceOrders } from './rpt-resource-orders.mjs'
+import { reportProductStock } from './reports/rpt-product-stock.mjs'
+import { reportProductResources } from './reports/rpt-product-resources.mjs'
+import { reportResourceOrders } from './reports/rpt-resource-orders.mjs'
 
 // XLSX.set_fs(fs)
 
@@ -179,7 +179,8 @@ export const MrpProduct = (app) => {
                   dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
                   vendor: aBatch.vendor,
-                  productStage: productStage.id
+                  productStage: productStage.id,
+                  stageResource: stageResource.id
                 }
 
                 // зафиксируем сумму потребленных ресурсов:
@@ -212,7 +213,8 @@ export const MrpProduct = (app) => {
                   dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
                   price: aBatch.price,
                   vendor: aBatch.vendor,
-                  productStage: productStage.id
+                  productStage: productStage.id,
+                  stageResource: stageResource.id
                 }
 
                 // зафиксируем стоимость потребленных ресурсов
@@ -277,20 +279,6 @@ export const MrpProduct = (app) => {
     console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
 
     console.log(`== Gen XLSX reports:`)
-
-    ctx.app = app
-    await reportProductStock(ctx)
-
-    // вывести все калькуляции по всем продуктам:
-    const products = await Product.findAll()
-    for( const product of products ) {
-      const c = { product }
-      c.app = app
-      await reportProductResources(c)
-    }
-
-    ctx.app = app
-    await reportResourceOrders(ctx)
 
     return Promise.resolve(ret)
   }

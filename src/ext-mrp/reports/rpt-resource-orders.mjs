@@ -1,6 +1,6 @@
 // import _ from 'lodash'
 import XLSX from 'xlsx-js-style'
-import { makeMoment, printMoment } from '../packages/utils/moment-utils.mjs'
+import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 import path from 'path'
 import {
   newSheet,
@@ -10,7 +10,7 @@ import {
   setHeader, setStyle,
   setTableRow,
   theme
-} from '../packages/utils/xlsx-utils.mjs'
+} from '../../packages/utils/xlsx-utils.mjs'
 
 /** Отчёт о запланированных закупках ресурсов
  *
@@ -40,20 +40,23 @@ export const reportResourceOrders = async (ctx) => {
   // STEP: ШАПКА ОТЧЁТА
   c = setCell(ws, 0,0, 'Ведомость запланированных заказов ресурсов', theme.H1)
 
-  if (ctx.plan.id) {
-    c = setCell(ws,  1, 0, `План:`, theme.Normal)
+  let aRow = 1 // текущий номер строки в отчёте
+  if (ctx.plan && ctx.plan.id) {
+    c = setCell(ws,  aRow, 0, `План:`, theme.Normal)
     c.s.font.bold = true
     c.s.alignment.horizontal = 'right'
-    c = setCell(ws,  1, 1, `#${ctx.plan.id}`, theme.Normal)
+    c = setCell(ws,  aRow, 1, `#${ctx.plan.id}`, theme.Normal)
     c.s.font.bold = true
+    aRow += 1
   }
 
-  if (ctx.plan.date) {
-    c = setCell(ws, 2, 0, `Дата:`, theme.Normal)
+  if (ctx.plan && ctx.plan.date) {
+    c = setCell(ws, aRow, 0, `Дата:`, theme.Normal)
     c.s.font.bold = true
     c.s.alignment.horizontal = 'right'
-    c = setCell(ws, 2, 1, `${makeMoment(ctx.plan.date).format('DD-MM-YYYY')}`, theme.Normal)
+    c = setCell(ws, aRow, 1, `${makeMoment(ctx.plan.date).format('DD-MM-YYYY')}`, theme.Normal)
     c.s.font.bold = true
+    aRow += 1
   }
 
   // получим заказы:
@@ -62,11 +65,7 @@ export const reportResourceOrders = async (ctx) => {
     orderBy: ['dateOrder','resource']
   })
 
-  // const daysLabel = product.inWorkingDays ? 'р.д.' : 'д'
-
-  // Табличные данные:
-  // берем перечень этапов производства:
-  let aRow = 5 // текущий номер строки в отчёте
+  aRow += 1
 
   // запишем заголовок
   let data = [
