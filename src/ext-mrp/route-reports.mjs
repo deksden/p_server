@@ -23,6 +23,9 @@ export const MrpRouteReports = (app) => {
     ctx.app = app
     ret.push(await reportResourceOrders(ctx))
 
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    res.setHeader('Last-Modified', (new Date()).toUTCString())
     res.send({ items: ret })
   }
 
