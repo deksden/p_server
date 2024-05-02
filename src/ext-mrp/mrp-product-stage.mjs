@@ -43,8 +43,18 @@ export const MrpProductStage = (app) => {
         name: 'dateEnd',
         type: 'datetime',
         caption: 'Дата завершения',
-        description: 'Дата завыершения этого этапа производства',
+        description: 'Дата завершения этого этапа производства',
         format: 'DD-MM-YYYY'
+      },
+      {
+        name: 'totalQntForProd',
+        type: 'decimal',
+        caption: 'Количество в партии',
+        description: 'Количество продукции (общее), которое планируется произвести в партии',
+        precision: 12,
+        scale: 0,
+        format: '',
+        default: 0
       },
       {
         name: 'price',

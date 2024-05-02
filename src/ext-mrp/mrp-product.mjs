@@ -95,7 +95,8 @@ export const MrpProduct = (app) => {
           plan: ctx.plan.id,
           stage: stage.id,
           dateStart: stageStart.format(aDateFormat),
-          dateEnd: stageEnd.format(aDateFormat)
+          dateEnd: stageEnd.format(aDateFormat),
+          totalQntForProd: qntForProd
         }
 
         productStage = await ProductStage.create(productStage)
@@ -105,8 +106,10 @@ export const MrpProduct = (app) => {
           stage:${productStage.stage}
           dateStart:${printMoment(productStage.dateStart)}
           dateEnd:${printMoment(productStage.dateEnd)}
+          totalQntForProd:${productStage.totalQntForProd}
           price:${productStage.price}`)
-        ctx.productStage = productStage
+        if(!ctx.productStage) ctx.productStage = []
+        ctx.productStage.push(productStage)
 
         // для этого этапа получим список требуемых ресурсов
         console.log(`stage: ${stage.order} "${stage.caption}"`)
@@ -127,7 +130,7 @@ export const MrpProduct = (app) => {
             console.log(`  - batches: ${JSON.stringify(resStock.batches)}`)
 
             // вычислим требуемое количество ресурса для данного этапа
-            const reqQnt = qnt / stageResource.baseQnt * stageResource.qnt
+            const reqQnt = qntForProd / stageResource.baseQnt * stageResource.qnt
             const aResource = await Resource.findById(stageResource.resource)
 
             console.log(`Resource: id ${stageResource.resource}

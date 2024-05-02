@@ -6,23 +6,24 @@ export const MrpRouteReports = (app) => {
 
   const routeHandler = async (req, res) => {
     const Product = app.exModular.models['MrpProduct']
+    const ret = []
 
     const ctx = {}
     ctx.app = app
-    await reportProductStocks(ctx)
+    ret.push(await reportProductStocks(ctx))
 
     // вывести все калькуляции по всем продуктам:
     const products = await Product.findAll()
     for( const product of products ) {
       const c = { product }
       c.app = app
-      await reportProductResources(c)
+      ret.push(await reportProductResources(c))
     }
 
     ctx.app = app
-    await reportResourceOrders(ctx)
+    ret.push(await reportResourceOrders(ctx))
 
-    res.send({})
+    res.send({ items: ret })
   }
 
   app.exModular.routes.Add({

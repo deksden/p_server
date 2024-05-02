@@ -15,10 +15,11 @@ import {
 /** Отчет о производстве партии продукции
  *
   * @param ctx {object} : объект контекста, ожидаем внутри ctx.plan
- * @return {Promise<Awaited<string>>}
+ * @return {Promise<Awaited<Object>>} возвращает структуру { reportProductStock: [] } с массивом путей к файлам отчетов
  */
 export const reportProductStocks = async (ctx) => {
   const app = ctx.app
+  const ret = []
 
   const ProductStock = app.exModular.models['MrpProductStock']
   const Plan = app.exModular.models['MrpPlan']
@@ -29,8 +30,10 @@ export const reportProductStocks = async (ctx) => {
     const plan = await Plan.findById(row.plan)
     const c = {  app, plan, productStock: row }
 
-    await reportProductStock(c)
+    ret.push(await reportProductStock(c))
   }
+
+  return { reportProductStock: ret }
 }
 
 export const reportProductStock = async (ctx) => {
