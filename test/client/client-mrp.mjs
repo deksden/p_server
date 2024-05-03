@@ -6,3 +6,9 @@ export const mrpPlanAdd = (context, data, expectedCode) => context.request.post(
   .type('json')
   .accept('json')
   .expect(expectedCode || expected.OkCreated)
+
+export const mrpPlan = (context, data, expectedCode) => context.request.get(`${context.apiRoot}/mrp/plan`)
+  .set('Authorization', `${context.authSchema} ${context.token}`)
+  .type('json')
+  .accept('json')
+  .expect(expectedCode || expected.Ok)

@@ -411,7 +411,7 @@ export const Codegen = (app, opt) => {
   app.exModular.routes.Add({
     method: 'GET',
     name: 'codegen',
-    description: 'Generate list code for model',
+    description: 'Generate list view code for the model',
     path: '/codegen/model/:modelName/list',
     validate: checkModelName,
     handler: generateModelListCode
@@ -420,7 +420,7 @@ export const Codegen = (app, opt) => {
   app.exModular.routes.Add({
     method: 'GET',
     name: 'codegen',
-    description: 'Generate list code for model',
+    description: 'Generate form code for edit/create views of the model',
     path: '/codegen/model/:modelName/edit',
     validate: checkModelName,
     handler: generateModelEditCode
@@ -429,7 +429,7 @@ export const Codegen = (app, opt) => {
   app.exModular.routes.Add({
     method: 'GET',
     name: 'codegen',
-    description: 'Generate list code for model',
+    description: 'Generate code for filter components on the list view of the model',
     path: '/codegen/model/:modelName/filter',
     validate: checkModelName,
     handler: generateModelFilterCode

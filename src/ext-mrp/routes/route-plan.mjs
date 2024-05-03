@@ -2,25 +2,21 @@ export const MrpRoutePlan = (app) => {
 
   const routeHandler = async (req, res) => {
     const Plan = app.exModular.models['MrpPlan']
-    const ret = []
 
     let version = ''
     if (req.query && req.query.version) {
       version = req.query.version
     }
 
-    // очистить данные
-    app.exModular.seedVariantFolder = version
-    await app.exModular.storages.Clear()
-
-    // обработать все планы
-    const plans = await Plan.findAll({ orderBy: ['date', 'product'] })
-    for( const plan of plans ) {
-      ret.push(await Plan.processPlan(plan.id))
+    let clearData = true
+    if (req.query && req.query.clear) {
+      clearData = req.query.clear
     }
 
+    const ret = await Plan.processAllPlans(version, clearData)
+
     res.setHeader('Last-Modified', (new Date()).toUTCString())
-    res.send({ items: ret })
+    res.send(ret)
   }
 
   app.exModular.routes.Add({

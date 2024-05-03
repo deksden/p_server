@@ -7,23 +7,36 @@
  This module initialize "MRP" extension module.
 
 */
-import { MrpPlan } from './mrp-plan'
-import { MrpVendor } from './mrp-vendor'
-import { MrpVendorPayment } from './mrp-vendor-payment'
-import { MrpStage } from './mrp-stage'
-import { MrpProductStock } from './mrp-product-stock'
-import { MrpProduct } from './mrp-product'
-import { MrpResourceStock } from './mrp-resource-stock'
-import { MrpResource } from './mrp-resource'
-import { MrpStageResource } from './mrp-stage-resource'
-import { MrpProductStage } from './mrp-product-stage.mjs'
+import { MrpPlan } from './models/mrp-plan.mjs'
+import { MrpVendor } from './models/mrp-vendor.mjs'
+import { MrpVendorPayment } from './models/mrp-vendor-payment.mjs'
+import { MrpStage } from './models/mrp-stage.mjs'
+import { MrpProductStock } from './models/mrp-product-stock.mjs'
+import { MrpProduct } from './models/mrp-product.mjs'
+import { MrpResourceStock } from './models/mrp-resource-stock.mjs'
+import { MrpResource } from './models/mrp-resource.mjs'
+import { MrpStageResource } from './models/mrp-stage-resource.mjs'
+import { MrpProductStage } from './models/mrp-product-stage.mjs'
 // import { InitExtTest } from './init-mrp.mjs'
-import { MrpRouteReports } from './route-reports'
-import { MrpRoutePlan } from './route-plan.mjs'
+import { MrpRouteReports } from './routes/route-reports.mjs'
+import { MrpRoutePlan } from './routes/route-plan.mjs'
 
 const packageName = 'ExtMrp'
 
 export const ExtMrp = (app, opt) => {
+  app.exModular.moduleSet.MRP = [
+    'MrpPlan',
+    'MrpVendor',
+    'MrpVendorPayment',
+    'MrpStage',
+    'MrpStageResource',
+    'MrpProductStock',
+    'MrpProduct',
+    'MrpProductStage',
+    'MrpResource',
+    'MrpResourceStock'
+  ]
+
   app.exModular.modules.Add({
     moduleName: packageName,
     dependency: [

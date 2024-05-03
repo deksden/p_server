@@ -40,7 +40,7 @@ import {
 import { ExtMrp } from '../../src/ext-mrp/ext-mrp.mjs'
 import { appInit } from '../../src/packages/app-init.mjs'
 // import { expected, UserAdmin, UserFirst, UserSecond } from '../client/client-const.mjs'
-import { mrpPlanAdd } from '../client/client-mrp.mjs'
+import { mrpPlan } from '../client/client-mrp.mjs'
 // import moment from 'moment'
 import path from 'path'
 import fs from 'fs'
@@ -181,18 +181,19 @@ describe('MRP: tests', function () {
       const Models = app.exModular.models
 
       return createAdmin(context)
-        .then(() => mrpPlanAdd(context, {
-          id: 1,
-          date: '01-09-2023',
-          product: 1,
-          qnt: 25000
-        }))
-        .then(() => mrpPlanAdd(context, {
-          id: 2,
-          date: '01-09-2023',
-          product: 2,
-          qnt: 10000
-        }))
+        .then(() => mrpPlan(context))
+        // .then(() => mrpPlanAdd(context, {
+        //   id: 1,
+        //   date: '01-09-2023',
+        //   product: 1,
+        //   qnt: 25000
+        // }))
+        // .then(() => mrpPlanAdd(context, {
+        //   id: 2,
+        //   date: '01-09-2023',
+        //   product: 2,
+        //   qnt: 10000
+        // }))
         .then(() => Models.MrpResourceStock.findOne({ where: { resource: 1, type: 'order' }, orderBy: [{ column: 'date', order: 'asc' }] }))
         .then((res) => {
           expect(res.resource).to.be.equal('1')

@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../packages/utils/moment-utils.mjs'
-import { reportProductStock } from './reports/rpt-product-stock.mjs'
-import { reportProductResources } from './reports/rpt-product-resources.mjs'
-import { reportResourceOrders } from './reports/rpt-resource-orders.mjs'
+import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
+import { reportProductStock } from '../reports/rpt-product-stocks.mjs'
+import { reportProductResources } from '../reports/rpt-product-resources.mjs'
+import { reportResourceOrders } from '../reports/rpt-resource-orders.mjs'
 
 // XLSX.set_fs(fs)
 

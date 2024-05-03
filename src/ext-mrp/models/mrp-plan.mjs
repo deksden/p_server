@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
-import { makeMoment } from '../packages/utils/moment-utils.mjs'
+import { makeMoment } from '../../packages/utils/moment-utils.mjs'
 
 /*
  Алгоритм:
@@ -44,6 +44,11 @@ export const MrpPlan = (app) => {
     const ret = await processPlan(res.data.id)
   }
 
+  /** Обработать указанных план из таблицы MRpPlan
+   *
+   * @param planId {number} идентификатор плана в таблице
+   * @return {Promise<Awaited<{planId: string, prodDuration: number, plannedProd: number}>>} возвращаем информацию о проведенном планировании
+   */
   const processPlan = async (planId) => {
     const fnName = 'MRP.processPlan'
     const Product = app.exModular.models['MrpProduct']
@@ -88,8 +93,35 @@ export const MrpPlan = (app) => {
 
     console.log(`${fnName}: end`)
 
-    return Promise.resolve({ plannedProd, prodDuration })
+    return Promise.resolve({ planId, plannedProd, prodDuration })
   }
+
+  /** Обработать все имеющиеся в табличке MrpPlan записи о планах производства
+   *
+   * @param version {string} версия данных, если '' то используем основную версию
+   * @param clearData {boolean} нужно ли очищать данные (как правило - да)
+   * @return {Promise<{items: Object}>} возвращает массив данных об обработанных планах
+   */
+  const processAllPlans = async (version = '', clearData=true) => {
+    const Plan = app.exModular.models['MrpPlan']
+    const ret = []
+
+    // очистить данные
+    if (clearData) {
+      app.exModular.seedVariantFolder = version
+      await app.exModular.storages.Clear()
+    }
+
+    // обработать все планы
+    const plans = await Plan.findAll({ orderBy: ['date', 'product'] })
+    for( const plan of plans ) {
+      ret.push(await Plan.processPlan(plan.id)) // добавим сведения о выполненном планировании
+    }
+
+    // вернем массив сведений о выполненных планированиях
+    return ({ items: ret })
+  }
+
   const Wrap = app.exModular.services.wrap
 
   return {
@@ -100,6 +132,7 @@ export const MrpPlan = (app) => {
     icon: 'BarChart',
     qntForDate,
     processPlan,
+    processAllPlans,
     afterCreateBeg: [Wrap(afterSavePlan)],
     props: [
       {

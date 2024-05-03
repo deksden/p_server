@@ -15,8 +15,13 @@ export const Seed = (app) => {
     try {
       const variantFile = path.join(process.env.SEEDS_DIR, app.exModular.seedVariantFolder, fileName)
 
-      fileName = path.join(process.env.SEEDS_DIR, fileName)
-      if (fs.existsSync(variantFile)) fileName = variantFile
+      // можно указать полный путь к файлу - тогда, если такой файл существует - будем работать с ним,
+      // игнорируя SEEDS_DIR и VARIANT_DIR
+      if (!fs.existsSync(fileName)) {
+        // если путь к файлу неполный, то будем составлять путь:
+        fileName = path.join(process.env.SEEDS_DIR, fileName)
+        if (fs.existsSync(variantFile)) fileName = variantFile
+      }
 
       const Model = app.exModular.models[modelName]
       if (!Model) {

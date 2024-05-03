@@ -1,6 +1,7 @@
-import { reportProductStocks } from './reports/rpt-product-stock.mjs'
-import { reportProductResources } from './reports/rpt-product-resources.mjs'
-import { reportResourceOrders } from './reports/rpt-resource-orders.mjs'
+import { reportProductStocks } from '../reports/rpt-product-stocks.mjs'
+import { reportProductResources } from '../reports/rpt-product-resources.mjs'
+import { reportResourceOrders } from '../reports/rpt-resource-orders.mjs'
+import { reportProductProd } from '../reports/rpt-product-prod.mjs'
 
 export const MrpRouteReports = (app) => {
 
@@ -9,8 +10,13 @@ export const MrpRouteReports = (app) => {
     const ret = []
 
     const ctx = {}
+    // Отчет о производстве партии продукции
     ctx.app = app
     ret.push(await reportProductStocks(ctx))
+
+    // Ведомость произведенных партий продукции
+    ctx.app = app
+    ret.push(await reportProductProd(ctx))
 
     // вывести все калькуляции по всем продуктам:
     const products = await Product.findAll()
