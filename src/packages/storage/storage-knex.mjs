@@ -296,7 +296,7 @@ export default (app) => {
   aStorage.modelFromSchema = (Model) => {
     const modelMethods = []
 
-    modelMethods.push({ name: 'dataInit', handler: Model.storage.dataInit(Model) })
+    // modelMethods.push({ name: 'dataInit', handler: Model.storage.dataInit(Model) })
     modelMethods.push({ name: 'dataClear', handler: Model.storage.dataClear(Model) })
     modelMethods.push({ name: 'schemaInit', handler: Model.storage.schemaInit(Model) })
     modelMethods.push({ name: 'schemaClear', handler: Model.storage.schemaClear(Model) })
@@ -342,15 +342,15 @@ export default (app) => {
     return table.string(prop.name)
   }
 
-  aStorage.storageInit = () => {
+  aStorage.storageInit = async () => {
     return Promise.resolve()
   }
 
-  aStorage.storageClose = () => {
+  aStorage.storageClose = async () => {
     return Promise.resolve()
   }
 
-  aStorage.schemaInit = (Model) => () => {
+  aStorage.schemaInit = (Model) => async () => {
     if (checkIsFullVirtual(Model) === true) {
       return Promise.resolve(true)
     }
@@ -410,7 +410,7 @@ export default (app) => {
       .catch((e) => { throw e })
   }
 
-  aStorage.schemaClear = (Model) => () => {
+  aStorage.schemaClear = (Model) => async () => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.storageSchemaClear: some Model's properties are invalid:
         Model ${Model},
@@ -428,22 +428,22 @@ export default (app) => {
       })
   }
 
-  aStorage.dataInit = (Model) => (seedFileName) => {
-    if (!Model || !Model.storage || !Model.storage.db) {
-      return Promise.reject(new Error(`${Model.name}.dataInit: some Model's properties are invalid:
-        Model ${Model},
-        .storage ${Model.storage}
-        .db ${Model.storage.db}`))
-    }
-    const knex = Model.storage.db
-    const seedData = JSON.parse((fs.readFileSync(seedFileName)).toString())
+  // aStorage.dataInit = (Model) => async (seedFileName) => {
+  //   if (!Model || !Model.storage || !Model.storage.db) {
+  //     return Promise.reject(new Error(`${Model.name}.dataInit: some Model's properties are invalid:
+  //       Model ${Model},
+  //       .storage ${Model.storage}
+  //       .db ${Model.storage.db}`))
+  //   }
+  //   const knex = Model.storage.db
+  //   const seedData = JSON.parse((fs.readFileSync(seedFileName)).toString())
+  //
+  //   const tasks = seedData.map((item) => knex(Model.name).insert(item))
+  //   return Promise.all(tasks)
+  //     .catch((err) => { throw err })
+  // }
 
-    const tasks = seedData.map((item) => knex(Model.name).insert(item))
-    return Promise.all(tasks)
-      .catch((err) => { throw err })
-  }
-
-  aStorage.dataClear = (Model) => () => {
+  aStorage.dataClear = (Model) => async () => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.dataClear: some Model's properties are invalid:
         Model ${Model},
@@ -468,10 +468,10 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refsInit = () => () => {}
-  aStorage.refsClear = () => () => {}
+  aStorage.refsInit = () => async () => {}
+  aStorage.refsClear = () => async () => {}
 
-  aStorage.findById = (Model) => (id) => {
+  aStorage.findById = (Model) => async (id) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.findById: some Model's properties are invalid:
         Model ${Model},
@@ -487,7 +487,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.findOne = (Model) => (opt) => {
+  aStorage.findOne = (Model) => async (opt) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.findOne: some Model's properties are invalid:
         Model ${Model},
@@ -513,7 +513,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.findAll = (Model) => (opt) => {
+  aStorage.findAll = (Model) => async (opt) => {
     // console.log('storage.findAll:')
     // console.log(opt)
     if (!Model || !Model.storage || !Model.storage.db) {
@@ -550,7 +550,7 @@ export default (app) => {
       })
   }
 
-  aStorage.count = (Model) => () => {
+  aStorage.count = (Model) => async () => {
     // console.log('storage.count')
     if (!Model || !Model.storage || !Model.storage.db) {
       throw Error(`${Model.name}.count: some Model's properties are invalid:
@@ -578,7 +578,7 @@ export default (app) => {
       })
   }
 
-  aStorage.removeById = (Model) => (id) => {
+  aStorage.removeById = (Model) => async (id) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.removeById: some Model's properties are invalid:
         Model ${Model},
@@ -599,7 +599,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.removeAll = (Model) => (opt) => {
+  aStorage.removeAll = (Model) => async (opt) => {
     // console.log(`${Model.name}.removeAll: opt:`)
     // console.log(opt)
     return Model.findAll(opt)
@@ -620,7 +620,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.create = (Model) => (item) => {
+  aStorage.create = (Model) => async (item) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.create: some Model's properties are invalid:
         Model ${Model},
@@ -640,7 +640,7 @@ export default (app) => {
       })
   }
 
-  aStorage.update = (Model) => (aId, item) => {
+  aStorage.update = (Model) => async (aId, item) => {
     if (!aId) {
       return Promise.reject(new Error(`${Model.name}.update: aId param should have value`))
     }
@@ -688,7 +688,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refAdd = (Model, prop) => (id, items) => {
+  aStorage.refAdd = (Model, prop) => async (id, items) => {
     if (!Array.isArray(items)) {
       items = [items]
     }
@@ -706,7 +706,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refRemove = (Model, prop) => (id, items) => {
+  aStorage.refRemove = (Model, prop) => async (id, items) => {
     if (!Array.isArray(items)) {
       items = [items]
     }
@@ -724,7 +724,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refList = (Model, prop) => (id) => {
+  aStorage.refList = (Model, prop) =>async  (id) => {
     return Model.findById(id)
       .then((item) => {
         if (!item) {
@@ -744,7 +744,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refClear = (Model, prop) => (id) => {
+  aStorage.refClear = (Model, prop) => async (id) => {
     return Model.findById(id)
       .then((item) => {
         if (!item) {
@@ -756,7 +756,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.refCount = (Model, prop) => (id) => {
+  aStorage.refCount = (Model, prop) => async (id) => {
     return Model.findById(id)
       .then((item) => {
         if (!item) {

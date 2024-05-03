@@ -24,7 +24,7 @@ import { MrpRoutePlan } from './routes/route-plan.mjs'
 const packageName = 'ExtMrp'
 
 export const ExtMrp = (app, opt) => {
-  app.exModular.moduleSet.MRP = [
+  app.exModular.services.seed.modelSet.MRP = [
     'MrpPlan',
     'MrpVendor',
     'MrpVendorPayment',

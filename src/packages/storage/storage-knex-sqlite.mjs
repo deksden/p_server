@@ -57,7 +57,7 @@ export default (app) => {
       }
     },
 
-    storageInit: () => {
+    storageInit: async () => {
       // console.log('KNEX driver')
       let debug = false
       if (process.env.NODE_ENV === 'test' || process.env.DEBUG) debug = false
@@ -86,7 +86,7 @@ export default (app) => {
         .catch((err) => { throw err })
     },
 
-    storageClose: () => {
+    storageClose: async () => {
       // console.log('KNEX - close')
       return Promise.resolve()
         .then(() => aStorage.db.migrate.latest())

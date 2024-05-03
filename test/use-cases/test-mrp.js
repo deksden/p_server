@@ -113,7 +113,7 @@ describe('MRP: tests', function () {
       const qnt3 = data[2].qnt
 
       return createAdmin(context)
-        .then(() => app.exModular.services.seed('MrpPlan', aFile))
+        .then(() => app.exModular.services.seed.seedModelFromFile('MrpPlan', aFile))
         .then(() => app.exModular.models.MrpPlan.qntForDate(prodId, date3))
         .then((res) => {
           expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
@@ -164,7 +164,7 @@ describe('MRP: tests', function () {
       const duration3 = data[2].duration
 
       return createAdmin(context)
-        .then(() => app.exModular.services.seed('MrpStage', aFile))
+        .then(() => app.exModular.services.seed.seedModelFromFile('MrpStage', aFile))
         .then(() => app.exModular.models.MrpProduct.prodDuration(prodId))
         .then((res) => {
           expect(res).to.be.equal(duration1 + duration2 + duration3)

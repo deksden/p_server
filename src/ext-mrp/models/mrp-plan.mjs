@@ -109,7 +109,7 @@ export const MrpPlan = (app) => {
     // очистить данные
     if (clearData) {
       app.exModular.seedVariantFolder = version
-      await app.exModular.storages.Clear()
+      await app.exModular.storages.Clear('MRP')
     }
 
     // обработать все планы

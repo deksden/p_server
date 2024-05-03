@@ -13,8 +13,6 @@ export const exModular = (app) => {
   ex.access = {}
   ex.session = {}
   ex.init = []
-  ex.seedVariantFolder = ''
-  ex.moduleSet = {}
 
   ex.storages.byName = (name) => {
     if (name === 'default') {
@@ -52,14 +50,38 @@ export const exModular = (app) => {
       .catch(e => { throw e })
   }
 
-  ex.storages.Clear = () => {
+  /** очистить хранилище, все или указанный набор моделей, а также загрузить начальные данные
+   *
+   * @param modelSet {string} (пустое по умолчанию) название набора моделей
+   * @return {Promise<Awaited<string[]>>} возвращает массив строк с именами моделей, которые были очищены и инициализированы заново
+   */
+  ex.storages.Clear = async (modelSet = '') => {
     if (!ex.storages || !ex.models) {
       throw new Error('.storages should be initialized before initializing model')
     }
-    // return ex.services.serial(Object.keys(ex.models).map((modelName) => () => ex.models[modelName].dataClear()))
-    return Promise.all(Object.keys(ex.models).map((modelName) => ex.models[modelName].dataClear()))
-      .then(() => app.exModular.initAll())
-      .catch((e) => { throw e })
+
+    console.log(`ex.storages.Clear ${modelSet}`)
+    // получим список моделей для обработки
+    let modelNames = Object.keys(ex.models)
+    if (modelSet) {
+      if (!ex.services.seed.modelSet[modelSet]) {
+        throw Error(`storages.Clear: model set "${modelSet}" not found in app`)
+      }
+
+      // нужно загружать только те модели, которые указаны в наборе:
+      modelNames = ex.services.seed.modelSet[modelSet] // получили список
+    }
+
+    // clear all models:
+    for(const modelName of modelNames) {
+      const model = ex.models[modelName]
+      await model.dataClear()
+    }
+
+    // load data back:
+    await ex.initAll(modelSet)
+
+    return Promise.resolve(modelNames)
   }
 
   ex.checkDeps = () => {
@@ -150,45 +172,15 @@ export const exModular = (app) => {
     ex.init.push(item)
   }
 
-  ex.initAll = () => {
-    // add init from module.seeds:
-    ex.modules.map((module) => {
-      if (module.seeds && Array.isArray(module.seeds) && module.seeds.length > 0) {
-        module.seeds.map((seed) => {
-          if (seed.modelName && seed.seedFileName) {
-            const seedInit = (app) => () => {
-              console.log(`init seed: module "${seed.modelName}" - file "${seed.seedFileName}"`)
-              return ex.services.seed(seed.modelName, seed.seedFileName)
-                .catch((e) => { throw e })
-            }
-            ex.initAdd(seedInit(app))
-          }
-          return Promise.resolve()
-        })
-        return Promise.resolve()
-      }
-      return Promise.resolve()
-    })
+  /** выполнить все инициализации, зарегистрированные в системе, а также вызвать seed.loadAllSeeds()
+   *
+   * @return {Promise<app>}
+   */
+  ex.initAll = async (modelSet = '') => {
+    await ex.services.serial(ex.init) // инициализируем все инициализаторы, которые были добавлены в массив ex.init
+    await ex.services.seed.seedAll(modelSet) // а данные загрузим специальной функцией
 
-    // add init from models[i].seedFileName
-    Object.keys(ex.models).map((modelName) => {
-      const model = ex.models[modelName]
-      if (model.seedFileName) {
-        const seedInit = (app) => () => {
-          console.log(`init seed: module "${model.name}" - file "${model.seedFileName}"`)
-          return ex.services.seed(model.name, model.seedFileName)
-            .catch((e) => { throw e })
-        }
-        ex.initAdd(seedInit(app))
-        return Promise.resolve()
-      }
-      return Promise.resolve()
-    })
-
-    return ex.services.serial(ex.init)
-      .catch((e) => {
-        throw e
-      })
+    return Promise.resolve()
   }
 
   /**
