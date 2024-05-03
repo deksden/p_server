@@ -137,7 +137,7 @@ export const reportProductStock = async (ctx) => {
       /* 4 */ 'База нормы',
       /* 5 */ 'На ед',
       /* 6 */ 'Цена',
-      /* 7 */ 'Сумма'
+      /* 7 */ 'Себ'
     ]
     setHeader(ws, aRow, 0, data, theme)
     aRow += 1
@@ -164,7 +164,7 @@ export const reportProductStock = async (ctx) => {
         /* 4 */ `${itm.StageResource.baseQnt}`,
         /* 5 */ `${itm.StageResource.qnt / itm.StageResource.baseQnt}`,
         /* 6 */ `${itm.price}`,
-        /* 7 */ `${itm.price * itm.StageResource.qnt / itm.StageResource.baseQnt}`
+        /* 7 */ `${itm.price * -itm.qnt / ctx.productStock.qnt}`
       ]
       setTableRow(ws, aRow, 0, data, theme, styleSelector)
 
@@ -177,7 +177,7 @@ export const reportProductStock = async (ctx) => {
       setCellFormat(ws, aRow, 7, theme.TypeNumber, theme.FormatNumberDecimals)
 
       // меняем счётчики
-      tSumm += itm.price * itm.StageResource.qnt / itm.StageResource.baseQnt
+      tSumm += itm.price * -itm.qnt / ctx.productStock.qnt
       aRow += 1
 
       // настроить селектор стиля ячейки

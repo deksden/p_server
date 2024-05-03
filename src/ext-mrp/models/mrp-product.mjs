@@ -187,7 +187,7 @@ export const MrpProduct = (app) => {
                 }
 
                 // зафиксируем сумму потребленных ресурсов:
-                stageResSumm += aBatch.price * restQnt
+                stageResSumm += (aBatch.price * restQnt)
 
                 console.log(`ResStock.create (1 - batch big):
                   type: prod
@@ -221,7 +221,7 @@ export const MrpProduct = (app) => {
                 }
 
                 // зафиксируем стоимость потребленных ресурсов
-                stageResSumm += aBatch.price * aBatch.qnt
+                stageResSumm += (aBatch.price * aBatch.qnt)
 
                 console.log(`ResStock.create (2 - batch low):
                   type: prod
