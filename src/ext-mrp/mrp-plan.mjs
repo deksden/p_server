@@ -34,19 +34,30 @@ export const MrpPlan = (app) => {
 
   // Функция для обработки строки плана. Должна быть выполнена перед sendData (до отправки результатов клиенту),
   // возможно - до saveData:
-  const processPlan = async (req, res, next) => {
-    const fnName = 'MRP.processPlan'
-    const Product = app.exModular.models['MrpProduct']
-    const Plan = app.exModular.models['MrpPlan']
-    const ProductStock = app.exModular.models['MrpProductStock']
+  const afterSavePlan = async (req, res, next) => {
+    const fnName = 'MRP.afterSavePlan'
 
     console.log(`${fnName}:`)
     if (res.err) {
       return next(new Error(`Error detected on ${fnName}!`))
     }
+    const ret = await processPlan(res.data.id)
+  }
+
+  const processPlan = async (planId) => {
+    const fnName = 'MRP.processPlan'
+    const Product = app.exModular.models['MrpProduct']
+    const Plan = app.exModular.models['MrpPlan']
+    const ProductStock = app.exModular.models['MrpProductStock']
+
+    if (!planId) {
+      throw new Error(`${fnName}: invalid planId argument`)
+    }
+
+    console.log(`${fnName}:`)
 
     // получаем сведения о продукте
-    const plan = await Plan.findById(res.data.id)
+    const plan = await Plan.findById(planId)
     plan.date = makeMoment(plan.date, Plan.props.date.format)
     console.log(`plan = ${JSON.stringify(plan)}`)
 
@@ -61,6 +72,8 @@ export const MrpPlan = (app) => {
     const currentQnt = stockQnt - planQnt
     console.log(`\nproduct "${product.caption}", ${plan.date}: stock ${stockQnt}, plan ${planQnt} = ${currentQnt}`)
 
+    let plannedProd = 0
+    let prodDuration = 0
     // product.qntMin = 50000
     if (currentQnt <= product.qntMin) {
       // если текущее сальдо меньше минимального остатка на складе, нужно планировать партию продукции:
@@ -68,12 +81,14 @@ export const MrpPlan = (app) => {
 
       const ctx = { plan }
 
-      const plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt), ctx)
-      const prodDuration = await Product.prodDuration(product.id)
+      plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt), ctx)
+      prodDuration = await Product.prodDuration(product.id)
       console.log(`Plan prod: qnt: ${plannedProd.qntForProd}, duration=${prodDuration}${product.inWorkingDays ? 'wd' : 'd'}`)
     }
 
     console.log(`${fnName}: end`)
+
+    return Promise.resolve({ plannedProd, prodDuration })
   }
   const Wrap = app.exModular.services.wrap
 
@@ -81,9 +96,11 @@ export const MrpPlan = (app) => {
     name: 'MrpPlan',
     caption: 'План',
     description: 'План продаж',
-//    seedFileName: 'mrp-plan.json',
+    seedFileName: 'mrp-plan.json',
     icon: 'BarChart',
-    afterCreateBeg: [Wrap(processPlan)],
+    qntForDate,
+    processPlan,
+    afterCreateBeg: [Wrap(afterSavePlan)],
     props: [
       {
         name: 'id',
@@ -129,7 +146,6 @@ export const MrpPlan = (app) => {
         format: '',
         default: ''
       }
-    ],
-    qntForDate
+    ]
   }
 }

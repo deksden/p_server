@@ -19,6 +19,7 @@ import { MrpStageResource } from './mrp-stage-resource'
 import { MrpProductStage } from './mrp-product-stage.mjs'
 // import { InitExtTest } from './init-mrp.mjs'
 import { MrpRouteReports } from './route-reports'
+import { MrpRoutePlan } from './route-plan.mjs'
 
 const packageName = 'ExtMrp'
 
@@ -45,6 +46,7 @@ export const ExtMrp = (app, opt) => {
   })
 
   MrpRouteReports(app)
+  MrpRoutePlan(app)
 
   return app
 }
