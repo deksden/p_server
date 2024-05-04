@@ -313,6 +313,16 @@ export const setColumnWidth = (ws, C, width, unit='wch') => {
   }
 }
 
+export const setRowHeight = (ws, R, height, unit = 'hpx') => {
+  if(!ws["!rows"]) ws["!rows"] = []
+  if(!ws["!rows"][R]) {
+    ws["!rows"][R] = {}
+    ws["!rows"][R][unit] = height
+  } else {
+    ws["!rows"][R][unit] = height
+  }
+}
+
 /** Установить форматирование ячейки:
  *
  * @param ws {WorkSheet} лист XLS

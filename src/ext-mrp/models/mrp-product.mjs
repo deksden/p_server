@@ -149,7 +149,7 @@ export const MrpProduct = (app) => {
               resStock = await ResourceStock.qntForDate(stageResource.resource, stageStart)
             }
 
-            startDate = moment(endDate)
+            // startDate = moment(endDate)
 
             // списываем из имеющихся партий ресурсов
             // списать ресурсы на производство датой _начала_ этапа:
@@ -276,6 +276,7 @@ export const MrpProduct = (app) => {
       product: productId,
       plan: ctx.plan.id,
       date: date.format(aDateFormat),
+      dateStart: startDate.format(aDateFormat),
       qnt: qntForProd,
       price: prodResSumm / qntForProd
     })

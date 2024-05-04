@@ -7,17 +7,17 @@ import {
   setCell,
   setCellFormat,
   setColumnWidth,
-  setHeader, setStyle,
+  setHeader, setRowHeight, setStyle,
   setTableRow,
   theme
 } from '../../packages/utils/xlsx-utils.mjs'
 
-/** Отчёт о произведенных партиях продукции
+/** Отчёт о произведенных партиях продукции с этапами
  *
  * @param ctx {object} : нужен только объект app и plan
  * @return {Promise<Awaited<string>>}
  */
-export const reportProductProd = async (ctx) => {
+export const reportProductProdStage = async (ctx) => {
   // проверим контекст
   if (!ctx.app) {
     throw new Error(`Report: ctx in invalid. Check required properties!`)
@@ -29,6 +29,8 @@ export const reportProductProd = async (ctx) => {
   const ProductStock = app.exModular.models['MrpProductStock']
   const Product = app.exModular.models['MrpProduct']
   const Plan = app.exModular.models['MrpPlan']
+  const ProductStage = app.exModular.models['MrpProductStage']
+  const Stage = app.exModular.models['MrpStage']
 
   // const ResourceStock = app.exModular.models['MrpResourceStock']
   // const Resource = app.exModular.models['MrpResource']
@@ -42,7 +44,7 @@ export const reportProductProd = async (ctx) => {
   let c = null
 
   // STEP: ШАПКА ОТЧЁТА
-  c = setCell(ws, 0,0, 'Ведомость произведенных партий продукции', theme.H1)
+  c = setCell(ws, 0,0, 'График производства партий продукции с этапами', theme.H1)
 
   let aRow = 1 // текущий номер строки в отчёте
   if (ctx.plan && ctx.plan.id) {
@@ -71,18 +73,7 @@ export const reportProductProd = async (ctx) => {
 
   aRow += 1
 
-  // запишем заголовок
   let data = []
-  data = [
-    /* 0 */ `Дата нач`,
-    /* 1 */ `Дата ок`,
-    /* 2 */ `Продукт`,
-    /* 3 */ `План, шт`,
-    /* 4 */ `Произведено, шт`,
-    /* 5 */ `Себестоимость`,
-  ]
-  setHeader(ws, aRow, 0, data, theme)
-  aRow += 1
 
   // настроить селекторы стиля:
   let rts = 'FR'
@@ -97,6 +88,18 @@ export const reportProductProd = async (ctx) => {
     row.Product = await Product.findById(row.product)
     row.Plan = await Plan.findById(row.plan)
 
+    // запишем заголовок
+    data = [
+      /* 0 */ `Дата нач`,
+      /* 1 */ `Дата ок`,
+      /* 2 */ `Продукт`,
+      /* 3 */ `План, шт`,
+      /* 4 */ `Произведено, шт`,
+      /* 5 */ `Себестоимость`,
+    ]
+    setHeader(ws, aRow, 0, data, theme)
+    aRow += 1
+
     // сформируем строку для вывода
     data = [
       /* 0 */ `${printMoment(row.dateStart)}`,
@@ -106,7 +109,7 @@ export const reportProductProd = async (ctx) => {
       /* 4 */ `${row.qnt}`,
       /* 5 */ `${row.price}`,
     ]
-    setTableRow(ws, aRow,0, data, theme, rts)
+    setTableRow(ws, aRow,0, data, theme, 'LR')
 
     setCellFormat(ws, aRow, 3, theme.TypeNumber, theme.FormatNumberDecimals)
     setCellFormat(ws, aRow, 4, theme.TypeNumber, theme.FormatNumberDecimals)
@@ -118,6 +121,52 @@ export const reportProductProd = async (ctx) => {
     if (ndx === rows.length-2) rts = 'LR'
 
     // gtSumm += (row.price * row.qnt)
+
+    // Выведем отчет о стадии производства:
+    const dtRows = await ProductStage.findAll({
+      where: { plan: row.plan },
+      orderBy: ['dateStart'],
+    })
+
+    // заголовок:
+    setRowHeight(ws, aRow, 10)
+    aRow += 1
+    data = [
+      /* 0 */ `Этап`,
+      /* 1 */ `Дата нач`,
+      /* 2 */ `Дата ок`,
+      /* 3 */ `Себестоимость`,
+    ]
+    setHeader(ws, aRow, 1, data, theme)
+    aRow += 1
+
+    // настроить селекторы стиля:
+    let dtRts = 'FR'
+    if (dtRows.length === 1) dtRts = 'LR'
+
+    for (let [dtNdx, dtRow] of dtRows.entries()) {
+      // развернуть необходимые объекты в строку:
+      dtRow.Stage = await Stage.findById(dtRow.stage)
+
+      // сформируем строку для вывода
+      data = [
+        /* 0 */ `${dtRow.Stage.order}`,
+        /* 1 */ `${printMoment(dtRow.dateStart)}`,
+        /* 2 */ `${printMoment(dtRow.dateEnd)}`,
+        /* 3 */ `${dtRow.price}`,
+      ]
+      setTableRow(ws, aRow,1, data, theme, dtRts)
+      setCellFormat(ws, aRow, 1 + 3, theme.TypeNumber, theme.FormatNumberDecimals)
+      aRow += 1
+
+      // настроить селектор стиля ячейки
+      dtRts = 'R'
+      if (dtNdx === dtRows.length-2) dtRts = 'LR'
+    }
+    setRowHeight(ws, aRow, 10)
+    aRow += 1
+    setRowHeight(ws, aRow, 10)
+    aRow += 1
   }
 
   // c = setCell(ws, aRow, 5, 'ИТОГО:', theme.Normal)
@@ -139,7 +188,7 @@ export const reportProductProd = async (ctx) => {
 
   // STEP 4: Write Excel file
   XLSX.utils.book_append_sheet(wb, ws, "Sheet")
-  const fileName = path.join(process.env.REPORT_DIR, `product-prod.xlsx`)
+  const fileName = path.join(process.env.REPORT_DIR, `product-prod-stage.xlsx`)
   XLSX.writeFile(wb, fileName)
 
   return Promise.resolve(fileName)

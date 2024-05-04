@@ -2,6 +2,7 @@ import { reportProductStocks } from '../reports/rpt-product-stocks.mjs'
 import { reportProductResources } from '../reports/rpt-product-resources.mjs'
 import { reportResourceOrders } from '../reports/rpt-resource-orders.mjs'
 import { reportProductProd } from '../reports/rpt-product-prod.mjs'
+import { reportProductProdStage } from '../reports/rpt-product-prod-stage.mjs'
 
 export const MrpRouteReports = (app) => {
 
@@ -17,6 +18,10 @@ export const MrpRouteReports = (app) => {
     // Ведомость произведенных партий продукции
     ctx.app = app
     ret.push(await reportProductProd(ctx))
+
+    // График производства партий продукции с этапами
+    ctx.app = app
+    ret.push(await reportProductProdStage(ctx))
 
     // вывести все калькуляции по всем продуктам:
     const products = await Product.findAll()

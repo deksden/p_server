@@ -67,6 +67,14 @@ export const MrpProductStock = (app) => {
         default: null
       },
       {
+        name: 'dateStart',
+        type: 'datetime',
+        caption: 'Дата нач',
+        description: 'Дата старта производства, для записей о производстве',
+        format: 'DD-MM-YYYY',
+        default: null
+      },
+      {
         name: 'qnt',
         type: 'decimal',
         caption: 'Количество',
