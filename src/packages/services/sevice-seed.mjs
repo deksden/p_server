@@ -27,6 +27,8 @@ export const Seed = (app) => {
       throw Error(`Seed: model ${modelName} not found in app`)
     }
 
+    console.log(`fileName=${fileName}`)
+
     // if no data file, then exit
     if (!fs.existsSync(fileName)) {
       console.log('no file for seeding, exiting')
@@ -119,6 +121,30 @@ export const Seed = (app) => {
 
     return Promise.resolve()
   }
+
+  const getVariantFolders = () => {
+    // Читаем содержимое директории
+    const items = fs.readdirSync(process.env.SEEDS_DIR, { withFileTypes: true })
+
+    // Фильтруем список, оставляя только директории
+    return items.filter(item => item.isDirectory()).map(item => item.name);
+}
+
+  const handlerGetVariantFolders = (req, res) => {
+    let folders = getVariantFolders()
+
+    // prevent 304
+    res.setHeader('Last-Modified', (new Date()).toUTCString())
+    res.json(folders)
+  }
+
+  app.exModular.routes.Add({
+    method: 'GET',
+    name: 'seed',
+    description: 'List all variant folders',
+    path: '/seed/variant-folders',
+    handler: handlerGetVariantFolders
+  })
 
   return {
     modelSet: {},
