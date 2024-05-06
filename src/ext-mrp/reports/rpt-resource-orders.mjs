@@ -28,7 +28,7 @@ export const reportResourceOrders = async (ctx) => {
   // получаем API всех нужных объектов в системе
   const ResourceStock = app.exModular.models['MrpResourceStock']
   const Resource = app.exModular.models['MrpResource']
-  const Vendor = app.exModular.models['MrpVendor']
+  const VendorTerm = app.exModular.models['MrpVendorTerm']
 
   // STEP: Create a new workbook
   const wb = XLSX.utils.book_new();
@@ -95,7 +95,7 @@ export const reportResourceOrders = async (ctx) => {
   for (const [ndx, row] of rows.entries()) {
     // развернуть необходимые объекты в строку:
     row.Resource = await Resource.findById(row.resource)
-    row.Vendor = await Vendor.findById(row.vendor)
+    row.VendorTerm = await VendorTerm.findById(row.vendorTerm)
 
     // сформируем строку для вывода
     data = [
@@ -106,7 +106,7 @@ export const reportResourceOrders = async (ctx) => {
       /* 4 */ `${row.qntReq}`,
       /* 5 */ `${row.price}`,
       /* 6 */ `${row.price * row.qnt}`,
-      /* 7 */ `${row.Vendor.caption}`,
+      /* 7 */ `${row.VendorTerm.caption}`,
       /* 8 */ `${printMoment(row.date)}`,
       /* 9 */ `${printMoment(row.dateProd)}`,
       /* 10*/ `${printMoment(row.dateExp)}`,

@@ -17,11 +17,11 @@ export const MrpVendorPayment = (app) => {
         default: () => uuid()
       },
       {
-        name: 'vendor',
+        name: 'vendorTerm',
         type: 'ref',
-        model: 'MrpVendor',
-        caption: 'Поставщик',
-        description: 'Ссылка на поставщика',
+        model: 'MrpVendorTerm',
+        caption: 'Условия поставки',
+        description: 'Ссылка на условия поставщика',
         default: null
       },
       {

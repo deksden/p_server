@@ -156,7 +156,7 @@ export const MrpProduct = (app) => {
           console.log(`* processing batch[${ndx}]:
               qnt: ${aBatch.qnt}
               batchId: ${aBatch.batchId}
-              vendor: ${aBatch.vendor}`)
+              vendorTerm: ${aBatch.vendorTerm}`)
           if (aBatch.qnt >= restQnt) {
             // если текущей партии сырья хватает, чтобы покрыть остаток списываемых ресурсов, то:
             aBatch.qnt = aBatch.qnt - restQnt // скорректируем размер партии ресурсов
@@ -171,7 +171,7 @@ export const MrpProduct = (app) => {
               dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
               dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
               price: aBatch.price,
-              vendor: aBatch.vendor,
+              vendorTerm: aBatch.vendorTerm,
               productStage: productStage.id,
               stageResource: stageResource.id
             }
@@ -194,7 +194,7 @@ export const MrpProduct = (app) => {
               dateProd: aBatch.dateProd ? moment(aBatch.dateProd).format(aDateFormat) : null,
               dateExp: aBatch.dateExp ? moment(aBatch.dateExp).format(aDateFormat) : null,
               price: aBatch.price,
-              vendor: aBatch.vendor,
+              vendorTerm: aBatch.vendorTerm,
               productStage: productStage.id,
               stageResource: stageResource.id
             }

@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import _ from 'lodash'
 import moment from 'moment-business-days'
 
-export const MrpVendor = (app) => {
+export const MrpVendorTerm = (app) => {
   /**
    * Рассчитать дату начала заказа с учетом времени доставки и времени выполнения заказа поставщиком
    * @param vendor    поставщик
@@ -28,10 +28,10 @@ export const MrpVendor = (app) => {
    * Выбрать поставщика, который может поставить ресурс на указанную дату
    * @param resourceId  Ресурс
    * @param date        Дата поставки
-   * @return (MrpVendor) выбранный поставщик
+   * @return (MrpVendorTerm) выбранный поставщик
    */
   const selectVendor = async (resourceId, date) => {
-    const Vendor = app.exModular.models['MrpVendor']
+    const Vendor = app.exModular.models['MrpVendorTerm']
     const aDate = moment(date)
 
     // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
@@ -67,12 +67,12 @@ export const MrpVendor = (app) => {
   }
 
   return {
-    name: 'MrpVendor',
+    name: 'MrpVendorTerm',
     caption: 'Поставщик',
     description: 'Компания - поставщик ресурса, а также сведения о базовых условиях поставки',
-    seedFileName: 'mrp-vendor.json',
+    seedFileName: 'mrp-vendor-term.json',
     icon: 'BarChart',
-    selectVendor,
+    selectVendorTerm: selectVendor,
     calculateOrderStartDate,
     props: [
       {

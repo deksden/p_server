@@ -1,7 +1,7 @@
 [
       {
         "id": 1,
-        "vendor": 1,
+        "vendorTerm": 1,
         "type": "invoice",
         "term": "percent",
         "value": 10,
@@ -12,7 +12,7 @@
       },
       {
         "id": 2,
-        "vendor": 1,
+        "vendorTerm": 1,
         "type": "invoice",
         "term": "percent",
         "value": 90,
@@ -23,7 +23,7 @@
       },
       {
         "id": 3,
-        "vendor": 1,
+        "vendorTerm": 1,
         "type": "delivery",
         "term": "fixed",
         "value": 150,
@@ -33,7 +33,7 @@
       },
       {
         "id": 4,
-        "vendor": 1,
+        "vendorTerm": 1,
         "type": "delivery",
         "term": "percent",
         "value": 20,
@@ -44,7 +44,7 @@
       },
       {
         "id": 5,
-        "vendor": 1,
+        "vendorTerm": 1,
         "type": "delivery",
         "term": "percent",
         "value": 15,
@@ -55,7 +55,7 @@
       },
       {
         "id": 6,
-        "vendor": 2,
+        "vendorTerm": 2,
         "type": "invoice",
         "term": "percent",
         "value": 100,
@@ -66,7 +66,7 @@
       },
       {
         "id": 7,
-        "vendor": 2,
+        "vendorTerm": 2,
         "type": "delivery",
         "term": "percent",
         "value": 100,
@@ -77,7 +77,7 @@
       },
       {
         "id": 8,
-        "vendor": 3,
+        "vendorTerm": 3,
         "type": "invoice",
         "term": "percent",
         "value": 100,
@@ -88,7 +88,7 @@
       },
       {
         "id": 9,
-        "vendor": 3,
+        "vendorTerm": 3,
         "type": "delivery",
         "term": "percent",
         "value": 100,
@@ -99,7 +99,7 @@
       },
       {
         "id": 10,
-        "vendor": 4,
+        "vendorTerm": 4,
         "type": "invoice",
         "term": "percent",
         "value": 100,
@@ -110,7 +110,7 @@
       },
       {
         "id": 11,
-        "vendor": 4,
+        "vendorTerm": 4,
         "type": "delivery",
         "term": "percent",
         "value": 100,

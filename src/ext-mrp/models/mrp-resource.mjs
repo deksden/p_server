@@ -6,8 +6,8 @@ import _ from 'lodash'
 export const MrpResource = (app) => {
 
   /** Рассчитать объем заказа
-   * @param orderMin {number} минимальный заказ, обычно из vendor.orderMin
-   * @param orderStep {number} шаг изменения партии, обычно из vendor.orderStep
+   * @param orderMin {number} минимальный заказ, обычно из vendorTerm.orderMin
+   * @param orderStep {number} шаг изменения партии, обычно из vendorTerm.orderStep
    * @param qnt {number} требуемое количество
    * @return {number} количество для заказа
    */
@@ -30,7 +30,7 @@ export const MrpResource = (app) => {
   */
   const planOrderRes = async (resourceId, date, qnt) => {
     // подключим нужные API:
-    const Vendor = app.exModular.models['MrpVendor']
+    const VendorTerm = app.exModular.models['MrpVendorTerm']
     const Resource = app.exModular.models['MrpResource']
     const ResourceStock = app.exModular.models['MrpResourceStock']
 
@@ -41,9 +41,9 @@ export const MrpResource = (app) => {
     console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
-    const vendor = await Vendor.selectVendor(resourceId, date)
+    const vendorTerm = await VendorTerm.selectVendorTerm(resourceId, date)
 
-    if (!vendor) {
+    if (!vendorTerm) {
       throw new Error('Vendor not found')
     }
 
@@ -58,7 +58,7 @@ export const MrpResource = (app) => {
       ${JSON.stringify(orders)}
       `)
 
-    const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
+    const startDate = VendorTerm.calculateOrderStartDate(vendorTerm, aDate)
 
     // смотрим последний заказ, вычисляем дату поступления на склад, сверяем с нашей потребностью;
     // если дата поступления отличается менее чем на 25% по сроку, то увеличим заказ:
@@ -75,7 +75,7 @@ export const MrpResource = (app) => {
       ) {
         // будем увеличивать прошлый заказ:
         console.log('  Не заказывать новую партию, а увеличить последнюю заказанную партию')
-        order.qnt = getOrderQnt(vendor.orderMin, vendor.orderStep, qnt + order.qntReq)
+        order.qnt = getOrderQnt(vendorTerm.orderMin, vendorTerm.orderStep, qnt + order.qntReq)
         order.qntReq += qnt
         console.log(`  новое количество в заказе - ${order.qnt}`)
         return await ResourceStock.update(order.id, order)
@@ -84,22 +84,22 @@ export const MrpResource = (app) => {
     }
 
     // заказываем новую партию:
-    const orderQnt = getOrderQnt(vendor.orderMin, vendor.orderStep, qnt)
+    const orderQnt = getOrderQnt(vendorTerm.orderMin, vendorTerm.orderStep, qnt)
 
     console.log(` ResourceStock.create:
       ${startDate.format(aDateFormat)}
       qnt=${orderQnt}
-      price=${vendor.invoicePrice}`)
+      price=${vendorTerm.invoicePrice}`)
 
     // указать срок годности, для этого к дате начала заказа прибавить срок производства, и срок годности:
     let expDate = null
-    if (vendor.expDuration && vendor.expDuration > 0) {
+    if (vendorTerm.expDuration && vendorTerm.expDuration > 0) {
       // если для вендора указана длительность годности каждой партии сырья, то проставим срок годности:
-      expDate= dateAddDays(startDate, vendor.expDuration, vendor.inWorkingDays)
+      expDate= dateAddDays(startDate, vendorTerm.expDuration, vendorTerm.inWorkingDays)
     }
 
     // указать расчетную дату производства, для этого добавить к дате начала заказа срок производства:
-    let prodDate = dateAddDays(startDate, vendor.orderDuration, vendor.inWorkingDays)
+    let prodDate = dateAddDays(startDate, vendorTerm.orderDuration, vendorTerm.inWorkingDays)
 
     // записать поступающий заказ в список партий: поступление заказа записываем целевой датой
     let aResStock = await ResourceStock.create({
@@ -109,8 +109,8 @@ export const MrpResource = (app) => {
       dateOrder: startDate.format(aDateFormat),
       qnt: orderQnt,
       qntReq: qnt,
-      price: vendor.invoicePrice,
-      vendor: vendor.id,
+      price: vendorTerm.invoicePrice,
+      vendorTerm: vendorTerm.id,
       dateExp: expDate,
       dateProd: prodDate
     })

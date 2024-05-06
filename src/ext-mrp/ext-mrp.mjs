@@ -8,7 +8,7 @@
 
 */
 import { MrpPlan } from './models/mrp-plan.mjs'
-import { MrpVendor } from './models/mrp-vendor.mjs'
+import { MrpVendorTerm } from './models/mrp-vendor-term.mjs'
 import { MrpVendorPayment } from './models/mrp-vendor-payment.mjs'
 import { MrpStage } from './models/mrp-stage.mjs'
 import { MrpProductStock } from './models/mrp-product-stock.mjs'
@@ -26,7 +26,7 @@ const packageName = 'ExtMrp'
 export const ExtMrp = (app, opt) => {
   app.exModular.services.seed.modelSet.MRP = [
     'MrpPlan',
-    'MrpVendor',
+    'MrpVendorTerm',
     'MrpVendorPayment',
     'MrpStage',
     'MrpStageResource',
@@ -46,7 +46,7 @@ export const ExtMrp = (app, opt) => {
     ],
     models: [
       MrpPlan,
-      MrpVendor,
+      MrpVendorTerm,
       MrpVendorPayment,
       MrpStage,
       MrpStageResource,
