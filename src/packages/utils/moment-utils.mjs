@@ -8,7 +8,7 @@ import moment from 'moment-business-days'
  * @param isWorkingDays {boolean}: признак, что указываем в рабочих днях; если null - то в календарных
  * @return {moment} возвращает moment объект с новой датой
  */
-export const dateAddDays = function (date, daysCount, isWorkingDays) {
+export const momentAddDays = function (date, daysCount, isWorkingDays) {
   let aDate = moment(date)
   if (!daysCount) {
     return aDate
@@ -28,7 +28,7 @@ export const dateAddDays = function (date, daysCount, isWorkingDays) {
  * @param isWorkingDays {boolean}: признак, что указываем в рабочих днях; если null - то в календарных
  * @return {moment} возвращает moment объект с новой датой
  */
-export const dateSubtractDays = function (date, daysCount, isWorkingDays) {
+export const momentSubtractDays = function (date, daysCount, isWorkingDays) {
   let aDate = moment(date)
   if (!daysCount) {
     return aDate

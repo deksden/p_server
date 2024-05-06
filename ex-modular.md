@@ -151,7 +151,7 @@ Json драйвер работает так: создается модель в�
 
 ### findAll(opt)
 
-opt:
+Параметр `opt`:
 * where: `object`: k-v pairs of field / value
 * whereOp: `array`: [{ column, op, value }]
 * whereIn: `array`: [{ column, ids }]

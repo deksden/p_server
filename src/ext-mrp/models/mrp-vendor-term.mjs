@@ -1,26 +1,28 @@
 import { v4 as uuid } from 'uuid'
 import _ from 'lodash'
 import moment from 'moment-business-days'
+import { momentSubtractDays, printMoment } from '../../packages/utils/moment-utils.mjs'
 
 export const MrpVendorTerm = (app) => {
   /**
    * Рассчитать дату начала заказа с учетом времени доставки и времени выполнения заказа поставщиком
-   * @param vendor    поставщик
+   * @param vendorTerm    поставщик
    * @param date        дата завершения заказа
    * @return {moment}   дата начала заказа
    */
-  const calculateOrderStartDate = (vendor, date) => {
-    const supplyStart = moment(date)
-    console.log(`Vendor.calculateOrderStartDate: vendor ${vendor.caption} date="${supplyStart.format('DD-MM-YYYY')}"`)
+  const calculateOrderStartDate = (vendorTerm, date) => {
     // вычтем из конечной даты длительность заказа
-    vendor.inWorkingDays
-      ? supplyStart.businessSubtract(vendor.orderDuration)
-      : supplyStart.subtract(vendor.orderDuration, 'days')
+    let supplyStart = momentSubtractDays(date, vendorTerm.orderDuration, vendorTerm.inWorkingDays)
+
     // вычтем длительность доставки:
-    vendor.deliveryInWorkingDays
-      ? supplyStart.businessSubtract(vendor.deliveryDuration)
-      : supplyStart.subtract(vendor.deliveryDuration, 'days')
-    console.log(`Vendor.calculateOrderStartDate: end, supplyStart="${supplyStart.format('DD-MM-YYYY')}"`)
+    supplyStart = momentSubtractDays(supplyStart, vendorTerm.deliveryDuration, vendorTerm.deliveryInWorkingDays)
+
+    console.log(`fn VendorTerm.calculateOrderStartDate:
+      vendorTerm: ${vendorTerm.caption}
+      date="${printMoment(date)}
+      supplyStart: "${printMoment(supplyStart)}"
+    `)
+
     return supplyStart
   }
 
@@ -30,38 +32,42 @@ export const MrpVendorTerm = (app) => {
    * @param date        Дата поставки
    * @return (MrpVendorTerm) выбранный поставщик
    */
-  const selectVendor = async (resourceId, date) => {
-    const Vendor = app.exModular.models['MrpVendorTerm']
+  const selectVendorTerm = async (resourceId, date) => {
+    const VendorTerm = app.exModular.models['MrpVendorTerm']
     const aDate = moment(date)
 
     // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
-    console.log(`MrpVendor.selectVendor(resource=${resourceId}, date=${aDate.format('DD-MM-YYYY')})`)
+    console.log(`fn VendorTerm.selectVendor:
+      resource=${resourceId}
+      date=${printMoment(aDate)}
+    `)
 
-    const resVendors = await Vendor.findAll({
+    const aVendorTerms = await VendorTerm.findAll({
       where: { resource: resourceId },
       orderBy: [{ column: 'date', order: 'desc' }, { column: 'id', order: 'asc' }]
     })
 
-    let selectedVendor = null
+    let selectedVendorTerm = null
 
-    if (resVendors.some((vendor) => {
-      vendor.date = moment(vendor.date)
+    if (aVendorTerms.some((aVendorTerm) => {
+      aVendorTerm.date = moment(aVendorTerm.date)
 
-      console.log(`  Testing vendor: ${vendor.id} - "${vendor.caption}" (from ${vendor.date.format('DD-MM-YYYY')})`)
+      console.log(`  Testing vendor: ${aVendorTerm.id} - "${aVendorTerm.caption}" (from ${printMoment(aVendorTerm.date)})`)
+
       // проверим этого вендора на пригодность по дате поставки:
-      const supplyStart = calculateOrderStartDate(vendor, date)
-      console.log(`  calculated supplyStart is ${supplyStart.format('DD-MM-YYYY')}`)
+      const supplyStart = calculateOrderStartDate(aVendorTerm, date)
+
       // теперь в supplyStart находится самая ранняя дата доставки для этого вендора
-      if (supplyStart.isSameOrAfter(vendor.date)) {
-        console.log(`  This vendor "${vendor.caption}" was selected.`)
-        selectedVendor = vendor
+      if (supplyStart.isSameOrAfter(aVendorTerm.date)) {
+        console.log(`  This vendor "${aVendorTerm.caption}" was selected.`)
+        selectedVendorTerm = aVendorTerm
         return true
       }
 
-      console.log('Vendor not selected.')
+      console.log('VendorTerm not selected.')
       return false
     })) {
-      return selectedVendor
+      return selectedVendorTerm
     }
     return null
   }
@@ -72,7 +78,7 @@ export const MrpVendorTerm = (app) => {
     description: 'Сведения об условиях поставки от поставщика',
     seedFileName: 'mrp-vendor-term.json',
     icon: 'BarChart',
-    selectVendorTerm: selectVendor,
+    selectVendorTerm: selectVendorTerm,
     calculateOrderStartDate,
     props: [
       {

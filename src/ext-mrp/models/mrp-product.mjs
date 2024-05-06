@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays, dateSubtractDays, makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
+import { momentAddDays, momentSubtractDays, makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 import { reportProductStock } from '../reports/rpt-product-stocks.mjs'
 import { reportProductResources } from '../reports/rpt-product-resources.mjs'
 import { reportResourceOrders } from '../reports/rpt-resource-orders.mjs'
@@ -70,7 +70,7 @@ export const MrpProduct = (app) => {
     // рассчитаем дату начала производства:
     const duration = await Product.prodDuration(productId)
     const endDate = date
-    let startDate  = dateSubtractDays(endDate, duration, product.inWorkingDays)
+    let startDate  = momentSubtractDays(endDate, duration, product.inWorkingDays)
     console.log(`duration=${duration}, startDate="${startDate.format(aDateFormat)}"`)
 
     // получим список этапов производства
@@ -87,7 +87,7 @@ export const MrpProduct = (app) => {
     // перебираем все этапы производства:
     for (const stage of stages) {
       // рассчитать дату завершения этапа
-      stageEnd = dateAddDays(stageStart, stage.duration, product.inWorkingDays)
+      stageEnd = momentAddDays(stageStart, stage.duration, product.inWorkingDays)
 
       // сделаем запись о запланированном этапе производства
       let productStage = {
@@ -223,7 +223,7 @@ export const MrpProduct = (app) => {
 
       // вызовем функцию в цикле обработки этапов:
       // await fnStage(stage, stages)
-      stageStart = dateAddDays(stageStart, stage.duration, product.inWorkingDays)
+      stageStart = momentAddDays(stageStart, stage.duration, product.inWorkingDays)
     }
 
     // добавить запись об этой производственной партии в остатки продукции:
@@ -238,9 +238,8 @@ export const MrpProduct = (app) => {
     }
     aProductStock =await ProductStock.create(aProductStock)
     ProductStock.print(aProductStock, '(created)')
-    console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
 
-    console.log(`== Gen XLSX reports:`)
+    console.log(`MrpProduct.planProduction: end, ret = ${JSON.stringify(ret)}`)
 
     return Promise.resolve(ret)
   }

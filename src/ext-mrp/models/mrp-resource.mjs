@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays, printMoment } from '../../packages/utils/moment-utils.mjs'
+import { momentAddDays, printMoment } from '../../packages/utils/moment-utils.mjs'
 import _ from 'lodash'
 
 export const MrpResource = (app) => {
@@ -44,13 +44,14 @@ export const MrpResource = (app) => {
     const vendorTerm = await VendorTerm.selectVendorTerm(resourceId, date)
 
     if (!vendorTerm) {
-      throw new Error('Vendor not found')
+      throw new Error('VendorTerm not found')
     }
 
     // получим все партии продукта, которые заказывались у этого вендора, от последних до первых;
     // нам нужна только последняя партия на самом деле:
     const orders = await ResourceStock.findAll({
       where: { resource: resourceId, type: 'order'},
+      whereOp: [ { column: 'date', op: '<=', value: printMoment(date) } ],
       orderBy: [{ column: 'date', order: 'desc' }]
     })
 
@@ -95,24 +96,24 @@ export const MrpResource = (app) => {
     let expDate = null
     if (vendorTerm.expDuration && vendorTerm.expDuration > 0) {
       // если для вендора указана длительность годности каждой партии сырья, то проставим срок годности:
-      expDate= dateAddDays(startDate, vendorTerm.expDuration, vendorTerm.inWorkingDays)
+      expDate= momentAddDays(startDate, vendorTerm.expDuration, vendorTerm.inWorkingDays)
     }
 
     // указать расчетную дату производства, для этого добавить к дате начала заказа срок производства:
-    let prodDate = dateAddDays(startDate, vendorTerm.orderDuration, vendorTerm.inWorkingDays)
+    let prodDate = momentAddDays(startDate, vendorTerm.orderDuration, vendorTerm.inWorkingDays)
 
     // записать поступающий заказ в список партий: поступление заказа записываем целевой датой
     let aResStock = await ResourceStock.create({
       type: 'order',
       resource: resourceId,
-      date: aDate.format(aDateFormat),
-      dateOrder: startDate.format(aDateFormat),
+      date: printMoment(aDate),
+      dateOrder: printMoment(startDate),
       qnt: orderQnt,
       qntReq: qnt,
       price: vendorTerm.invoicePrice,
       vendorTerm: vendorTerm.id,
-      dateExp: expDate,
-      dateProd: prodDate
+      dateExp: printMoment(expDate),
+      dateProd: printMoment(prodDate)
     })
     aResStock = await ResourceStock.update(aResStock.id, { batchId: aResStock.id })
     return aResStock
