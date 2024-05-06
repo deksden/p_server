@@ -68,8 +68,8 @@ export const MrpVendorTerm = (app) => {
 
   return {
     name: 'MrpVendorTerm',
-    caption: 'Поставщик',
-    description: 'Компания - поставщик ресурса, а также сведения о базовых условиях поставки',
+    caption: 'Условия поставки',
+    description: 'Сведения об условиях поставки от поставщика',
     seedFileName: 'mrp-vendor-term.json',
     icon: 'BarChart',
     selectVendorTerm: selectVendor,
@@ -88,7 +88,7 @@ export const MrpVendorTerm = (app) => {
         type: 'ref',
         model: 'MrpResource',
         caption: 'Ресурс',
-        description: 'Ссылка на ресурс, который поставляет данный поставщик',
+        description: 'Ссылка на поставляемый ресурс',
         defOptions: {
           wide: "wide"
         },
@@ -99,7 +99,7 @@ export const MrpVendorTerm = (app) => {
         type: 'text',
         format: '',
         caption: 'Название',
-        description: 'Наименование поставщика',
+        description: 'Наименование условий поставки',
         defOptions: {
           wide: "fullWide"
         },
@@ -120,8 +120,16 @@ export const MrpVendorTerm = (app) => {
         name: 'date',
         type: 'datetime',
         format: 'DD-MM-YYYY',
-        caption: 'Дата',
-        description: 'Дата начала работы с поставщиком',
+        caption: 'Дата нач',
+        description: 'Дата, с которой эти условия начинают работать, включительно',
+        default: null
+      },
+      {
+        name: 'dateEnd',
+        type: 'datetime',
+        format: 'DD-MM-YYYY',
+        caption: 'Дата ок',
+        description: 'Дата окончания работы условий - дата до которой условия действовали, включительно',
         default: null
       },
       {
@@ -146,7 +154,7 @@ export const MrpVendorTerm = (app) => {
         name: 'orderDuration',
         type: 'decimal',
         caption: 'Длительность заказа',
-        description: 'Длительность выполнения заказа от даты размещения заказа до даты отгрузки',
+        description: 'Длительность выполнения заказа от даты размещения заказа до даты отгрузки (передачи в транспортную компанию)',
         precision: 12,
         scale: 0,
         format: '',
@@ -193,7 +201,7 @@ export const MrpVendorTerm = (app) => {
         type: 'text',
         format: '',
         caption: 'Доставка',
-        description: 'Способ доставки партий заказываемого ресурса, например, транспортная компания',
+        description: 'Способ доставки партий заказываемого ресурса, например, транспортная компания (или ее название)',
         defOptions: {
           wide: "wide"
         },
@@ -221,7 +229,7 @@ export const MrpVendorTerm = (app) => {
         name: 'expDuration',
         type: 'decimal',
         caption: 'Длительность годности',
-        description: 'Длительность годности ресурса от даты производства, в днях .inWorkingDays',
+        description: 'Длительность годности ресурса от даты производства, в днях, с учетом .inWorkingDays',
         precision: 12,
         scale: 0,
         format: '',
