@@ -1,5 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment/moment.js'
+import _ from 'lodash'
+import { printMoment } from '../../packages/utils/moment-utils.mjs'
 
 export const MrpProductStock = (app) => {
   const qntForDate = async (productId, date) => {
@@ -18,6 +20,32 @@ export const MrpProductStock = (app) => {
 
   }
 
+  const print = async (aItem, comments = '') => {
+    if(process.env.NODE_ENV !== 'development') return
+
+    // clone item:
+    const item = _.clone(aItem)
+
+    // expand item:
+    const Product = app.exModular.models['MrpProduct']
+    item.Product = await Product.findById(item.product)
+    const Plan = app.exModular.models['MrpPlan']
+    item.Plan = await Plan.findById(item.plan)
+
+    console.log(`ProductStock: ${comments}
+      id: ${item.id}
+      product: ${item.product}
+      Product.caption: ${item.Product.caption}
+      plan:${item.plan}
+      plan.date:${printMoment(item.Plan.date)}
+      type: ${item.type}
+      date: ${printMoment(item.date)}
+      dateStart: ${printMoment(item.dateStart)}
+      qnt: ${item.qnt}
+      price: ${item.price}
+      `)
+  }
+
   return {
     name: 'MrpProductStock',
     caption: 'Остатки продукции',
@@ -25,6 +53,7 @@ export const MrpProductStock = (app) => {
     seedFileName: 'mrp-product-stock.json',
     icon: 'BarChart',
     qntForDate,
+    print,
     props: [
       {
         name: 'id',
