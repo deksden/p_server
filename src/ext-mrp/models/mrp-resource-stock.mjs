@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
 import _ from 'lodash'
+import { printMoment } from '../../packages/utils/moment-utils.mjs'
 
 export const MrpResourceStock = (app) => {
   /** Получить остатки ресурса на указанную дату - общее количество и перечень партий,
@@ -45,12 +46,55 @@ export const MrpResourceStock = (app) => {
     }
   }
 
+  const print = async (aItem, comments = '') => {
+    if(process.env.NODE_ENV !== 'development') return
+
+    // clone item:
+    const item = _.clone(aItem)
+
+    // expand item:
+    const Vendor = app.exModular.models['MrpVendor']
+    item.Vendor = await Vendor.findById(item.vendor)
+    const Resource = app.exModular.models['MrpResource']
+    item.Resource = await Resource.findById(item.resource)
+    const ProductStage = app.exModular.models['MrpProductStage']
+    item.ProductStage = await ProductStage.findById(item.productStage)
+    const StageResource = app.exModular.models['MrpStageResource']
+    item.StageResource = await StageResource.findById(item.stageResource)
+
+    console.log(`ResourceStock: ${comments}
+      id: ${item.id}
+      batchId: ${item.batchId}
+      type: ${item.type}
+      resource: ${item.resource}
+      resource.Caption: ${item.Resource.caption}
+      date: ${printMoment(item.date)}
+      qnt: ${item.qnt}
+      qntReq: ${item.qntReq}
+      price: ${item.price}
+      vendor: ${item.vendor}
+      Vendor.caption: ${item.Vendor.caption}
+      productStage: ${item.productStage}
+      ProductStage.dateStart: ${printMoment(item.ProductStage.dateStart)}
+      ProductStage.dateEnd: ${printMoment(item.ProductStage.dateStart)}
+      ProductStage.price: ${item.ProductStage.price}
+      stageResource: ${item.stageResource}
+      StageResource.qnt: ${item.StageResource.qnt}
+      StageResource.baseQnt: ${item.StageResource.baseQnt}
+      StageResource.price: ${item.StageResource.price}
+      dateOrder: ${printMoment(item.dateOrder)}
+      dateProd: ${printMoment(item.dateProd)}
+      dateExp: ${printMoment(item.dateExp)}
+      `)
+  }
+
   return {
     name: 'MrpResourceStock',
     seedFileName: 'mrp-resource-stock.json',
     caption: 'Остатки ресурсов',
     icon: 'BarChart',
     qntForDate,
+    print,
     props: [
       {
         name: 'id',

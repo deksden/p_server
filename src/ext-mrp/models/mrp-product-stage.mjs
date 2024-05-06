@@ -1,12 +1,41 @@
 import { v4 as uuid } from 'uuid'
+import { printMoment } from '../../packages/utils/moment-utils.mjs'
+import _ from 'lodash'
 
 export const MrpProductStage = (app) => {
+  const print = async (aItem, comments='') => {
+    if(process.env.NODE_ENV !== 'development') return
+
+    // clone item:
+    const item = _.clone(aItem)
+
+    // expand:
+    const Plan = app.exModular.models['MrpPlan']
+    item.Plan = await Plan.findById(item.plan)
+    const Stage = app.exModular.models['MrpStage']
+    item.Stage = await Stage.findById(item.stage)
+
+    // print:
+    console.log(`ProductStage: ${comments}
+      id:${item.id}
+      plan:${item.plan}
+      plan.date:${printMoment(item.Plan.date)}
+      plan.qnt:${item.Plan.qnt}
+      stage:${item.stage}
+      stage.Caption: ${item.Stage.caption}
+      dateStart:${printMoment(item.dateStart)}
+      dateEnd:${printMoment(item.dateEnd)}
+      totalQntForProd:${item.totalQntForProd}
+      price:${item.price}`)
+  }
+
   return {
     name: 'MrpProductStage',
     caption: 'Запланированный этап',
     description: 'Запланированный производственный этап',
     seedFileName: 'mrp-product-stage.json',
     icon: 'BarChart',
+    print,
     props: [
       {
         name: 'id',

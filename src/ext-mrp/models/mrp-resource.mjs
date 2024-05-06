@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment-business-days'
-import { dateAddDays } from '../../packages/utils/moment-utils.mjs'
+import { dateAddDays, printMoment } from '../../packages/utils/moment-utils.mjs'
+import _ from 'lodash'
 
 export const MrpResource = (app) => {
 
@@ -53,7 +54,9 @@ export const MrpResource = (app) => {
       orderBy: [{ column: 'date', order: 'desc' }]
     })
 
-    console.log(` Order res. last orders: \n ${ JSON.stringify(orders)}`)
+    console.log(`ResourceStock.orders:
+      ${JSON.stringify(orders)}
+      `)
 
     const startDate = Vendor.calculateOrderStartDate(vendor, aDate)
 
@@ -115,6 +118,20 @@ export const MrpResource = (app) => {
     return aResStock
   }
 
+  const print = async (aItem, comments='') => {
+    if(process.env.NODE_ENV !== 'development') return
+
+    // clone item:
+    const item = _.clone(aItem)
+
+    console.log(`Resource: ${comments}
+      id: ${item.id}
+      caption: ${item.caption}
+      unit: ${item.unit}
+      minStock: ${item.minStock}
+      expDuration: ${item.expDuration}`)
+  }
+
   return {
     name: 'MrpResource',
     caption: 'Ресурсы',
@@ -122,6 +139,7 @@ export const MrpResource = (app) => {
     seedFileName: 'mrp-resource.json',
     icon: 'BarChart',
     planOrderRes,
+    print,
     props: [
       {
         name: 'id',
@@ -167,45 +185,6 @@ export const MrpResource = (app) => {
         format: '',
         default: 0
       }
-      /*
-      {
-        name: 'minOrder',
-        type: 'decimal',
-        caption: 'Мин заказ',
-        description: 'Минимальный заказ',
-        precision: 12,
-        scale: 0,
-        format: '',
-        default: 0
-      },
-      {
-        name: 'orderPeriod',
-        type: 'decimal',
-        caption: 'Срок заказа',
-        description: 'Длительность поставки',
-        precision: 12,
-        scale: 0,
-        format: '',
-        default: 0
-      },
-      {
-        name: 'defPrice',
-        type: 'decimal',
-        caption: 'Цена',
-        description: 'Цена ресурса по-умолчанию',
-        precision: 12,
-        scale: 2,
-        format: '',
-        default: 0
-      },
-      {
-        name: 'initialDate',
-        type: 'datetime',
-        caption: 'Дата',
-        description: 'Начальная дата появления ресурса',
-        format: 'DD-MM-YYYY',
-        default: null
-      } */
     ]
   }
 }
