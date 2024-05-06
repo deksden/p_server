@@ -3,7 +3,7 @@
     "id": "1",
     "caption": "Hyaluronate Sodium - Гиалуроновая кислота",
     "unit": "гр",
-    "minStock": 300,
+    "minStock": 50,
     "expDuration": 365
   },
   {
