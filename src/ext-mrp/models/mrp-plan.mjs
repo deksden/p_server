@@ -2,17 +2,6 @@ import { v4 as uuid } from 'uuid'
 import moment from 'moment'
 import { makeMoment } from '../../packages/utils/moment-utils.mjs'
 
-/*
- Алгоритм:
-
- Делаем обработчик - после сохранения позиции плана вызываем модуль планирования для этой позиции.
-
- Лог планирования сохраняем в переменную status
-
-
-
-* */
-
 export const MrpPlan = (app) => {
 
   // получить остатки продукта на указанную дату
@@ -133,7 +122,7 @@ export const MrpPlan = (app) => {
     qntForDate,
     processPlan,
     processAllPlans,
-    afterCreateBeg: [Wrap(afterSavePlan)],
+    // afterCreateBeg: [Wrap(afterSavePlan)],
     props: [
       {
         name: 'id',
