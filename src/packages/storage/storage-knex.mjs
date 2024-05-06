@@ -2,6 +2,7 @@ import _ from 'lodash'
 import fs from 'fs'
 import moment from 'moment'
 import { isPromise } from '../utils/is-promise.mjs'
+import { makeMoment } from '../utils/moment-utils.mjs'
 
 export const checkIsFullVirtual = (Model) => {
   // check if model have only calculated fields
@@ -188,7 +189,12 @@ export const processAfterLoadFromStorage = (Model, item) => {
     }
 
     if (item[key] && prop.type === 'datetime') {
-      aItem[key] = moment.utc(item[key]).toDate()
+      if(!prop.format) prop.format = 'DD-MM-YYYY'
+      if(typeof item[key] === 'string') {
+        aItem[key] = moment.utc(item[key], prop.format).toDate()
+      } else {
+        aItem[key] = moment.utc(new Date(item[key])).toDate()
+      }
     }
     /* if (prop.type === 'calculated') {
       if (prop.getter && (typeof prop.getter === 'function')) {
@@ -241,8 +247,17 @@ const withWhereOp = (queryBuilder, opt) => {
       op = [opt.whereOp]
     }
     op.map((item) => {
-      if (item.column && item.op && item.value) {
-        queryBuilder.andWhere(item.column, item.op, item.value)
+      if (item.column && item.op && item.value ) {
+        // process some data:
+        let aValue = item.value
+        if (opt.Model) {
+          const prop = opt.Model.props[item.column]
+
+          if (prop.type === 'datetime') {
+            aValue = makeMoment(item.value).toDate()
+          }
+        }
+        queryBuilder.andWhere(item.column, item.op, aValue)
       }
     })
   }
@@ -496,6 +511,11 @@ export default (app) => {
     }
     const knex = Model.storage.db
 
+    if(!opt) opt = {}
+
+    opt.Model = Model
+    opt.app = app
+
     // if (opt) {
     //   console.log('opt:')
     //   console.log(opt)
@@ -528,10 +548,14 @@ export default (app) => {
     //   console.log('opt:')
     //   console.log(opt)
     // }
+    if(!opt) opt = {}
+
+    opt.Model = Model
+    opt.app = app
 
     return knex.select()
       .from(Model.name)
-      .where((opt && opt.where) ? opt.where : {})
+      .modify(withWhere, opt)
       .modify(withWhereIn, opt)
       .modify(withWhereOp, opt)
       .modify(withWhereQ, opt)

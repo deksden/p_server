@@ -8,12 +8,10 @@ export const MrpPlan = (app) => {
   const qntForDate = async (productId, date) => {
     const Plan = app.exModular.models['MrpPlan']
     const knex = Plan.storage.db
-    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
-    const aDate2 = aDate1.toString()
     return knex('MrpPlan')
       .sum({ res:'qnt' })
       .where({ product: productId })
-      .where('date', '<=', aDate2)
+      .where('date', '<=', makeMoment(date).toDate() )
       .then((res) => {
           return res[0].res
       })
@@ -74,6 +72,8 @@ export const MrpPlan = (app) => {
       console.log(`Need production: minQnt ${product.qntMin}`)
 
       const ctx = { plan }
+
+      // console.log(`ctx = ${JSON.stringify(ctx)}`)
 
       plannedProd = await Product.planProduction(product.id, plan.date, Math.abs(currentQnt), ctx)
       prodDuration = await Product.prodDuration(product.id)
@@ -167,6 +167,15 @@ export const MrpPlan = (app) => {
         description: 'Статус планирования производства этой позиции плана продаж',
         format: '',
         default: ''
+      },
+      {
+        name: 'vendorTermSelector',
+        type: 'text',
+        caption: 'Выбор условий',
+        description: 'Критерий выбора условий: minPrice, minDuration или $-директивы',
+        format: '',
+        size: 512,
+        default: 'minPrice'
       }
     ]
   }

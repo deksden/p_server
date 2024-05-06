@@ -28,7 +28,7 @@ export const MrpResource = (app) => {
    * поступления будет целевая, а количество ресурса может быть увеличено в соответствии с требованиями поставщика
    * по минимальной партии к заказу и шагу увеличения партии)
   */
-  const planOrderRes = async (resourceId, date, qnt) => {
+  const planOrderRes = async (resourceId, date, qnt, vtSelector = 'minPrice') => {
     // подключим нужные API:
     const VendorTerm = app.exModular.models['MrpVendorTerm']
     const Resource = app.exModular.models['MrpResource']
@@ -38,14 +38,22 @@ export const MrpResource = (app) => {
     const aDate = moment(date)
     const aDateFormat = ResourceStock.props.date.format
 
+    console.log(`vtSelector: ${vtSelector}`)
+
+    if (!['minPrice','minDuration'].includes(vtSelector)) {
+      throw new Error(`vtSelector value ("${vtSelector}") is invalid.`)
+    }
+
     console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
-    const vendorTerm = await VendorTerm.selectVendorTerm(resourceId, date)
+    const ret = await VendorTerm.selectVendorTerm(resourceId, date, vtSelector)
 
-    if (!vendorTerm) {
+    if (!ret || !ret.vendorTerm) {
       throw new Error('VendorTerm not found')
     }
+
+    const vendorTerm = ret.vendorTerm
 
     // получим все партии продукта, которые заказывались у этого вендора, от последних до первых;
     // нам нужна только последняя партия на самом деле:

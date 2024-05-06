@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import _ from 'lodash'
 import moment from 'moment-business-days'
-import { momentSubtractDays, printMoment } from '../../packages/utils/moment-utils.mjs'
+import { makeMoment, momentSubtractDays, printMoment } from '../../packages/utils/moment-utils.mjs'
 
 export const MrpVendorTerm = (app) => {
   /**
@@ -28,48 +28,99 @@ export const MrpVendorTerm = (app) => {
 
   /**
    * Выбрать поставщика, который может поставить ресурс на указанную дату
-   * @param resourceId  Ресурс
-   * @param date        Дата поставки
-   * @return (MrpVendorTerm) выбранный поставщик
+   * @param resourceId  {string} (-> MrpResource.id) код ресурса
+   * @param date        {string|moment} Дата, к которой должна быть выполнена поставка (в формате строки или
+   * moment-like), то есть дата завершения заказа
+   * @param vtSelector {string} селектор для выбора условий поставки:
+   *   * "minPrice": выбрать условия с минимальной ценой
+   *   * "minDuration": выбрать условия с минимальным сроком поставки (максимальной датой начала поставки)
+   *   * "$-cmd": (ещё не реализовано) директивы по выбору условий
+   * @return {Object} структура данных формата:
+   *   * vendorTerm: выбранные условия поставки
+   *   * terms: полный список условий, которые по дате подходят для поставки
    */
-  const selectVendorTerm = async (resourceId, date) => {
+  const selectVendorTerm = async (resourceId, date,
+    vtSelector = 'minPrice') =>
+  {
     const VendorTerm = app.exModular.models['MrpVendorTerm']
-    const aDate = moment(date)
+    const aDate = makeMoment(date)
+    const ret = {
+      vendorTerm: null,
+      terms: []
+    }
 
-    // получить список поставщиков этого ресурса, сортированный по дате (от самых последних к более ранним)
+    // console.log(`vtSelector: ${vtSelector}`)
+
+    if (!['minPrice','minDuration'].includes(vtSelector)) {
+      throw new Error(`vtSelector value ("${vtSelector}") is invalid.`)
+    }
+
+    // получить список поставщиков этого ресурса, сортированный по
+    // дате (от самых последних к более ранним)
     console.log(`fn VendorTerm.selectVendor:
       resource=${resourceId}
       date=${printMoment(aDate)}
     `)
 
+    // получим все условия поставки для этого ресурса в хронологическом порядке:
+    // уберем только заведомо ненужные условия с датой начала действия условий больше даты поставки
     const aVendorTerms = await VendorTerm.findAll({
       where: { resource: resourceId },
+      whereOp: [{ column: 'date', op: '<=', value: printMoment(date) }],
       orderBy: [{ column: 'date', order: 'desc' }, { column: 'id', order: 'asc' }]
     })
 
-    let selectedVendorTerm = null
-
-    if (aVendorTerms.some((aVendorTerm) => {
+    for (const [ndx, aVendorTerm] of aVendorTerms.entries()) {
       aVendorTerm.date = moment(aVendorTerm.date)
 
-      console.log(`  Testing vendor: ${aVendorTerm.id} - "${aVendorTerm.caption}" (from ${printMoment(aVendorTerm.date)})`)
-
       // проверим этого вендора на пригодность по дате поставки:
-      const supplyStart = calculateOrderStartDate(aVendorTerm, date)
+      // вычислим дату начала заказа для этих условий:
+      aVendorTerm._dateStart = calculateOrderStartDate(aVendorTerm, date)
 
-      // теперь в supplyStart находится самая ранняя дата доставки для этого вендора
-      if (supplyStart.isSameOrAfter(aVendorTerm.date)) {
-        console.log(`  This vendor "${aVendorTerm.caption}" was selected.`)
-        selectedVendorTerm = aVendorTerm
-        return true
+      // укажем что не подходит
+      aVendorTerm._status = false
+
+      // проверим что дата начала заказа попадает в период действия этих условий:
+      if (
+        (aVendorTerm.dateEnd === null && aVendorTerm._dateStart.isSameOrAfter(aVendorTerm.date)) ||
+        (aVendorTerm._dateStart.isBetween(aVendorTerm.date, aVendorTerm.dateEnd, 'days', '[]'))
+      ) {
+        // укажем что подходит по дате:
+        aVendorTerm._status = true
       }
 
-      console.log('VendorTerm not selected.')
-      return false
-    })) {
-      return selectedVendorTerm
+      console.log(`#${ndx} vendor:
+        _status: ${aVendorTerm._status}
+        _dateStart: ${printMoment(aVendorTerm._dateStart)}
+        id: ${aVendorTerm.id}
+        caption: "${aVendorTerm.caption}"
+        date: ${printMoment(aVendorTerm.date)}
+        dateEnd: ${printMoment(aVendorTerm.dateEnd)}
+        price: ${aVendorTerm.invoicePrice}
+      `)
+
+      // добавим отобранные условия в массив:
+      if (aVendorTerm._status) ret.terms.push(aVendorTerm)
     }
-    return null
+
+    // если вообще ничего нет - вернем пустую запись
+    if (ret.terms.length === 0) {
+      console.log('No terms! exiting with null')
+      return ret
+    }
+    if (ret.terms.length === 1) {
+      // если только одна запись - то ее и вернем:
+      ret.vendorTerm = ret.terms[0]
+      console.log(`single vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
+    } else if (vtSelector === 'minPrice') {
+      ret.vendorTerm = _.minBy(ret.terms, 'invoicePrice')
+      console.log(`select minPrice, vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
+    } else if (vtSelector === 'minDuration') {
+      ret.vendorTerm = _.maxBy(ret.terms, '_dateStart')
+      console.log(`select minDuration, vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
+    }
+
+    return ret
   }
 
   return {
@@ -78,7 +129,7 @@ export const MrpVendorTerm = (app) => {
     description: 'Сведения об условиях поставки от поставщика',
     seedFileName: 'mrp-vendor-term.json',
     icon: 'BarChart',
-    selectVendorTerm: selectVendorTerm,
+    selectVendorTerm,
     calculateOrderStartDate,
     props: [
       {

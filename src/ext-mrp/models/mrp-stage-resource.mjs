@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import { printMoment } from '../../packages/utils/moment-utils.mjs'
+import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 import _ from 'lodash'
 
 export const MrpStageResource = (app) => {
@@ -65,7 +65,7 @@ export const MrpStageResource = (app) => {
         caption: 'Дата',
         description: 'Дата с которой действует эта норма',
         format: 'DD-MM-YYYY',
-        default: '01-01-1900'
+        default: makeMoment('01-01-1900')
       },
 
       {

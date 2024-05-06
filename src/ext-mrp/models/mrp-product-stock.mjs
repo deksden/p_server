@@ -1,18 +1,16 @@
 import { v4 as uuid } from 'uuid'
 import moment from 'moment/moment.js'
 import _ from 'lodash'
-import { printMoment } from '../../packages/utils/moment-utils.mjs'
+import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 
 export const MrpProductStock = (app) => {
   const qntForDate = async (productId, date) => {
     const ProductStock = app.exModular.models['MrpProductStock']
     const knex = ProductStock.storage.db
-    const aDate1 = (moment.utc(date, 'DD-MM-YYYY').toDate()).getTime()
-    const aDate2 = aDate1.toString()
     return knex(ProductStock.name)
       .sum({ res:'qnt' })
       .where({ product: productId })
-      .where('date', '<=', aDate2)
+      .where('date', '<=', makeMoment(date).toDate())
       .then((res) => {
           return res[0].res
       })

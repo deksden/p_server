@@ -19,7 +19,7 @@ import { Validator } from './services/service-validator.mjs'
 import { RouteBuilder } from './route-builder.mjs'
 import { ControllerDF } from './services/service-controller-df.mjs'
 import { Codegen } from './services/service-codegen.mjs'
-import { Seed } from './services/sevice-seed.mjs'
+import { Seed } from './services/service-seed.mjs'
 import { Serial } from './services/service-serial.mjs'
 import { Yandex } from '../ext-intg/service-yandex.mjs'
 

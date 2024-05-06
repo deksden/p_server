@@ -132,7 +132,7 @@ export const MrpProduct = (app) => {
         // (?) учесть толерантность к дефициту ресурса при работе на грани minStock:
         if (reqQnt > (resStock.qnt - aResource.minStock)) {
           // заказываем такое количество ресурсов, чтобы на начало этапа было как минимум требуемое количество плюс мин запас
-          await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - resStock.qnt))
+          await Resource.planOrderRes(aResource.id, stageStart, (reqQnt + aResource.minStock - resStock.qnt), ctx.plan.vendorTermSelector)
 
           // обновляем данные о ресурсах, потому что заказаны недостающие ресурсы:
           resStock = await ResourceStock.qntForDate(stageResource.resource, stageStart)

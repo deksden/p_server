@@ -203,4 +203,46 @@ describe('MRP: tests', function () {
         .catch((e) => { throw e })
     })
   })
+  describe('MRP us-2: vtSelector', function () {
+    it('2.1 minPrice:', async function () {
+      const Models = app.exModular.models
+
+      return createAdmin(context)
+        .then(() => mrpPlan(context, 'mrp-c3'))
+        .then(() => Models.MrpResourceStock.findOne({
+          where: { resource: 4, type: 'order' },
+          whereOp: [
+            { column: 'date', op: '>=', value: '01-10-2023' },
+            { column: 'date', op: '<=', value: '31-10-2023' }
+          ]
+        }))
+        .then((res) => {
+          expect(res).to.be.not.undefined()
+          expect(res.resource).to.be.equal('4')
+          expect(res.price).to.be.equal(130)
+          expect(res.vendorTerm).to.be.equal('25')
+        })
+        .catch((e) => { throw e })
+    })
+    it('2.1 minDuration:', async function () {
+      const Models = app.exModular.models
+
+      return createAdmin(context)
+        .then(() => mrpPlan(context, 'mrp-c4'))
+        .then(() => Models.MrpResourceStock.findOne({
+          where: { resource: 4, type: 'order' },
+          whereOp: [
+            { column: 'date', op: '>=', value: '01-10-2023' },
+            { column: 'date', op: '<=', value: '31-10-2023' }
+          ]
+        }))
+        .then((res) => {
+          expect(res).to.be.not.undefined()
+          expect(res.resource).to.be.equal('4')
+          expect(res.price).to.be.equal(155)
+          expect(res.vendorTerm).to.be.equal('22')
+        })
+        .catch((e) => { throw e })
+    })
+  })
 })
