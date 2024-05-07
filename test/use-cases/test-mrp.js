@@ -182,23 +182,12 @@ describe('MRP: tests', function () {
 
       return createAdmin(context)
         .then(() => mrpPlan(context))
-        // .then(() => mrpPlanAdd(context, {
-        //   id: 1,
-        //   date: '01-09-2023',
-        //   product: 1,
-        //   qnt: 25000
-        // }))
-        // .then(() => mrpPlanAdd(context, {
-        //   id: 2,
-        //   date: '01-09-2023',
-        //   product: 2,
-        //   qnt: 10000
-        // }))
         .then(() => Models.MrpResourceStock.findOne({ where: { resource: 1, type: 'order' }, orderBy: [{ column: 'date', order: 'asc' }] }))
         .then((res) => {
           expect(res.resource).to.be.equal('1')
-          // expect(res.qnt).to.be.equal(2500)
-          // expect(res.qntReq).to.be.equal(2445)
+          expect(res.qnt).to.be.equal(1000)
+          expect(res.qntReq).to.be.equal(920)
+          expect(res.price).to.be.equal(990)
         })
         .catch((e) => { throw e })
     })
