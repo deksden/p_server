@@ -89,7 +89,7 @@ export default (app) => {
     storageClose: async () => {
       // console.log('KNEX - close')
       return Promise.resolve()
-        .then(() => aStorage.db.migrate.latest())
+        // .then(() => aStorage.db.migrate.latest())
         .then(() => {
           aStorage.db.destroy()
           aStorage.db = null

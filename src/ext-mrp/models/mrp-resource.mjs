@@ -6,8 +6,8 @@ import _ from 'lodash'
 export const MrpResource = (app) => {
 
   /** Рассчитать объем заказа
-   * @param orderMin {number} минимальный заказ, обычно из vendorTerm.orderMin
-   * @param orderStep {number} шаг изменения партии, обычно из vendorTerm.orderStep
+   * @param orderMin {number} минимальный заказ, обычно из term.orderMin
+   * @param orderStep {number} шаг изменения партии, обычно из term.orderStep
    * @param qnt {number} требуемое количество
    * @return {number} количество для заказа
    */
@@ -30,7 +30,7 @@ export const MrpResource = (app) => {
   */
   const planOrderRes = async (resourceId, date, qnt, tSelector = 'minPrice') => {
     // подключим нужные API:
-    const VendorTerm = app.exModular.models['MrpVendorTerm']
+    const Term = app.exModular.models['MrpTerm']
     const Resource = app.exModular.models['MrpResource']
     const ResourceStock = app.exModular.models['MrpResourceStock']
 
@@ -47,13 +47,13 @@ export const MrpResource = (app) => {
     console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
-    const ret = await VendorTerm.selectVendorTerm(resourceId, date, tSelector)
+    const ret = await Term.selectTerm(resourceId, date, tSelector)
 
-    if (!ret || !ret.vendorTerm) {
-      throw new Error('VendorTerm not found')
+    if (!ret || !ret.term) {
+      throw new Error('Term not found')
     }
 
-    const vendorTerm = ret.vendorTerm
+    const term = ret.term
 
     // получим все партии продукта, которые заказывались у этого вендора, от последних до первых;
     // нам нужна только последняя партия на самом деле:
@@ -67,7 +67,7 @@ export const MrpResource = (app) => {
       ${JSON.stringify(orders)}
       `)
 
-    const startDate = VendorTerm.calculateOrderStartDate(vendorTerm, aDate)
+    const startDate = Term.calculateOrderStartDate(term, aDate)
 
     // смотрим последний заказ, вычисляем дату поступления на склад, сверяем с нашей потребностью;
     // если дата поступления отличается менее чем на 25% по сроку, то увеличим заказ:
@@ -84,7 +84,7 @@ export const MrpResource = (app) => {
       ) {
         // будем увеличивать прошлый заказ:
         console.log('  Не заказывать новую партию, а увеличить последнюю заказанную партию')
-        order.qnt = getOrderQnt(vendorTerm.orderMin, vendorTerm.orderStep, qnt + order.qntReq)
+        order.qnt = getOrderQnt(term.orderMin, term.orderStep, qnt + order.qntReq)
         order.qntReq += qnt
         console.log(`  новое количество в заказе - ${order.qnt}`)
         return await ResourceStock.update(order.id, order)
@@ -93,22 +93,22 @@ export const MrpResource = (app) => {
     }
 
     // заказываем новую партию:
-    const orderQnt = getOrderQnt(vendorTerm.orderMin, vendorTerm.orderStep, qnt)
+    const orderQnt = getOrderQnt(term.orderMin, term.orderStep, qnt)
 
     console.log(` ResourceStock.create:
       ${startDate.format(aDateFormat)}
       qnt=${orderQnt}
-      price=${vendorTerm.price}`)
+      price=${term.price}`)
 
     // указать срок годности, для этого к дате начала заказа прибавить срок производства, и срок годности:
     let expDate = null
-    if (vendorTerm.expDuration && vendorTerm.expDuration > 0) {
+    if (term.expDuration && term.expDuration > 0) {
       // если для вендора указана длительность годности каждой партии сырья, то проставим срок годности:
-      expDate= momentAddDays(startDate, vendorTerm.expDuration, vendorTerm.inWorkingDays)
+      expDate= momentAddDays(startDate, term.expDuration, term.inWorkingDays)
     }
 
     // указать расчетную дату производства, для этого добавить к дате начала заказа срок производства:
-    let prodDate = momentAddDays(startDate, vendorTerm.orderDuration, vendorTerm.inWorkingDays)
+    let prodDate = momentAddDays(startDate, term.orderDuration, term.inWorkingDays)
 
     // записать поступающий заказ в список партий: поступление заказа записываем целевой датой
     let aResStock = await ResourceStock.create({
@@ -118,8 +118,8 @@ export const MrpResource = (app) => {
       dateOrder: printMoment(startDate),
       qnt: orderQnt,
       qntReq: qnt,
-      price: vendorTerm.price,
-      vendorTerm: vendorTerm.id,
+      price: term.price,
+      term: term.id,
       dateExp: printMoment(expDate),
       dateProd: printMoment(prodDate)
     })

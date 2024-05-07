@@ -32,7 +32,7 @@ export const reportProductProd = async (ctx) => {
 
   // const ResourceStock = app.exModular.models['MrpResourceStock']
   // const Resource = app.exModular.models['MrpResource']
-  // const Vendor = app.exModular.models['MrpVendorTerm']
+  // const Vendor = app.exModular.models['MrpTerm']
 
   // STEP: Create a new workbook
   const wb = XLSX.utils.book_new();

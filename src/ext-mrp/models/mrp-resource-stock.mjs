@@ -28,7 +28,7 @@ export const MrpResourceStock = (app) => {
 
     // теперь получим общее количество ресурса на остатке в разрезе партий:
     const batches = await knex(ResourceStock.name)
-      .select('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'vendorTerm')
+      .select('batchId', 'date', 'resource', 'price', 'dateProd', 'dateExp', 'term')
       .sum({ qnt: 'qnt' })
       .groupBy('batchId')
       .orderBy([
@@ -53,8 +53,8 @@ export const MrpResourceStock = (app) => {
     const item = _.clone(aItem)
 
     // expand item:
-    const VendorTerm = app.exModular.models['MrpVendorTerm']
-    item.VendorTerm = await VendorTerm.findById(item.vendorTerm)
+    const Term = app.exModular.models['MrpTerm']
+    item.Term = await Term.findById(item.term)
     const Resource = app.exModular.models['MrpResource']
     item.Resource = await Resource.findById(item.resource)
     const ProductStage = app.exModular.models['MrpProductStage']
@@ -72,8 +72,8 @@ export const MrpResourceStock = (app) => {
       qnt: ${item.qnt}
       qntReq: ${item.qntReq}
       price: ${item.price}
-      vendor: ${item.vendorTerm}
-      VendorTerm.caption: ${item.VendorTerm.caption}
+      vendor: ${item.term}
+      Term.caption: ${item.Term.caption}
       productStage: ${item.productStage}
       ProductStage.dateStart: ${printMoment(item.ProductStage.dateStart)}
       ProductStage.dateEnd: ${printMoment(item.ProductStage.dateStart)}
@@ -167,9 +167,9 @@ export const MrpResourceStock = (app) => {
         default: 0
       },
       {
-        name: 'vendorTerm',
+        name: 'term',
         type: 'ref',
-        model: 'MrpVendorTerm',
+        model: 'MrpTerm',
         caption: 'Условия поставки',
         description: 'Ссылка на условия поставщика ресурса, для расходных операций указывается поставщик той партии, которая списыввается этой операцией',
         default: null
