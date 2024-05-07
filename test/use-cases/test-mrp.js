@@ -192,7 +192,7 @@ describe('MRP: tests', function () {
         .catch((e) => { throw e })
     })
   })
-  describe('MRP us-2: vtSelector', function () {
+  describe('MRP us-2: tSelector', function () {
     it('2.1 minPrice:', async function () {
       const Models = app.exModular.models
 

@@ -31,7 +31,7 @@ export const MrpVendorTerm = (app) => {
    * @param resourceId  {string} (-> MrpResource.id) код ресурса
    * @param date        {string|moment} Дата, к которой должна быть выполнена поставка (в формате строки или
    * moment-like), то есть дата завершения заказа
-   * @param vtSelector {string} селектор для выбора условий поставки:
+   * @param tSelector {string} селектор для выбора условий поставки:
    *   * "minPrice": выбрать условия с минимальной ценой
    *   * "minDuration": выбрать условия с минимальным сроком поставки (максимальной датой начала поставки)
    *   * "$-cmd": (ещё не реализовано) директивы по выбору условий
@@ -40,7 +40,7 @@ export const MrpVendorTerm = (app) => {
    *   * terms: полный список условий, которые по дате подходят для поставки
    */
   const selectVendorTerm = async (resourceId, date,
-    vtSelector = 'minPrice') =>
+    tSelector = 'minPrice') =>
   {
     const VendorTerm = app.exModular.models['MrpVendorTerm']
     const aDate = makeMoment(date)
@@ -49,10 +49,8 @@ export const MrpVendorTerm = (app) => {
       terms: []
     }
 
-    // console.log(`vtSelector: ${vtSelector}`)
-
-    if (!['minPrice','minDuration'].includes(vtSelector)) {
-      throw new Error(`vtSelector value ("${vtSelector}") is invalid.`)
+    if (!['minPrice','minDuration'].includes(tSelector)) {
+      throw new Error(`tSelector value ("${tSelector}") is invalid.`)
     }
 
     // получить список поставщиков этого ресурса, сортированный по
@@ -96,7 +94,7 @@ export const MrpVendorTerm = (app) => {
         caption: "${aVendorTerm.caption}"
         date: ${printMoment(aVendorTerm.date)}
         dateEnd: ${printMoment(aVendorTerm.dateEnd)}
-        price: ${aVendorTerm.invoicePrice}
+        price: ${aVendorTerm.price}
       `)
 
       // добавим отобранные условия в массив:
@@ -112,10 +110,10 @@ export const MrpVendorTerm = (app) => {
       // если только одна запись - то ее и вернем:
       ret.vendorTerm = ret.terms[0]
       console.log(`single vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
-    } else if (vtSelector === 'minPrice') {
-      ret.vendorTerm = _.minBy(ret.terms, 'invoicePrice')
+    } else if (tSelector === 'minPrice') {
+      ret.vendorTerm = _.minBy(ret.terms, 'price')
       console.log(`select minPrice, vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
-    } else if (vtSelector === 'minDuration') {
+    } else if (tSelector === 'minDuration') {
       ret.vendorTerm = _.maxBy(ret.terms, '_dateStart')
       console.log(`select minDuration, vendorTerm: ${JSON.stringify(ret.vendorTerm)}`)
     }
@@ -190,7 +188,7 @@ export const MrpVendorTerm = (app) => {
         default: null
       },
       {
-        name: 'invoicePrice',
+        name: 'price',
         type: 'decimal',
         caption: 'Цена',
         description: 'Прайсовая цена поставляемого ресурса',

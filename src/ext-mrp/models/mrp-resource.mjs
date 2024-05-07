@@ -28,7 +28,7 @@ export const MrpResource = (app) => {
    * поступления будет целевая, а количество ресурса может быть увеличено в соответствии с требованиями поставщика
    * по минимальной партии к заказу и шагу увеличения партии)
   */
-  const planOrderRes = async (resourceId, date, qnt, vtSelector = 'minPrice') => {
+  const planOrderRes = async (resourceId, date, qnt, tSelector = 'minPrice') => {
     // подключим нужные API:
     const VendorTerm = app.exModular.models['MrpVendorTerm']
     const Resource = app.exModular.models['MrpResource']
@@ -38,16 +38,16 @@ export const MrpResource = (app) => {
     const aDate = moment(date)
     const aDateFormat = ResourceStock.props.date.format
 
-    console.log(`vtSelector: ${vtSelector}`)
+    console.log(`tSelector: ${tSelector}`)
 
-    if (!['minPrice','minDuration'].includes(vtSelector)) {
-      throw new Error(`vtSelector value ("${vtSelector}") is invalid.`)
+    if (!['minPrice','minDuration'].includes(tSelector)) {
+      throw new Error(`tSelector value ("${tSelector}") is invalid.`)
     }
 
     console.log(`MrpResource.planOrderRes(resource=${resourceId} "${resource.caption}", date="${aDate.format(aDateFormat)}", qnt=${qnt})`)
 
     // выбрать вендера для этой поставки:
-    const ret = await VendorTerm.selectVendorTerm(resourceId, date, vtSelector)
+    const ret = await VendorTerm.selectVendorTerm(resourceId, date, tSelector)
 
     if (!ret || !ret.vendorTerm) {
       throw new Error('VendorTerm not found')
@@ -98,7 +98,7 @@ export const MrpResource = (app) => {
     console.log(` ResourceStock.create:
       ${startDate.format(aDateFormat)}
       qnt=${orderQnt}
-      price=${vendorTerm.invoicePrice}`)
+      price=${vendorTerm.price}`)
 
     // указать срок годности, для этого к дате начала заказа прибавить срок производства, и срок годности:
     let expDate = null
@@ -118,7 +118,7 @@ export const MrpResource = (app) => {
       dateOrder: printMoment(startDate),
       qnt: orderQnt,
       qntReq: qnt,
-      price: vendorTerm.invoicePrice,
+      price: vendorTerm.price,
       vendorTerm: vendorTerm.id,
       dateExp: printMoment(expDate),
       dateProd: printMoment(prodDate)

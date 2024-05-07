@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "product": 1,
+    "product": "p1",
     "order": 1,
     "caption": "Гель - Производство в ампулы",
     "duration": 20,
@@ -9,7 +9,7 @@
   },
   {
     "id": 2,
-    "product": 1,
+    "product": "p1",
     "order": 2,
     "caption": "Гель - Упаковка",
     "duration": 5,
@@ -17,7 +17,7 @@
   },
   {
     "id": 3,
-    "product": 2,
+    "product": "p2",
     "order": 1,
     "caption": "Гель - Производство во флаконы",
     "duration": 15,
@@ -25,7 +25,7 @@
   },
   {
     "id": 4,
-    "product": 2,
+    "product": "p2",
     "order": 2,
     "caption": "Флаконы - Упаковка",
     "duration": 3,

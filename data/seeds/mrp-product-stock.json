@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "product": 1,
+    "product": "p1",
     "type": "initial",
     "date": "01-07-2023",
     "qnt": 1500,
@@ -9,7 +9,7 @@
   },
   {
     "id": 2,
-    "product": 1,
+    "product": "p1",
     "type": "in-production",
     "date": "25-09-2023",
     "qnt": 3000,

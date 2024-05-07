@@ -169,7 +169,7 @@ export const MrpPlan = (app) => {
         default: ''
       },
       {
-        name: 'vendorTermSelector',
+        name: 'tSelector',
         type: 'text',
         caption: 'Выбор условий',
         description: 'Критерий выбора условий: minPrice, minDuration или $-директивы',

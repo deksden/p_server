@@ -2,15 +2,15 @@
   {
     "id": 1,
     "date": "01-09-2023",
-    "product": 1,
+    "product": "p1",
     "qnt": 25000,
-    "vendorTermSelector": "minPrice"
+    "tSelector": "minPrice"
   },
   {
     "id": 2,
     "date": "01-09-2023",
-    "product": 2,
+    "product": "p2",
     "qnt": 10000,
-    "vendorTermSelector": "minPrice"
+    "tSelector": "minPrice"
   }
 ]
