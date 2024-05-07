@@ -29,6 +29,8 @@ export const routeList = (app, Model) => {
     before: [
       app.exModular.auth.check,
       app.exModular.access.check(objectName),
+      app.exModular.services.controllerDF.processSort(Model),
+      app.exModular.services.controllerDF.processRange(Model),
       app.exModular.services.controllerDF.processFilter(Model),
       app.exModular.services.validator.listFilterValidator(Model)
     ],

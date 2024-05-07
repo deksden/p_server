@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 const {{name}}Filter = (props) => {
   const classes = useStyles()
 
-  return(
+  return (
     <Filter {...props}>
       <div /** Fragment: filter-fields, model: {{name}} */ />
       <div /** FragmentEnd */ />

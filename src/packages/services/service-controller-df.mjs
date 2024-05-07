@@ -220,7 +220,7 @@ export const ControllerDF = (app) => {
    * processRange: возвращает middleware для указанной модели, которое обрабатывает параметр range из
    * req.query.range и помещает данные в req.data.opt
    * @param Model - для какой модели подготовить middleware
-   * @return взвращает middleware для указанной модели
+   * @return возвращает middleware для указанной модели
    */
   const processRange = (Model) => (req, res, next) => {
     if (!req.data) {
@@ -277,13 +277,17 @@ export const ControllerDF = (app) => {
       ret.range[0] = f[0]
       ret.range[1] = f[1]
       _.merge(req.data.opt, ret)
-      next()
     } else if (req.query.page && req.query.perPage) {
-      throw new Error('processRange: Not implemented')
+      // throw new Error('processRange: Not implemented')
       // console.log('page:')
       // console.log(req.query.page)
       // console.log(req.query.perPage)
+      // console.log(`controller`)
+      ret.range[0] = (req.query.page-1) * req.query.perPage
+      ret.range[1] = ret.range[0] + req.query.perPage - 1
+      _.merge(req.data.opt, ret)
     }
+    next()
   }
 
   /**
