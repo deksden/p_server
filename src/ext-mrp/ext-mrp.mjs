@@ -19,6 +19,9 @@ import { MrpProductStage } from './models/mrp-product-stage.mjs'
 // import { InitExtTest } from './init-mrp.mjs'
 import { MrpRouteReports } from './routes/route-reports.mjs'
 import { MrpRoutePlan } from './routes/route-plan.mjs'
+import { MrpCost } from './models/mrp-cost.mjs'
+import { MrpResource2 } from './models/mrp-resource2.mjs'
+import { MrpResourceStage } from './models/mrp-resource-stage.mjs'
 
 const packageName = 'ExtMrp'
 
@@ -51,7 +54,11 @@ export const ExtMrp = (app, opt) => {
       MrpProduct,
       MrpProductStage,
       MrpResource,
-      MrpResourceStock
+      MrpResourceStock,
+      MrpCost,
+      MrpResource2,
+      MrpResourceStage,
+      MrpStageCost
     ]
   })
 

@@ -89,7 +89,7 @@ export const MrpProductStage = (app) => {
         name: 'price',
         type: 'decimal',
         caption: 'Цена',
-        description: 'Себестоимость ресурсов на одну единицу произведенной продукции нат этом этапе',
+        description: 'Себестоимость ресурсов на одну единицу произведенной продукции на этом этапе',
         precision: 16,
         scale: 4,
         format: '',

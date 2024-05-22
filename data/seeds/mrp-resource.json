@@ -1,5 +1,18 @@
 [
   {
+    "id": "p1",
+    "caption": "Гель стерильный ампула 2мл",
+    "unit": "Ампула 2мл",
+    "minStock": 0,
+    "expDuration": 365
+  },
+  {
+    "id": "p2",
+    "caption": "Гель стерильный флакон 5мл",
+    "unit": "Флакон 5мл",
+    "expDuration": 365
+  },
+  {
     "id": "1",
     "caption": "Hyaluronate Sodium - Гиалуроновая кислота",
     "unit": "гр",

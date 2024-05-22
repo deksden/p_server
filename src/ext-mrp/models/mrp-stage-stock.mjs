@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 import _ from 'lodash'
 
-export const MrpStageResource = (app) => {
+export const MrpStageStock = (app) => {
   const print = async (aItem, comments='') => {
     if(process.env.NODE_ENV !== 'development') return
 
@@ -15,7 +15,7 @@ export const MrpStageResource = (app) => {
     const Resource = app.exModular.models['MrpResource']
     item.Resource = await Resource.findById(item.resource)
 
-    console.log(`StageResource: ${comments}
+    console.log(`MrpStageStock: ${comments}
       id: ${item.id}
       stage: ${item.stage}
       stage.Caption: ${item.Stage.caption}
@@ -28,10 +28,10 @@ export const MrpStageResource = (app) => {
   }
 
   return {
-    name: 'MrpStageResource',
+    name: 'MrpStageStock',
     caption: 'Нормы расхода',
-    description: 'Нормы расхода ресурсов на этапе производства',
-    seedFileName: 'mrp-stage-resource.json',
+    description: 'Описание норм расхода ресурсов на этапе',
+    seedFileName: 'mrp-stage-stock.json',
     icon: 'BarChart',
     print,
     props: [
@@ -44,19 +44,19 @@ export const MrpStageResource = (app) => {
         default: () => uuid()
       },
       {
-        name: 'stage',
+        name: 'stageId',
         type: 'ref',
-        model: 'MrpStage',
+        model: 'MrpStage2',
         caption: 'Этап',
-        description: 'Ссылка на этап производства, для которого указана норма расхода',
+        description: 'Ссылка на этап, для которого указана норма расхода',
         default: null
       },
       {
-        name: 'resource',
+        name: 'resourceId',
         type: 'ref',
-        model: 'MrpResource',
+        model: 'MrpResource2',
         caption: 'Ресурс',
-        description: 'Ссылка на ресурс, для которого указана норма расхода на этапе производства',
+        description: 'Ссылка на ресурс, для которого указана норма расхода на этапе',
         default: null
       },
       {
