@@ -148,7 +148,7 @@ export const Seed = (app) => {
 
   return {
     modelSet: {},
-    variantFolder: '',
+    variantFolder: process.env.VARIANT_FOLDER | '',
     seedModelFromFile,
     seedAll
   }

@@ -15,6 +15,55 @@ export const checkIsFullVirtual = (Model) => {
   return allCalculated
 }
 
+/** проверить что значение value подходит для enum свойства prop
+ *
+ * @param prop {Object} объект, описывающий свойство
+ * @param value {string} значение для тестирования
+ * @return {boolean} если значение подходит - возвращает true, иначе false
+ * @throws {Error} если:
+ *    * prop пустое,
+ *    * prop.choices отсутствует,
+ *    * prop.choices не массив,
+ *    * prop.choices - это пустой массив
+ */
+export const checkEnumProp = (prop, value) => {
+  // протестируем что все в порядке с параметрами
+  if (!prop) {
+    // параметр prop пустой
+    throw Error(`checkEnumProp: prop is undefined`)
+  }
+
+  if (!prop.choices) {
+    // у prop нет свойства .choices
+    throw Error(`checkEnumProp: prop "${prop}" - .choices is undefined`)
+  }
+
+  if (!Array.isArray(prop.choices)) {
+    // prop.choices должен быть массивом
+    throw Error(`checkEnumProp: prop "${prop}".choices is not an array`)
+  }
+
+  if (prop.choices.length === 0) {
+    throw Error(`checkEnumProp: prop "${prop}".choices is empty`)
+  }
+
+  // посмотрим, в каком формате описан enum:
+  if (typeof prop.choices[0] === 'number' || typeof prop.choices[0] === 'string') {
+    // свойство описано как массив цифровых значений, преобразуем его в массив строк и найдем в нем value
+    const vals = prop.choices.split(',').map((itm) => itm.toString())
+    return _.indexOf(vals, value) !== -1
+  } else if (typeof prop.choices[0] === 'object') {
+    // если у нас .choices описан как массив объектов, то нужно чтобы
+    // было указано ключевое свойство в .optionValue. проверим на это:
+    if (!prop.optionValue) {
+      throw Error(`checkEnumProp: prop "${prop}".optionValue is empty. Should be set for .choices with array ob Objects`)
+    }
+    return _.find(prop.choices.map((itm) => itm.toString()), [prop.optionValue,value]) !== undefined
+  } else {
+    throw Error(`checkEnumProp: typeof prop "${prop}".choices should be list of strings/numbers or objects`)
+  }
+
+}
 export const processBeforeSaveToStorage = (Model, item, opts) => {
   // console.log(`processBeforeSaveToStorage(${Model.name}, ${JSON.stringify(item)})\n`)
   let aItem = _.merge({}, item)
@@ -35,6 +84,8 @@ export const processBeforeSaveToStorage = (Model, item, opts) => {
     if (opts.defaults && prop.default && (!item[prop.name] || item[prop.name] === null || item[prop.name] === undefined)) {
       if (typeof prop.default === 'function') {
         aItem[prop.name] = prop.default(aItem)
+      } else if (prop.type === 'enum') {
+        aItem[prop.name] = prop.default.toString()
       } else {
         aItem[prop.name] = prop.default
       }
@@ -57,8 +108,8 @@ export const processBeforeSaveToStorage = (Model, item, opts) => {
     }
     if (prop.type === 'enum') {
       // ensure enum values are in range:
-      if (!_.find(prop.format, { value: aItem[prop.name] })) {
-        throw Error(`${Model.name}.${prop.name} enum value invalid: not found in enum format definition (${item[prop.name]})`)
+      if (!checkEnumProp(prop, aItem[prop.name])) {
+        throw Error(`${Model.name}.${prop.name} enum is invalid`)
       }
     }
     if (prop.calculated) {
@@ -154,12 +205,9 @@ export const processAfterLoadFromStorage = (Model, item) => {
     }
     if (item[key] && prop.type === 'enum') {
       // check loaded value for enum field:
-      const format = _.find(prop.format, { value: item[key] })
-      if (!format) {
-        throw Error(`${Model.name}.${prop.name} enum value invalid: not found in enum format definition; value = ${item[key]}`)
+      if (!checkEnumProp(prop, aItem[prop.name])) {
+        throw Error(`${Model.name}.${prop.name} enum value invalid; value = ${item[key]}`)
       }
-      // set enum caption for field
-      // aItem[`${key}_caption`] = format.caption
     }
     if (prop.type === 'refs') {
       // console.log('refs prop')
@@ -196,11 +244,6 @@ export const processAfterLoadFromStorage = (Model, item) => {
         aItem[key] = moment.utc(new Date(item[key])).toDate()
       }
     }
-    /* if (prop.type === 'calculated') {
-      if (prop.getter && (typeof prop.getter === 'function')) {
-        getters.push({ name: prop.name, getter: prop.getter })
-      }
-    } */
   })
 
   // process all after-load getters:
@@ -223,6 +266,15 @@ export const processAfterLoadFromStorage = (Model, item) => {
 const withWhere = (queryBuilder, opt) => {
   if (opt && opt.where) {
     queryBuilder.where(opt.where)
+  }
+}
+
+const withSum = (queryBuilder, opt) => {
+  if (opt && opt.sum) {
+    queryBuilder.sum(opt.sum)
+  }
+  if (opt && opt.sumDistinct) {
+    queryBuilder.sum(opt.sumDistinct)
   }
 }
 
@@ -338,6 +390,7 @@ export default (app) => {
       modelMethods.push({ name: 'findById', handler: Model.storage.findById(Model) })
       modelMethods.push({ name: 'findOne', handler: Model.storage.findOne(Model) })
       modelMethods.push({ name: 'findAll', handler: Model.storage.findAll(Model) })
+      modelMethods.push({ name: 'sum', handler: Model.storage.sum(Model) })
       modelMethods.push({ name: 'count', handler: Model.storage.count(Model) })
       modelMethods.push({ name: 'removeById', handler: Model.storage.removeById(Model) })
       modelMethods.push({ name: 'removeAll', handler: Model.storage.removeAll(Model) })
@@ -534,8 +587,6 @@ export default (app) => {
   }
 
   aStorage.findAll = (Model) => async (opt) => {
-    // console.log('storage.findAll:')
-    // console.log(opt)
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.findAll: some Model's properties are invalid:
         Model ${Model},
@@ -544,10 +595,6 @@ export default (app) => {
     }
     const knex = Model.storage.db
 
-    // if (opt) {
-    //   console.log('opt:')
-    //   console.log(opt)
-    // }
     if(!opt) opt = {}
 
     opt.Model = Model
@@ -565,6 +612,45 @@ export default (app) => {
       .then((res) => {
         // console.log('res:')
         // console.log(res)
+        return Promise.resolve(res)
+      })
+      .catch((err) => {
+        // console.log('error:')
+        // console.log(err)
+        throw err
+      })
+  }
+
+  aStorage.sum = (Model) => async (propName, opt) => {
+    if (!Model || !Model.storage || !Model.storage.db) {
+      return Promise.reject(new Error(`${Model.name}.sum: some Model's properties are invalid:
+        Model ${Model},
+        .storage ${Model.storage}
+        .db ${Model.storage.db}`))
+    }
+    const knex = Model.storage.db
+
+    if(!opt) opt = {}
+
+    opt.Model = Model
+    opt.app = app
+    if (opt.sumDistinct) {
+      opt.sumDistinct = propName
+    } else {
+      opt.sum = propName
+    }
+
+    return knex
+      .from(Model.name)
+      .modify(withSum, opt)
+      .modify(withWhere, opt)
+      .modify(withWhereIn, opt)
+      .modify(withWhereOp, opt)
+      .modify(withWhereQ, opt)
+      // .modify(withOrderBy, opt)
+      // .modify(withRange, opt)
+      // .then((res) => Promise.all(res.map((item) => processAfterLoadFromStorageAsync(Model, item))))
+      .then((res) => {
         return Promise.resolve(res)
       })
       .catch((err) => {

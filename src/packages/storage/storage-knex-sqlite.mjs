@@ -107,6 +107,7 @@ export default (app) => {
     findById: knexStorage.findById,
     findOne: knexStorage.findOne,
     findAll: knexStorage.findAll,
+    sum: knexStorage.sum,
     count: knexStorage.count,
     removeById: knexStorage.removeById,
     removeAll: knexStorage.removeAll,
