@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid'
 
-export const MrpStage = (app) => {
+export const MrpRegStage = (app) => {
   return {
-    name: 'MrpStage',
+    name: 'MrpRegStage',
     caption: 'Учет этапов',
     description: 'Регистр фактического учета прохождения этапов',
-    seedFileName: 'mrp-stage2.json',
+    seedFileName: 'mrp-reg-stage.json',
     icon: 'BarChart',
     props: [
       {
@@ -28,7 +28,7 @@ export const MrpStage = (app) => {
         name: 'pushId',
         type: 'text',
         caption: 'Push-id',
-        description: 'Идентификатор push операции, с которой связана эта операция (группирует операции поступления)',
+        description: 'Идентификатор push операции, с которой связана эта операция (группирует операции, связанные с поступлением)',
         format: 'uuid',
         default: ''
       },
@@ -47,9 +47,9 @@ export const MrpStage = (app) => {
         format: 'DD-MM-YYYY'
       },
       {
-        name: 'resourceStageId',
+        name: 'defStageId',
         type: 'ref',
-        model: 'MrpResourceStage',
+        model: 'MrpDefStage',
         caption: 'Этап',
         description: 'Ссылка на описание этого этапа',
         default: null
@@ -58,7 +58,7 @@ export const MrpStage = (app) => {
         name: 'qntPush',
         type: 'decimal',
         caption: 'Количество',
-        description: 'Количество ресурса, которое будет получено в ходе прохождения этапов',
+        description: 'Количество ресурса, которое будет получено в ходе прохождения всех этапов',
         precision: 12,
         scale: 0,
         format: '',

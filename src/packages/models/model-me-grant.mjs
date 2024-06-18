@@ -43,12 +43,12 @@ export const MeGrant = (app, options) => {
         type: 'enum',
         caption: 'Разрешение',
         description: 'Какое именно передоверие выдано',
-        format: [
+        choices: [
           ACCESS.AccessPermissionType.unknown,
           ACCESS.AccessPermissionType.DENY,
           ACCESS.AccessPermissionType.ALLOW
         ],
-        default: ACCESS.AccessPermissionType.unknown.value
+        default: ACCESS.AccessPermissionType.unknown.id
       },
       {
         name: 'withGrant',

@@ -3,7 +3,7 @@ import moment from 'moment-business-days'
 import _ from 'lodash'
 import { printMoment } from '../../packages/utils/moment-utils.mjs'
 
-export const MrpStock = (app) => {
+export const MrpRegStock = (app) => {
   /** Получить остатки ресурса на указанную дату - общее количество и перечень партий,
    * из которых состоит остаток;
    *
@@ -12,7 +12,7 @@ export const MrpStock = (app) => {
    * @return {Promise<Object>} промис разрешается в объект с полями qnt и batches
    */
   const qntForDate = async (resourceId, date) => {
-    const Stock = app.exModular.models['MrpStock']
+    const Stock = app.exModular.models['MrpRegStock']
     const knex = Stock.storage.db
     const aDateFormat = Stock.props.date.format
 
@@ -90,8 +90,8 @@ export const MrpStock = (app) => {
   }
 
   return {
-    name: 'MrpStock',
-    seedFileName: 'mrp-stock.json',
+    name: 'MrpRegStock',
+    seedFileName: 'mrp-reg-stock.json',
     caption: 'Учет ресурсов',
     description: 'Регистр для количественного учета ресурсов',
     icon: 'BarChart',
@@ -123,6 +123,14 @@ export const MrpStock = (app) => {
         default: ''
       },
       {
+        name: 'pushId',
+        type: 'text',
+        caption: 'Push-id',
+        description: 'Идентификатор push операции, с которой связана эта операция (группирует операции поступления)',
+        format: 'uuid',
+        default: ''
+      },
+      {
         name: 'type',
         type: 'text',
         format: '',
@@ -133,7 +141,7 @@ export const MrpStock = (app) => {
       {
         name: 'resourceId',
         type: 'ref',
-        model: 'MrpResource2',
+        model: 'MrpResource',
         caption: 'Ресурс',
         description: 'Ссылка на ресурс, которого касается операция',
         default: null
@@ -143,6 +151,30 @@ export const MrpStock = (app) => {
         type: 'datetime',
         caption: 'Дата',
         description: 'Дата учетной операции на складе - поступление или списание, остатки ресурса на складе меняются в эту дату',
+        format: 'DD-MM-YYYY',
+        default: null
+      },
+      // {
+      //   name: 'dateOrder',
+      //   type: 'datetime',
+      //   caption: 'Дата заказа',
+      //   description: 'Дата размещения заказа поставщику',
+      //   format: 'DD-MM-YYYY',
+      //   default: null
+      // },
+      {
+        name: 'dateProd',
+        type: 'datetime',
+        caption: 'Дата производства',
+        description: 'Дата производства этой партии ресурса',
+        format: 'DD-MM-YYYY',
+        default: null
+      },
+      {
+        name: 'dateExp',
+        type: 'datetime',
+        caption: 'Дата годности',
+        description: 'Срок годности этой партии ресурса',
         format: 'DD-MM-YYYY',
         default: null
       },
@@ -167,59 +199,19 @@ export const MrpStock = (app) => {
         default: 0
       },
       {
-        name: 'pushId',
-        type: 'text',
-        caption: 'Push-id',
-        description: 'Идентификатор push операции, с которой связана эта операция (группирует операции поступления)',
-        format: 'uuid',
-        default: ''
-      },
-      {
-        name: 'stageId',
+        name: 'regStageId',
         type: 'ref',
-        model: 'MrpStage2',
+        model: 'MrpRegStage',
         caption: 'Этап',
-        description: 'Ссылка на этап, в рамках которого зарегистрирована операция (если push)',
+        description: 'Ссылка на этап, в рамках которого зарегистрирована операция pull',
         default: null
       },
       {
-        name: 'stageRes',
+        name: 'regStockId',
         type: 'ref',
-        model: 'MrpProductStage',
-        caption: 'Этап производства',
-        description: 'Ссылка на запланированный этап производства, к которому относится эта операция',
-        default: null
-      },
-      {
-        name: 'stageResource',
-        type: 'ref',
-        model: 'MrpStageResource',
-        caption: 'Ресурсы этап',
-        description: 'Ссылка на нормы расхода ресурса этапа производства, по которым был списан этот ресурс',
-        default: null
-      },
-      {
-        name: 'dateOrder',
-        type: 'datetime',
-        caption: 'Дата заказа',
-        description: 'Дата размещения заказа поставщику',
-        format: 'DD-MM-YYYY',
-        default: null
-      },
-      {
-        name: 'dateProd',
-        type: 'datetime',
-        caption: 'Дата производства',
-        description: 'Дата производства этой партии ресурса',
-        format: 'DD-MM-YYYY',
-        default: null
-      },
-      {
-        name: 'dateExp',
-        type: 'datetime',
-        caption: 'Дата годности',
-        description: 'Срок годности этой партии ресурса',
-        format: 'DD-MM-YYYY',
+        model: 'MrpRegStock',
+        caption: 'Описание норм расхода',
+        description: 'Ссылка на описание нормы расхода ресурсов, к которому относится эта pull операция',
         default: null
       },
       {

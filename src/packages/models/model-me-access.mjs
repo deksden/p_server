@@ -33,7 +33,7 @@ export const MeAccess = (app, options) => {
           ACCESS.AccessPermissionType.DENY,
           ACCESS.AccessPermissionType.ALLOW
         ],
-        default: ACCESS.AccessPermissionType.unknown.value
+        default: ACCESS.AccessPermissionType.unknown.id
       },
       {
         name: 'withGrant',

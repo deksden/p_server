@@ -46,7 +46,7 @@ export const AuthSocial = (app) => {
   const addSessionForUser = (user, ip, socialLogin) => {
     let session = { userId: user.id, ip }
     if (socialLogin) {
-      session.type = SessionType.Social.value
+      session.type = SessionType.Social.id
     }
     return Session.createOrUpdate(session)
       .then((_session) => {

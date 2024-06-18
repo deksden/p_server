@@ -1,0 +1,11 @@
+[
+  {
+    "id": "dc1",
+    "defStageId": "ds1",
+    "resourceId": "1",
+    "amount": 850,
+    "amountBase": "perPullQnt",
+    "partner": "КонтиПро",
+    "comments": "Нач остаток"
+  }
+]

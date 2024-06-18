@@ -2,14 +2,14 @@
   {
     "id": 1,
     "date": "01-09-2023",
-    "product": "p1",
+    "resourceId": "p1",
     "qnt": 25000,
     "tSelector": "minPrice"
   },
   {
     "id": 2,
     "date": "01-09-2023",
-    "product": "p2",
+    "resourceId": "p2",
     "qnt": 10000,
     "tSelector": "minPrice"
   }

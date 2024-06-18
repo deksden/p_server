@@ -140,9 +140,9 @@ export const MrpPlan = (app) => {
         format: 'DD-MM-YYYY'
       },
       {
-        name: 'product',
+        name: 'resourceId',
         type: 'ref',
-        model: 'MrpProduct',
+        model: 'MrpResource',
         caption: 'Продукт',
         description: 'Продукция, производство которой планируется',
         defOptions: {
@@ -172,7 +172,7 @@ export const MrpPlan = (app) => {
         name: 'tSelector',
         type: 'text',
         caption: 'Выбор условий',
-        description: 'Критерий выбора условий: minPrice, minDuration или $-директивы',
+        description: 'Критерий выбора условий: minPrice, minDuration, minTotal или $-директивы',
         format: '',
         size: 512,
         default: 'minPrice'

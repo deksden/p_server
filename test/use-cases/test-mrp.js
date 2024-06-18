@@ -44,6 +44,7 @@ import { mrpPlan } from '../client/client-mrp.mjs'
 // import moment from 'moment'
 import path from 'path'
 import fs from 'fs'
+// import { MrpResource } from '../../src/ext-mrp/models/mrp-resource.mjs'
 
 /**
 
@@ -91,15 +92,72 @@ describe('MRP: tests', function () {
       .catch(done)
   })
 
-  /* MRP Test plan:
+  describe('MRP 2.0 tests:', function () {
+    it('1: fnPush: списывает несколько партий', function () {
+      // app.exModular.services.seed.variantFolder = 'mrp-test-fn-push'
+      //
+      // const aFile = 'test-mrp-plan1.json'
+      // const fileName = path.join(process.env.SEEDS_DIR, aFile)
+      // const data = JSON.parse(fs.readFileSync(fileName).toString())
+      //
+      // const prodId = data[0].product
+      // const date3 = data[2].date
+      //
+      // const qnt1 = data[0].qnt
+      // const qnt2 = data[1].qnt
+      // const qnt3 = data[2].qnt
+      //
+      // return createAdmin(context)
+      //   .then(() => app.exModular.services.seed.seedModelFromFile('MrpPlan', aFile))
+      //   .then(() => app.exModular.models.MrpPlan.qntForDate(prodId, date3))
+      //   .then((res) => {
+      //     expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
+      //   })
+      //   .then(() => app.exModular.models.MrpPlan.qntForDate('?', date3))
+      //   .then((res) => {
+      //     expect(res).to.be.null()
+      //   })
+      //   .catch((e) => { throw e })
+    })
 
-    u-s-1:
-      1-c1: проверить что аккаунт успешно создан
-      1-c2: проверить что получен токен
-      1-c3: проверить что он администратор
-   */
+    it('1: параллельное течение процессов', function () {
+      // app.exModular.services.seed.variantFolder = 'mrp-test'
+      // const Seed = app.exModular.services.seed
+      //
+      // return createAdmin(context)
+      //   .then(() => Seed.seedModelFromFile('MrpDefStage'))
+      //   .then(() => Seed.seedModelFromFile('MrpDefCost'))
+      //   .then(() => app.exModular.models.MrpResource.select())
+      //   .then((res) => {
+      //     expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
+      //   })
+      //   .then(() => app.exModular.models.MrpPlan.qntForDate('?', date3))
+      //   .then((res) => {
+      //     expect(res).to.be.null()
+      //   })
+      //   .catch((e) => { throw e })
+    })
+  })
 
   describe('MRP unit tests:', function () {
+    it('0.1: test select', function () {
+      // app.exModular.services.seed.variantFolder = 'mrp-test'
+      // const Seed = app.exModular.services.seed
+      //
+      // return createAdmin(context)
+      //   .then(() => Seed.seedModelFromFile('MrpDefStage'))
+      //   .then(() => Seed.seedModelFromFile('MrpDefCost'))
+      //   .then(() => app.exModular.models.MrpResource.select())
+      //   .then((res) => {
+      //     expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
+      //   })
+      //   .then(() => app.exModular.models.MrpPlan.qntForDate('?', date3))
+      //   .then((res) => {
+      //     expect(res).to.be.null()
+      //   })
+      //   .catch((e) => { throw e })
+    })
+
     it('1.1: MrpPlan.qntForDate', function () {
       const aFile = 'test-mrp-plan1.json'
       const fileName = path.join(process.env.SEEDS_DIR, aFile)
@@ -112,18 +170,22 @@ describe('MRP: tests', function () {
       const qnt2 = data[1].qnt
       const qnt3 = data[2].qnt
 
+      // eslint-disable-next-line dot-notation
+      const MrpPlan = app.exModular.models['MrpPlan']
+
       return createAdmin(context)
         .then(() => app.exModular.services.seed.seedModelFromFile('MrpPlan', aFile))
-        .then(() => app.exModular.models.MrpPlan.qntForDate(prodId, date3))
+        .then(() => MrpPlan.qntForDate(prodId, date3))
         .then((res) => {
           expect(res).to.be.equal(qnt1 + qnt2 + qnt3)
         })
-        .then(() => app.exModular.models.MrpPlan.qntForDate('?', date3))
+        .then(() => MrpPlan.qntForDate('?', date3))
         .then((res) => {
           expect(res).to.be.null()
         })
         .catch((e) => { throw e })
     })
+
     it('1.2: MrpProductStock.qntForDate', function () {
       // load JSON data:
       const fileName = path.join(process.env.SEEDS_DIR, 'mrp-product-stock.json')

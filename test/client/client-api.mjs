@@ -301,27 +301,27 @@ export const createPermsForNoteForGroup = (groupId) => {
     {
       userGroupId: groupId,
       accessObjectId: 'Note.list',
-      permission: ACCESS.AccessPermissionType.ALLOW.value
+      permission: ACCESS.AccessPermissionType.ALLOW.id
     },
     {
       userGroupId: groupId,
       accessObjectId: 'Note.item',
-      permission: ACCESS.AccessPermissionType.ALLOW.value
+      permission: ACCESS.AccessPermissionType.ALLOW.id
     },
     {
       userGroupId: groupId,
       accessObjectId: 'Note.create',
-      permission: ACCESS.AccessPermissionType.ALLOW.value
+      permission: ACCESS.AccessPermissionType.ALLOW.id
     },
     {
       userGroupId: groupId,
       accessObjectId: 'Note.remove',
-      permission: ACCESS.AccessPermissionType.ALLOW.value
+      permission: ACCESS.AccessPermissionType.ALLOW.id
     },
     {
       userGroupId: groupId,
       accessObjectId: 'Note.removeAll',
-      permission: ACCESS.AccessPermissionType.ALLOW.value
+      permission: ACCESS.AccessPermissionType.ALLOW.id
     }
   ]
 }

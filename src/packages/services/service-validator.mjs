@@ -103,7 +103,7 @@ export const Validator = (app) => {
         })
 
         // вернем валидатор:
-        return body(propName).isIn(vals).withMessage(`${Model.name}.${prop.name} should be in predefined enum values: ${aValues}`)
+        return body(propName).isIn(vals).withMessage(`${Model.name}.${prop.name} should be in predefined enum values: ${vals}`)
       }
 
       if (Array.isArray(prop.choices) && (typeof prop.choices[0] === 'object')) {

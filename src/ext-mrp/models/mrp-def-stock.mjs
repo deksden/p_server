@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 import _ from 'lodash'
 
-export const MrpStageStock = (app) => {
+export const MrpDefStock = (app) => {
   const print = async (aItem, comments='') => {
     if(process.env.NODE_ENV !== 'development') return
 
@@ -10,28 +10,28 @@ export const MrpStageStock = (app) => {
     const item = _.clone(aItem)
 
     // expand item:
-    const Stage = app.exModular.models['MrpStage']
+    const Stage = app.exModular.models['MrpDefStage']
     item.Stage = await Stage.findById(item.stage)
     const Resource = app.exModular.models['MrpResource']
     item.Resource = await Resource.findById(item.resource)
 
-    console.log(`MrpStageStock: ${comments}
+    console.log(`MrpDefStock: ${comments}
       id: ${item.id}
-      stage: ${item.stage}
-      stage.Caption: ${item.Stage.caption}
-      resource: ${item.resource}
+      defStageId: ${item.defStageId}
+      resourceId: ${item.resourceId}
       resource.Caption: ${item.Resource.caption}
-      date: ${printMoment(item.date)}
+      dateBeg: ${printMoment(item.dateBeg)}
+      dateEnd: ${printMoment(item.dateEnd)}
       qnt: ${item.qnt}
       baseQnt: ${item.baseQnt}
       price: ${item.price}`)
   }
 
   return {
-    name: 'MrpStageStock',
+    name: 'MrpDefStock',
     caption: 'Нормы расхода',
     description: 'Описание норм расхода ресурсов на этапе',
-    seedFileName: 'mrp-stage-stock.json',
+    seedFileName: 'mrp-def-stock.json',
     icon: 'BarChart',
     print,
     props: [
@@ -44,9 +44,9 @@ export const MrpStageStock = (app) => {
         default: () => uuid()
       },
       {
-        name: 'stageId',
+        name: 'defStageId',
         type: 'ref',
-        model: 'MrpStage2',
+        model: 'MrpDefStage',
         caption: 'Этап',
         description: 'Ссылка на этап, для которого указана норма расхода',
         default: null
@@ -54,20 +54,25 @@ export const MrpStageStock = (app) => {
       {
         name: 'resourceId',
         type: 'ref',
-        model: 'MrpResource2',
+        model: 'MrpResource',
         caption: 'Ресурс',
         description: 'Ссылка на ресурс, для которого указана норма расхода на этапе',
         default: null
       },
       {
-        name: 'date',
+        name: 'dateBeg',
         type: 'datetime',
-        caption: 'Дата',
-        description: 'Дата с которой действует эта норма',
-        format: 'DD-MM-YYYY',
-        default: makeMoment('01-01-1900')
+        caption: 'Дата начала',
+        description: 'Дата начала действий этих норма расхода',
+        format: 'DD-MM-YYYY'
       },
-
+      {
+        name: 'dateEnd',
+        type: 'datetime',
+        caption: 'Дата завершения',
+        description: 'Дата завершения действий этих норма расхода',
+        format: 'DD-MM-YYYY'
+      },
       {
         name: 'qnt',
         type: 'decimal',

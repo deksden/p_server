@@ -2,8 +2,8 @@ import { v4 as uuid } from 'uuid'
 // import _ from 'lodash'
 
 export const AccessObjectType = {
-  unknown: { value: null, caption: '(unknown)' },
-  Controller: { value: 1, caption: 'Controller' }
+  unknown: { id: null, caption: '(unknown)' },
+  Controller: { id: 1, caption: 'Controller' }
 }
 
 export const AccessObject = (app, options) => {
@@ -37,11 +37,11 @@ export const AccessObject = (app, options) => {
         type: 'enum',
         caption: 'Тип объекта',
         description: 'Тип объекта, для которого указан доступ',
-        format: [
+        choices: [
           AccessObjectType.unknown,
           AccessObjectType.Controller
         ],
-        default: AccessObjectType.unknown.value
+        default: AccessObjectType.unknown.id
       }
     ]
   }

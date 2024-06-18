@@ -30,6 +30,22 @@ export const Note = (app) => {
         default: ''
       },
       {
+        name: 'type',
+        type: 'enum',
+        caption: 'Тип',
+        choices: [null, 1,2,3],
+        default: null
+      },
+      {
+        name: 'userId',
+        type: 'ref',
+        model: 'User',
+        expand: 'User',
+        caption: 'Пользователь',
+        description: 'Пользователь',
+        default: null
+      },
+      {
         name: 'createdAt',
         type: 'datetime',
         caption: 'Дата',

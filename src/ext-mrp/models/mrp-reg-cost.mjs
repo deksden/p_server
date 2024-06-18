@@ -3,7 +3,7 @@ import moment from 'moment-business-days'
 import _ from 'lodash'
 import { printMoment } from '../../packages/utils/moment-utils.mjs'
 
-export const MrpCost = (app) => {
+export const MrpRegCost = (app) => {
   const print = async (aItem, comments = '') => {
     if(process.env.NODE_ENV !== 'development') return
 
@@ -20,7 +20,7 @@ export const MrpCost = (app) => {
     const StageResource = app.exModular.models['MrpStageResource']
     item.StageResource = await StageResource.findById(item.stageResource)
 
-    console.log(`Stock: ${comments}
+    console.log(`MrpRegCost: ${comments}
       id: ${item.id}
       batchId: ${item.batchId}
       type: ${item.type}
@@ -47,8 +47,8 @@ export const MrpCost = (app) => {
   }
 
   return {
-    name: 'MrpCost',
-    seedFileName: 'mrp-cost.json',
+    name: 'MrpRegCost',
+    seedFileName: 'mrp-reg-cost.json',
     caption: 'Учет расходов',
     description: 'Регистр учета расходов',
     icon: 'BarChart',
@@ -87,17 +87,17 @@ export const MrpCost = (app) => {
         default: ''
       },
       {
-        name: 'stockId',
+        name: 'regStockId',
         type: 'ref',
-        model: 'MrpStock',
+        model: 'MrpRegStock',
         caption: 'Учет ресурсов',
         description: 'Ссылка на операцию с ресурсом, к которой относятся эти расходы',
         default: null
       },
       {
-        name: 'stageId',
+        name: 'regStageId',
         type: 'ref',
-        model: 'MrpStage2',
+        model: 'MrpRegStage',
         caption: 'Этап',
         description: 'Ссылка на этап, в рамках которого зарегистрирована операция',
         default: null
@@ -111,7 +111,7 @@ export const MrpCost = (app) => {
         default: null
       },
       {
-        name: 'price',
+        name: 'summ',
         type: 'decimal',
         caption: 'Цена',
         description: 'Стоимость единицы ресурса',

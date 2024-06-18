@@ -467,8 +467,8 @@ describe('exModular: storage', function () {
             context.groupEmployee = res.body.id
 
             const perms = [
-              { userGroupId: context.groupEmployee, accessObjectId: 'Note.list', permission: ACCESS.AccessPermissionType.ALLOW.value },
-              { userGroupId: context.groupEmployee, accessObjectId: 'Note.item', permission: ACCESS.AccessPermissionType.ALLOW.value }
+              { userGroupId: context.groupEmployee, accessObjectId: 'Note.list', permission: ACCESS.AccessPermissionType.ALLOW.id },
+              { userGroupId: context.groupEmployee, accessObjectId: 'Note.item', permission: ACCESS.AccessPermissionType.ALLOW.id }
             ]
             return permissionUserGroupCreate(context, perms)
           })
@@ -504,11 +504,11 @@ describe('exModular: storage', function () {
           .then(() => createGroupManagers(context))
           .then(() => {
             const perms = [
-              { userGroupId: context.groupManagers, accessObjectId: 'Note.list', permission: ACCESS.AccessPermissionType.ALLOW.value, withGrant: true },
-              { userGroupId: context.groupManagers, accessObjectId: 'Note.item', permission: ACCESS.AccessPermissionType.ALLOW.value, withGrant: true },
-              { userGroupId: context.groupManagers, accessObjectId: 'Note.create', permission: ACCESS.AccessPermissionType.ALLOW.value, withGrant: false },
-              { userGroupId: context.groupManagers, accessObjectId: 'Note.remove', permission: ACCESS.AccessPermissionType.ALLOW.value, withGrant: false },
-              { userGroupId: context.groupManagers, accessObjectId: 'Note.removeAll', permission: ACCESS.AccessPermissionType.ALLOW.value, withGrant: false }
+              { userGroupId: context.groupManagers, accessObjectId: 'Note.list', permission: ACCESS.AccessPermissionType.ALLOW.id, withGrant: true },
+              { userGroupId: context.groupManagers, accessObjectId: 'Note.item', permission: ACCESS.AccessPermissionType.ALLOW.id, withGrant: true },
+              { userGroupId: context.groupManagers, accessObjectId: 'Note.create', permission: ACCESS.AccessPermissionType.ALLOW.id, withGrant: false },
+              { userGroupId: context.groupManagers, accessObjectId: 'Note.remove', permission: ACCESS.AccessPermissionType.ALLOW.id, withGrant: false },
+              { userGroupId: context.groupManagers, accessObjectId: 'Note.removeAll', permission: ACCESS.AccessPermissionType.ALLOW.id, withGrant: false }
             ]
 
             return permissionUserGroupCreate(context, perms)

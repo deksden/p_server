@@ -1,14 +1,43 @@
 import { v4 as uuid } from 'uuid'
+import _ from 'lodash'
+import { printMoment } from '../../packages/utils/moment-utils.mjs'
 // import { makeMoment, printMoment } from '../../packages/utils/moment-utils.mjs'
 // import moment from 'moment-business-days'
 
-export const MrpResourceStage = (app) => {
+export const MrpDefProcess = (app) => {
+  const print = async (aItem, comments='') => {
+    if(process.env.NODE_ENV !== 'development') return
+
+    // clone item:
+    const item = _.clone(aItem)
+
+    // expand item:
+    const Resource = app.exModular.models['MrpResource']
+    item.Resource = await Resource.findById(item.resource)
+
+    // print item:
+    console.log(`MrpDefProcess: ${comments}
+      id: ${item.id}
+      resourceId: ${item.resourceId}
+      resource.Caption: ${item.Resource.caption}
+      dateBeg: ${printMoment(item.dateBeg)}
+      dateEnd: ${printMoment(item.dateEnd)}
+      order: ${item.order}
+      caption: ${item.caption}
+      duration: ${item.duration}
+      inWorkingDays: ${item.inWorkingDays}
+      orderMin: ${item.orderMin}
+      orderStep: ${item.orderStep}
+      comments: ${item.comments}`)
+  }
+
   return {
-    name: 'MrpStage2',
+    name: 'MrpDefProcess',
     caption: 'Этап',
-    description: 'Описания этапов получения ресурса',
-    seedFileName: 'mrp-resource-stage.json',
+    description: 'Описания процесса получения ресурса',
+    seedFileName: 'mrp-def-process.json',
     icon: 'BarChart',
+    print,
     props: [
       {
         name: 'id',
@@ -21,7 +50,7 @@ export const MrpResourceStage = (app) => {
       {
         name: 'resourceId',
         type: 'ref',
-        model: 'MrpResource2',
+        model: 'MrpResource',
         caption: 'Ресурс',
         description: 'Ссылка на ресурс, который будет получен в результате прохождения всех этапов',
         default: null
@@ -30,51 +59,23 @@ export const MrpResourceStage = (app) => {
         name: 'dateBeg',
         type: 'datetime',
         caption: 'Дата начала',
-        description: 'Дата начала действий этих условий этапа',
+        description: 'Дата начала действия этого процесса',
         format: 'DD-MM-YYYY'
       },
       {
         name: 'dateEnd',
         type: 'datetime',
         caption: 'Дата завершения',
-        description: 'Дата завершения действий этих условий этапа',
+        description: 'Дата завершения действий этого процесса',
         format: 'DD-MM-YYYY'
-      },
-      {
-        name: 'order',
-        type: 'decimal',
-        caption: 'Порядок',
-        description: 'Порядковый номер этапа',
-        precision: 6,
-        scale: 0,
-        format: '',
-        default: 1
       },
       {
         name: 'caption',
         type: 'text',
         format: '',
         caption: 'Название',
-        description: 'Наименование этапа',
+        description: 'Наименование процесса',
         default: ''
-      },
-      {
-        name: 'duration',
-        type: 'decimal',
-        caption: 'Длительность',
-        description: 'Длительность этого этапа',
-        precision: 6,
-        scale: 0,
-        format: '',
-        default: 1
-      },
-      {
-        name: 'inWorkingDays',
-        type: 'boolean',
-        format: '',
-        caption: 'Рабочие дни',
-        description: 'Признак, что длительность этого этапа указана в рабочих днях',
-        default: false
       },
       {
         name: 'orderMin',
@@ -95,14 +96,6 @@ export const MrpResourceStage = (app) => {
         scale: 2,
         format: '',
         default: 0
-      },
-      {
-        name: 'partner',
-        type: 'text',
-        format: '',
-        caption: 'Поставщик',
-        description: 'Компания-поставщик',
-        default: ''
       },
       {
         name: 'comments',

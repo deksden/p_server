@@ -42,12 +42,12 @@ export const PermissionUser = (app, options) => {
         type: 'enum',
         caption: 'Разрешение',
         description: 'Какое именно разрешение выдано',
-        format: [
+        choices: [
           AccessPermissionType.unknown,
           AccessPermissionType.DENY,
           AccessPermissionType.ALLOW
         ],
-        default: AccessPermissionType.unknown.value
+        default: AccessPermissionType.unknown.id
       },
       {
         name: 'withGrant',

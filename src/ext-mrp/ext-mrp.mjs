@@ -7,35 +7,34 @@
  This module initialize "MRP" extension module.
 
 */
+import { MrpDefCost } from './models/mrp-def-cost.mjs'
+import { MrpDefProcessResource } from './models/mrp-def-process-resource.mjs'
+import { MrpDefProcess } from './models/mrp-def-process.mjs'
+import { MrpDefStage } from './models/mrp-def-stage.mjs'
+import { MrpDefStock } from './models/mrp-def-stock.mjs'
 import { MrpPlan } from './models/mrp-plan.mjs'
-import { MrpTerm } from './models/mrp-term.mjs'
-import { MrpStage } from './models/mrp-stage.mjs'
-import { MrpProductStock } from './models/mrp-product-stock.mjs'
-import { MrpProduct } from './models/mrp-product.mjs'
-import { MrpResourceStock } from './models/mrp-resource-stock.mjs'
+import { MrpRegCost } from './models/mrp-reg-cost.mjs'
+import { MrpRegStage } from './models/mrp-reg-stage.mjs'
+import { MrpRegStock } from './models/mrp-reg-stock.mjs'
 import { MrpResource } from './models/mrp-resource.mjs'
-import { MrpStageResource } from './models/mrp-stage-resource.mjs'
-import { MrpProductStage } from './models/mrp-product-stage.mjs'
-// import { InitExtTest } from './init-mrp.mjs'
+
 import { MrpRouteReports } from './routes/route-reports.mjs'
 import { MrpRoutePlan } from './routes/route-plan.mjs'
-import { MrpCost } from './models/mrp-cost.mjs'
-import { MrpResource2 } from './models/mrp-resource2.mjs'
-import { MrpResourceStage } from './models/mrp-resource-stage.mjs'
 
 const packageName = 'ExtMrp'
 
 export const ExtMrp = (app, opt) => {
   app.exModular.services.seed.modelSet.MRP = [
     'MrpPlan',
-    'MrpTerm',
-    'MrpStage',
-    'MrpStageResource',
-    'MrpProductStock',
-    'MrpProduct',
-    'MrpProductStage',
-    'MrpResource',
-    'MrpResourceStock'
+    'MrpDefProcess',
+    'MrpDefProcessResource',
+    'MrpDefCost',
+    'MrpDefStage',
+    'MrpDefStock',
+    'MrpRegCost',
+    'MrpRegStage',
+    'MrpRegStock',
+    'MrpResource'
   ]
 
   app.exModular.modules.Add({
@@ -47,18 +46,15 @@ export const ExtMrp = (app, opt) => {
     ],
     models: [
       MrpPlan,
-      MrpTerm,
-      MrpStage,
-      MrpStageResource,
-      MrpProductStock,
-      MrpProduct,
-      MrpProductStage,
-      MrpResource,
-      MrpResourceStock,
-      MrpCost,
-      MrpResource2,
-      MrpResourceStage,
-      MrpStageCost
+      MrpDefCost,
+      MrpDefProcess,
+      MrpDefProcessResource,
+      MrpDefStage,
+      MrpDefStock,
+      MrpRegCost,
+      MrpRegStage,
+      MrpRegStock,
+      MrpResource
     ]
   })
 

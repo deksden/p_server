@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ds1",
+    "resourceId": "p1",
+    "dateBeg": "01-01-2022",
+    "dateEnd": null,
+    "order": 0,
+    "caption": "Гель - Производство в ампулы",
+    "duration": 20,
+    "inWorkingDays": true,
+    "orderMin": 5000,
+    "orderStep": 1000,
+    "comments": "Производство ампул и тестирование, 20 рабочих дней (4 недели)"
+  }
+]

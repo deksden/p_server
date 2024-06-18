@@ -42,12 +42,12 @@ export const Session = (app) => {
         type: 'enum',
         caption: '',
         description: '',
-        format: [
+        choices: [
           SessionType.Unknown,
           SessionType.Password,
           SessionType.Social
         ],
-        default: SessionType.Password.value
+        default: SessionType.Password.id
       }
     ]
   }

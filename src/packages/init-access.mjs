@@ -17,7 +17,7 @@ export const InitAccess = (app) => () => {
         return UserGroup.create({
           id: ACCESS.ADMIN_GROUP_ID,
           name: ACCESS.AccessSystemType.Admin.caption,
-          systemType: ACCESS.AccessSystemType.Admin.value,
+          systemType: ACCESS.AccessSystemType.Admin.id,
           users: []
         })
       }
@@ -29,7 +29,7 @@ export const InitAccess = (app) => () => {
         return UserGroup.create({
           id: ACCESS.LOGGED_GROUP_ID,
           name: ACCESS.AccessSystemType.Logged.caption,
-          systemType: ACCESS.AccessSystemType.Logged.value,
+          systemType: ACCESS.AccessSystemType.Logged.id,
           users: []
         })
       }
@@ -58,7 +58,7 @@ export const InitAccess = (app) => () => {
               return AccessObject.create({
                 id: route.name,
                 objectName: route.name,
-                type: AccessObjectType.Controller.value
+                type: AccessObjectType.Controller.id
               })
             }
             return _item
