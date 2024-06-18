@@ -105,6 +105,7 @@ export default (app) => {
     refsClear: knexStorage.refsClear,
 
     findById: knexStorage.findById,
+    expand: knexStorage.expand,
     findOne: knexStorage.findOne,
     findAll: knexStorage.findAll,
     sum: knexStorage.sum,

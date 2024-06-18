@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import fs from 'fs'
+// import fs from 'fs'
 import moment from 'moment'
 import { isPromise } from '../utils/is-promise.mjs'
 import { makeMoment } from '../utils/moment-utils.mjs'
@@ -47,18 +47,62 @@ export const checkEnumProp = (prop, value) => {
     throw Error(`checkEnumProp: prop "${prop}".choices is empty`)
   }
 
+  if (value) {
+    value = value.toString()
+  }
+  if (value === undefined) {
+    value = null
+  }
   // посмотрим, в каком формате описан enum:
-  if (typeof prop.choices[0] === 'number' || typeof prop.choices[0] === 'string') {
-    // свойство описано как массив цифровых значений, преобразуем его в массив строк и найдем в нем value
-    const vals = prop.choices.split(',').map((itm) => itm.toString())
+  if (typeof prop.choices === 'string') {
+    const vals = prop.choices.split(',')
     return _.indexOf(vals, value) !== -1
-  } else if (typeof prop.choices[0] === 'object') {
-    // если у нас .choices описан как массив объектов, то нужно чтобы
-    // было указано ключевое свойство в .optionValue. проверим на это:
+  }
+  if (Array.isArray(prop.choices) && (prop.choices[0] === null || prop.choices[0] === undefined || typeof prop.choices[0] === 'number' || typeof prop.choices[0] === 'string')) {
+    // свойство описано как массив значений:
+
+    // сформируем массив "как есть":
+    const m = prop.choices.map((itm) => {
+      if (itm === undefined) return undefined
+      if (itm === null) return null
+      return itm
+    })
+
+    // добавим строковые значения:
+    prop.choices.map((itm) => {
+      if (itm) m.push(itm.toString())
+    })
+
+    return _.indexOf(m, value) !== -1
+  } else if (Array.isArray(prop.choices) && typeof prop.choices[0] === 'object') {
+    // Если у нас .choices описан как массив объектов, то нужно чтобы
+    // было указано ключевое свойство в .optionValue, проверим на это:
     if (!prop.optionValue) {
       throw Error(`checkEnumProp: prop "${prop}".optionValue is empty. Should be set for .choices with array ob Objects`)
     }
-    return _.find(prop.choices.map((itm) => itm.toString()), [prop.optionValue,value]) !== undefined
+    const f = value
+
+    // сформируем массив значений "как есть":
+    const m = prop.choices.map((itm) => {
+      if (itm === undefined) return undefined
+      if (itm === null) return null
+
+      if (itm[prop.optionValue] === undefined) {
+        return undefined
+      }
+      if (itm[prop.optionValue] === null) {
+        return null
+      }
+      return itm[prop.optionValue]
+    })
+
+    // добавим строковые представления значений:
+    prop.choices.map((itm) => {
+      if (itm && itm[prop.optionValue]) m.push(itm[prop.optionValue].toString())
+    })
+
+    const a = _.indexOf(m, f)
+    return (a !== -1)
   } else {
     throw Error(`checkEnumProp: typeof prop "${prop}".choices should be list of strings/numbers or objects`)
   }
@@ -107,6 +151,9 @@ export const processBeforeSaveToStorage = (Model, item, opts) => {
       aItem[prop.name] = moment.utc(item[prop.name], fmt).toDate()
     }
     if (prop.type === 'enum') {
+      if (!prop.optionValue) {
+        prop.optionValue = 'id'
+      }
       // ensure enum values are in range:
       if (!checkEnumProp(prop, aItem[prop.name])) {
         throw Error(`${Model.name}.${prop.name} enum is invalid`)
@@ -168,7 +215,6 @@ export const processAfterLoadFromStorageAsync = (Model, item) => {
 
 // transform some item using rules from Model:l
 export const processAfterLoadFromStorage = (Model, item) => {
-  // console.log(`\nprocessGetProps(${Model.name}, ${JSON.stringify(item)}\n`)
   // if item is not defined, return null
   if (!item) {
     return item
@@ -388,6 +434,7 @@ export default (app) => {
       })
 
       modelMethods.push({ name: 'findById', handler: Model.storage.findById(Model) })
+      modelMethods.push({ name: 'expand', handler: Model.storage.expand(Model) })
       modelMethods.push({ name: 'findOne', handler: Model.storage.findOne(Model) })
       modelMethods.push({ name: 'findAll', handler: Model.storage.findAll(Model) })
       modelMethods.push({ name: 'sum', handler: Model.storage.sum(Model) })
@@ -511,6 +558,24 @@ export default (app) => {
   //     .catch((err) => { throw err })
   // }
 
+  aStorage.expand = (Model) => async (item) => {
+    const aItem = _.clone(item)
+
+    // expand props:
+    for(const prop of Model.props) {
+      if (prop.type === 'ref' && prop.expand && prop.model) {
+        // we have ref & expand:
+        const RefModel = app.exModular.models[prop.model]
+        if (!RefModel) {
+          throw Error(`${Model.name}.expand: ref prop "${prop.name}".model ("${prop.model}") is invalid:`)
+        }
+        // load ref resource as expanded property:
+        aItem[prop.expand] = await RefModel.findById(item[prop.name])
+      }
+    }
+    return aItem
+  }
+
   aStorage.dataClear = (Model) => async () => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.dataClear: some Model's properties are invalid:
@@ -552,6 +617,12 @@ export default (app) => {
       .from(Model.name)
       .where(Model.key, id)
       .then((res) => processAfterLoadFromStorageAsync(Model, res[0]))
+      .then(async (res) => {
+        if (res) {
+          return await Model.expand(res)
+        }
+        return res
+      })
       .catch((err) => { throw err })
   }
 
@@ -583,6 +654,13 @@ export default (app) => {
       .modify(withRange, opt)
       .limit(1)
       .then((res) => processAfterLoadFromStorageAsync(Model, res[0]))
+      .then(async (res) => {
+        if (opt.expand || opt.expand === undefined) {
+          return await Model.expand(res)
+        } else {
+          return res
+        }
+      })
       .catch((err) => { throw err })
   }
 
@@ -609,10 +687,16 @@ export default (app) => {
       .modify(withOrderBy, opt)
       .modify(withRange, opt)
       .then((res) => Promise.all(res.map((item) => processAfterLoadFromStorageAsync(Model, item))))
-      .then((res) => {
-        // console.log('res:')
-        // console.log(res)
-        return Promise.resolve(res)
+      .then(async (res) => {
+        if (opt.expand || opt.expand === undefined) {
+          const ret = []
+          for (const item of res) {
+            ret.push(await Model.expand(item))
+          }
+          return Promise.resolve(ret)
+        } else {
+          return Promise.resolve(res)
+        }
       })
       .catch((err) => {
         // console.log('error:')

@@ -78,8 +78,54 @@ export const Validator = (app) => {
       }
       return v
     } else if (prop.type === 'enum') {
-      const aValues = prop.format.map((item) => item.value)
-      return body(propName).isIn(aValues).withMessage(`${Model.name}.${prop.name} should have predefined enum values: ${aValues}`)
+      if (!prop.optionValue) {
+        prop.optionValue = 'id'
+      }
+
+      if (Array.isArray(prop.choices) && prop.choices.length === 0) {
+        throw Error(`${Model.name}.${prop.name} .choices should be an array, and not empty!`)
+      }
+
+      if (Array.isArray(prop.choices) && (typeof prop.choices[0] === 'number' || typeof prop.choices[0] === 'string')) {
+        // У нас choices записаны как массив строк/чисел,
+        // запишем как есть - массив значений с null/undefined значениями
+        const vals = prop.choices.map((itm) => {
+          if (itm === null) return null
+          if (itm === undefined) return undefined
+          return itm
+        })
+
+        // и на всякий случай запишем "как строки":
+        prop.choices.map((itm) => {
+          if (itm !== null &&  itm !== undefined) {
+            vals.push(itm.toString())
+          }
+        })
+
+        // вернем валидатор:
+        return body(propName).isIn(vals).withMessage(`${Model.name}.${prop.name} should be in predefined enum values: ${aValues}`)
+      }
+
+      if (Array.isArray(prop.choices) && (typeof prop.choices[0] === 'object')) {
+        // Массив choices определен как массив объектов. Получим значения из choices[optionValue]
+
+        // добавим валидатор для значений "как есть"
+        const aValues = prop.choices.map((item) => {
+          if (item === null) return null
+          if (item === undefined) return undefined
+          return item[prop.optionValue]
+        })
+
+        // запишем как строки:
+        prop.choices.map((item) => {
+          if (item !== null && item !== undefined) {
+            aValues.push(item.toString())
+          }
+        })
+        return body(propName).isIn(aValues).withMessage(`${Model.name}.${prop.name} should be in predefined enum values: ${aValues}`)
+      }
+
+      throw Error(`${Model.name}.${prop.name} .choices format is not supported`)
     }
     return null
   }

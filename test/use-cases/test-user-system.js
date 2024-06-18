@@ -6,6 +6,7 @@ import dirtyChai from 'dirty-chai'
 import env from 'dotenv-safe'
 import _ from 'lodash'
 
+
 import { appBuilder as App } from '../../src/packages/app-builder.mjs'
 
 import {
@@ -39,6 +40,8 @@ import * as ACCESS from '../../src/packages/const/const-access.mjs'
 import { ExtTest } from '../../src/ext-test/ext-test.mjs'
 import { expected, UserAdmin, UserFirst, UserSecond } from '../client/client-const.mjs'
 
+env.config({ allowEmptyValues: true })
+
 /**
 
 */
@@ -48,7 +51,7 @@ chai.use(dirtyChai)
 // test case:
 describe('exModular: storage', function () {
   env.config()
-  process.env.NODE_ENV = 'test' // just to be sure
+  // process.env.NODE_ENV = 'test' // just to be sure
   let app = null
 
   const context = {
@@ -585,6 +588,52 @@ describe('exModular: storage', function () {
           .catch((e) => { throw e })
       })
     })
+    it('6-4: Model.expand', function () {
+      return createAdmin(context)
+        .then(() => createGroupManagers(context))
+        .then(() => createUserFirst(context))
+        .then(() => userGroupUsersAdd(context, context.groupManagers, [context.userFirstId, context.adminId]))
+        .then(() => noteAdd(context, { caption: 'some note', userId: context.userFirstId }))
+        .then((res) => {
+          // 6-4-c1:
+          expect(res.body).to.exist('Body should exist')
+          expect(res.body).to.be.an('object')
+          expect(res.body.userId).to.exist()
+          expect(res.body.userId).to.be.equal(context.userFirstId)
+          expect(res.body.User).to.exist()
+          expect(res.body.User.id).to.exist()
+          expect(res.body.User.id).to.be.equal(context.userFirstId)
+          expect(res.body.User.name).to.exist()
+          expect(res.body.User.password).to.exist()
+        })
+        .catch((e) => { throw e })
+    })
+
+    describe('6-5. Module enum property', function () {
+      it('6-5-1: Model enum property, нормальное добавление', function () {
+        return createAdmin(context)
+          .then(() => noteAdd(context, { caption: 'some note', type: '1' }))
+          .then((res) => {
+            // 6-4-c1:
+            expect(res.body).to.exist('Body should exist')
+            expect(res.body).to.be.an('object')
+            expect(res.body.type).to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+
+      it('6-5-2: Model enum property, проверка на ошибку при добавлении', function () {
+        return createAdmin(context)
+          .then(() => noteAdd(context, { caption: 'some note', type: 5 }, expected.ErrCodeInvalidParams))
+          .then((res) => {
+            expect(res.body).to.exist('Body should exist')
+            expect(res.body).to.be.an('object')
+            expect(res.body.error).to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+    })
+
     describe('u-s-7: Me routes', function () {
       it('7-1: me access', function () {
         return createAdmin(context)
