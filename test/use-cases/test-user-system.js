@@ -217,6 +217,109 @@ describe('exModular: storage', function () {
         })
         .catch((e) => { throw e })
     })
+    describe('s-3: enum property', function () {
+      it('s-3-1: нормальное добавление', function () {
+        return createAdmin(context)
+          .then(() => noteAdd(context, { caption: 'some note', type: '1' }))
+          .then((res) => {
+            // 6-4-c1:
+            expect(res.body).to.exist('Body should exist')
+            expect(res.body).to.be.an('object')
+            expect(res.body.type).to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+
+      it('s-3-2: проверка на ошибку при добавлении', function () {
+        return createAdmin(context)
+          .then(() => noteAdd(context, { caption: 'some note', type: 5 }, expected.ErrCodeInvalidParams))
+          .then((res) => {
+            expect(res.body).to.exist('Body should exist')
+            expect(res.body).to.be.an('object')
+            expect(res.body.error).to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+    })
+
+    describe('s-4: Model.expand', function () {
+      it('s-4-1: нормальный вызов, расширение выполнено по-умолчанию', function () {
+        return createAdmin(context)
+          .then(() => createGroupManagers(context))
+          .then(() => createUserFirst(context))
+          .then(() => userGroupUsersAdd(context, context.groupManagers, [context.userFirstId, context.adminId]))
+          .then(() => noteAdd(context, { caption: 'some note', userId: context.userFirstId }))
+          .then((res) => {
+            // 6-4-c1:
+            expect(res.body).to.exist('Body should exist')
+            expect(res.body).to.be.an('object')
+            expect(res.body.userId).to.exist()
+            expect(res.body.userId).to.be.equal(context.userFirstId)
+            expect(res.body.User).to.exist()
+            expect(res.body.User.id).to.exist()
+            expect(res.body.User.id).to.be.equal(context.userFirstId)
+            expect(res.body.User.name).to.exist()
+            expect(res.body.User.password).to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+      it('s-4-2: опция opt.expand = false, расширение не производится', function () {
+        return createAdmin(context)
+          .then(() => createGroupManagers(context))
+          .then(() => createUserFirst(context))
+          .then(() => userGroupUsersAdd(context, context.groupManagers, [context.userFirstId, context.adminId]))
+          .then(async () => {
+            const res = await app.exModular.models.Note.create(
+              { caption: 'some note', userId: context.userFirstId },
+              { expand: false })
+
+            expect(res).to.exist('Body should exist')
+            expect(res).to.be.an('object')
+            expect(res.userId).to.exist()
+            expect(res.userId).to.be.equal(context.userFirstId)
+            expect(res.User).not.to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+      it('s-4-3: для функции findAll, findOne проверить работу опции opt.expand', function () {
+        return createAdmin(context)
+          .then(() => createGroupManagers(context))
+          .then(() => createUserFirst(context))
+          .then(() => userGroupUsersAdd(context, context.groupManagers, [context.userFirstId, context.adminId]))
+          .then(() => noteAdd(context, { caption: 'some note', userId: context.userFirstId }))
+          .then(async (res) => {
+            let notes = await app.exModular.models.Note.findAll({
+              where: { id: res.body.id },
+              expand: true
+            })
+
+            // expand should work:
+            expect(notes).to.exist('Body should exist')
+            expect(notes).to.be.an('array')
+            expect(notes[0].userId).to.exist()
+            expect(notes[0].userId).to.be.equal(context.userFirstId)
+            expect(notes[0].User).to.exist()
+            expect(notes[0].User.id).to.exist()
+            expect(notes[0].User.id).to.be.equal(context.userFirstId)
+            expect(notes[0].User.name).to.exist()
+            expect(notes[0].User.password).to.exist()
+
+            // expand should NOT work:
+            notes = await app.exModular.models.Note.findAll({
+              where: { id: res.body.id },
+              expand: false
+            })
+
+            // expand should work:
+            expect(notes).to.exist('Body should exist')
+            expect(notes).to.be.an('array')
+            expect(notes[0].userId).to.exist()
+            expect(notes[0].userId).to.be.equal(context.userFirstId)
+            expect(notes[0].User).not.to.exist()
+          })
+          .catch((e) => { throw e })
+      })
+    })
   })
 
   describe('exModular: user system', function () {
@@ -585,51 +688,6 @@ describe('exModular: storage', function () {
             expect(res.body.err).to.exist()
           })
 
-          .catch((e) => { throw e })
-      })
-    })
-    it('6-4: Model.expand', function () {
-      return createAdmin(context)
-        .then(() => createGroupManagers(context))
-        .then(() => createUserFirst(context))
-        .then(() => userGroupUsersAdd(context, context.groupManagers, [context.userFirstId, context.adminId]))
-        .then(() => noteAdd(context, { caption: 'some note', userId: context.userFirstId }))
-        .then((res) => {
-          // 6-4-c1:
-          expect(res.body).to.exist('Body should exist')
-          expect(res.body).to.be.an('object')
-          expect(res.body.userId).to.exist()
-          expect(res.body.userId).to.be.equal(context.userFirstId)
-          expect(res.body.User).to.exist()
-          expect(res.body.User.id).to.exist()
-          expect(res.body.User.id).to.be.equal(context.userFirstId)
-          expect(res.body.User.name).to.exist()
-          expect(res.body.User.password).to.exist()
-        })
-        .catch((e) => { throw e })
-    })
-
-    describe('6-5. Module enum property', function () {
-      it('6-5-1: Model enum property, нормальное добавление', function () {
-        return createAdmin(context)
-          .then(() => noteAdd(context, { caption: 'some note', type: '1' }))
-          .then((res) => {
-            // 6-4-c1:
-            expect(res.body).to.exist('Body should exist')
-            expect(res.body).to.be.an('object')
-            expect(res.body.type).to.exist()
-          })
-          .catch((e) => { throw e })
-      })
-
-      it('6-5-2: Model enum property, проверка на ошибку при добавлении', function () {
-        return createAdmin(context)
-          .then(() => noteAdd(context, { caption: 'some note', type: 5 }, expected.ErrCodeInvalidParams))
-          .then((res) => {
-            expect(res.body).to.exist('Body should exist')
-            expect(res.body).to.be.an('object')
-            expect(res.body.error).to.exist()
-          })
           .catch((e) => { throw e })
       })
     })

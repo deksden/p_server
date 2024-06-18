@@ -604,7 +604,7 @@ export default (app) => {
   aStorage.refsInit = () => async () => {}
   aStorage.refsClear = () => async () => {}
 
-  aStorage.findById = (Model) => async (id) => {
+  aStorage.findById = (Model) => async (id, opt = {}) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.findById: some Model's properties are invalid:
         Model ${Model},
@@ -618,7 +618,7 @@ export default (app) => {
       .where(Model.key, id)
       .then((res) => processAfterLoadFromStorageAsync(Model, res[0]))
       .then(async (res) => {
-        if (res) {
+        if (res && opt.expand !== false) {
           return await Model.expand(res)
         }
         return res
@@ -814,7 +814,7 @@ export default (app) => {
       .catch((err) => { throw err })
   }
 
-  aStorage.create = (Model) => async (item) => {
+  aStorage.create = (Model) => async (item, opt = {}) => {
     if (!Model || !Model.storage || !Model.storage.db) {
       return Promise.reject(new Error(`${Model.name}.create: some Model's properties are invalid:
         Model ${Model},
@@ -827,14 +827,14 @@ export default (app) => {
     // build query:
     return knex(Model.name)
       .insert(aItem)
-      .then(() => Model.findById(aItem.id))
+      .then(() => Model.findById(aItem.id, opt))
       .catch((err) => {
         // console.log(`--\nError: ${JSON.stringify(err)}`)
         throw err
       })
   }
 
-  aStorage.update = (Model) => async (aId, item) => {
+  aStorage.update = (Model) => async (aId, item, opt = {}) => {
     if (!aId) {
       return Promise.reject(new Error(`${Model.name}.update: aId param should have value`))
     }
@@ -878,7 +878,7 @@ export default (app) => {
     return knex(Model.name)
       .where(Model.key, aId)
       .update(aItem)
-      .then(() => Model.findById(aItem.id ? aItem.id : aId))
+      .then(() => Model.findById(aItem.id ? aItem.id : aId, opt))
       .catch((err) => { throw err })
   }
 
